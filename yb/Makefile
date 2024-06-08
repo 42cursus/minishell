@@ -6,7 +6,7 @@
 #    By: yublee <yublee@student.42london.com>       +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/02/19 14:55:22 by yublee            #+#    #+#              #
-#    Updated: 2024/06/07 22:34:47 by yublee           ###   ########.fr        #
+#    Updated: 2024/06/08 10:58:38 by yublee           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -29,7 +29,6 @@ INCLUDE = -I include/
 NAME = test
 
 SRC = src/main.c \
-	src/utils.c \
 	gnl/get_next_line.c \
 	gnl/get_next_line_utils.c \
 

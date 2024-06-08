@@ -6,7 +6,7 @@
 /*   By: yublee <yublee@student.42london.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/19 13:55:33 by yublee            #+#    #+#             */
-/*   Updated: 2024/06/07 22:48:42 by yublee           ###   ########.fr       */
+/*   Updated: 2024/06/08 14:14:09 by yublee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,5 +26,11 @@ typedef struct s_btree{
 	struct s_btree	*right;
 	void			*item;
 }	t_btree;
+
+t_btree	*create_node(void *item);
+void	expand_tree(t_btree *root);
+void	strtrim_with_free(void *str);
+void	btree_apply_infix(t_btree *root, void (*applyf)(void *));
+void	btree_free(t_btree *root);
 
 #endif
