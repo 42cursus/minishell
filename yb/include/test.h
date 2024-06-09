@@ -6,7 +6,7 @@
 /*   By: yublee <yublee@student.42london.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/19 13:55:33 by yublee            #+#    #+#             */
-/*   Updated: 2024/06/09 19:04:02 by yublee           ###   ########.fr       */
+/*   Updated: 2024/06/09 19:21:08 by yublee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 # include <fcntl.h>
 # include <stdio.h>
 # include <unistd.h>
+# include <limits.h>
 # include <errno.h>
 # include <sys/types.h>
 # include <sys/wait.h>
