@@ -6,11 +6,67 @@
 /*   By: yublee <yublee@student.42london.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/16 00:34:13 by yublee            #+#    #+#             */
-/*   Updated: 2024/06/08 14:23:13 by yublee           ###   ########.fr       */
+/*   Updated: 2024/06/09 18:07:34 by yublee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "test.h"
+
+// char	find_special_char(char *item)
+// {
+// 	int	i;
+
+// 	i = 0;
+// 	while (item && item[i])
+// 	{
+// 		if (item[i] == '|')
+// 			return ('|');
+// 		else if (item[i] == '<')
+// 		{
+// 			if (item[++i] == '<')
+// 				return ('d');
+// 			else
+// 				return ('<');
+// 		}
+// 		else if (item[i] == '>')
+// 		{
+// 			if (item[++i] == '>')
+// 				return ('a');
+// 			else
+// 				return ('>');
+// 		}
+// 		i++;
+// 	}
+// 	return (0);
+// }
+
+// void	expand_tree(t_btree *root)
+// {
+// 	char	*right;
+// 	char	*left;
+// 	char	c;
+// 	int		offset;
+// 	size_t	left_len;
+
+// 	c = find_special_char(root->item);
+// 	offset = 1;
+// 	if (c == 'd' || c == 'a')
+// 		offset++;
+// 	if (!c)
+// 		return ;
+// 	else
+// 	{
+// 		right = ft_strdup(ft_strchr(root->item, c) + offset);
+// 		left_len = ft_strlen(root->item) - ft_strlen(right);
+// 		left = (char *)malloc(left_len);
+// 		ft_strlcpy(left, root->item, left_len);
+// 		root->left = create_node(left);
+// 		root->right = create_node(right);
+// 		free(root->item);
+// 		root->item = ft_strdup(&c);
+// 		expand_tree(root->right);
+// 	}
+// }
 
 void	expand_tree(t_btree *root)
 {
@@ -44,15 +100,6 @@ t_btree	*create_node(void *item)
 	node->item = item;
 	return (node);
 }
-
-// void	btree_print_infix(t_btree *root)
-// {
-// 	if (root == NULL)
-// 		return ;
-// 	btree_print_infix(root->left);
-// 	ft_printf("%s\n", root->item);
-// 	btree_print_infix(root->right);
-// }
 
 void	btree_free(t_btree *root)
 {
