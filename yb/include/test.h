@@ -6,7 +6,7 @@
 /*   By: yublee <yublee@student.42london.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/19 13:55:33 by yublee            #+#    #+#             */
-/*   Updated: 2024/06/09 17:55:42 by yublee           ###   ########.fr       */
+/*   Updated: 2024/06/09 19:04:02 by yublee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,17 +21,21 @@
 # include "libft.h"
 # include "get_next_line.h"
 
-typedef struct s_btree{
+typedef struct s_btree
+{
 	struct s_btree	*left;
 	struct s_btree	*right;
 	void			*item;
 }	t_btree;
 
-t_btree	*create_node(void *item);
 char	find_special_char(char *item);
-void	expand_tree(t_btree *root);
+void	expand_tree_pipe(t_btree *root);
+void	expand_tree_redirect(t_btree *root);
+
+void	print_node(void *item);
+void	free_node(t_btree *root);
+t_btree	*create_node(void *item);
 void	btree_apply_infix(t_btree *root, void (*applyf)(void *));
-void	btree_free(t_btree *root);
-// void	strtrim_with_free(void *str);
+void	btree_apply_suffix(t_btree *root, void (*applyf)(t_btree *));
 
 #endif
