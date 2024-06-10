@@ -6,7 +6,7 @@
 /*   By: yublee <yublee@student.42london.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 15:07:25 by yublee            #+#    #+#             */
-/*   Updated: 2024/06/10 17:46:08 by yublee           ###   ########.fr       */
+/*   Updated: 2024/06/10 18:10:58 by yublee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,18 +24,18 @@ void	expand_tree_pipe(t_btree *root)
 	{
 		right = ft_strdup(ft_strchr(root->item, '|') + 1);
 		if (!right)
-			exit (1);
+			exit(EXIT_FAILUARE);
 		len = ft_strlen(root->item) - ft_strlen(right);
 		left = (char *)malloc(len);
 		if (!left)
-			exit (1);
+			exit(EXIT_FAILUARE);
 		ft_strlcpy(left, root->item, len);
 		root->left = create_node(left);
 		root->right = create_node(right);
 		free(root->item);
 		root->item = ft_strdup("|");
 		if (!root->item)
-			exit (1);
+			exit(EXIT_FAILUARE);
 		expand_tree_pipe(root->right);
 	}
 }
