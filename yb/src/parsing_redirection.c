@@ -6,11 +6,11 @@
 /*   By: yublee <yublee@student.42london.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 15:00:45 by yublee            #+#    #+#             */
-/*   Updated: 2024/06/10 15:26:21 by yublee           ###   ########.fr       */
+/*   Updated: 2024/06/10 17:46:01 by yublee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "test.h"
+#include "minishell.h"
 
 static char	*ft_worddup(char *str, char c)
 {
