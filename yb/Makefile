@@ -6,7 +6,7 @@
 #    By: yublee <yublee@student.42london.com>       +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/02/19 14:55:22 by yublee            #+#    #+#              #
-#    Updated: 2024/06/10 18:29:48 by yublee           ###   ########.fr        #
+#    Updated: 2024/06/10 19:32:08 by yublee           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -32,7 +32,7 @@ SRC = src/main.c \
 	src/parsing_pipe.c \
 	src/parsing_redirection.c \
 	src/parsing_tree_to_lst.c \
-	src/pipex.c \
+	src/pipex_init.c \
 	src/pipex_exec.c \
 	src/pipex_utils.c \
 	src/utils_tree.c \

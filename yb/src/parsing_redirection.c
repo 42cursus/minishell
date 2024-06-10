@@ -6,7 +6,7 @@
 /*   By: yublee <yublee@student.42london.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 15:00:45 by yublee            #+#    #+#             */
-/*   Updated: 2024/06/10 18:10:58 by yublee           ###   ########.fr       */
+/*   Updated: 2024/06/10 18:54:52 by yublee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ static char	*ft_worddup(char *str, char c)
 	len = i - j;
 	result = (char *)malloc(len + 1);
 	if (!result)
-		exit(EXIT_FAILUARE);
+		exit(EXIT_FAILURE);
 	i = -1;
 	j = 0;
 	while (j < len && ++i >= 0)
@@ -76,7 +76,7 @@ static char	*ft_leftoverdup(char *str, char c)
 	len = ft_strlen(str) - excluded_len(str, c);
 	result = (char *)malloc(len + 1);
 	if (!result)
-		exit(EXIT_FAILUARE);
+		exit(EXIT_FAILURE);
 	i = 0;
 	j = 0;
 	while (j < len + 1)

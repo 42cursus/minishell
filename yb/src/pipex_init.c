@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   pipex.c                                            :+:      :+:    :+:   */
+/*   pipex_init.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: yublee <yublee@student.42london.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/16 00:37:53 by yublee            #+#    #+#             */
-/*   Updated: 2024/06/10 18:13:36 by yublee           ###   ########.fr       */
+/*   Updated: 2024/06/10 19:41:56 by yublee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,12 +23,14 @@ int	free_fds(int **fds, int i)
 	return (1);
 }
 
-static t_info	get_info(t_list *cmd_list, char **env)
+static t_info	get_info(t_list **cmd_list, t_btree *root, char **env)
 {
 	t_info	info;
 
 	info.env = env;
-	info.cmd_cnt = ft_lstsize(cmd_list);
+	info.cmd_cnt = ft_lstsize(*cmd_list);
+	info.cmd_list = cmd_list;
+	info.root = root;
 	return (info);
 }
 
@@ -59,11 +61,11 @@ static int	**create_pipeline(int cnt)
 	return (fds);
 }
 
-int	pipex(t_list *cmd_list, char **env)
+void	pipex(t_list **cmd_list, t_btree *root, char **env)
 {
 	t_info	info;
 
-	info = get_info(cmd_list, env);
+	info = get_info(cmd_list, root, env);
 	info.fds = create_pipeline(info.cmd_cnt - 1);
 	exec_pipex(info, cmd_list);
 }
