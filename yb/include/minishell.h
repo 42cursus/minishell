@@ -6,7 +6,7 @@
 /*   By: yublee <yublee@student.42london.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/19 13:55:33 by yublee            #+#    #+#             */
-/*   Updated: 2024/06/10 18:15:10 by yublee           ###   ########.fr       */
+/*   Updated: 2024/06/10 19:42:19 by yublee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,19 +24,21 @@
 # define READ_END 0
 # define WRITE_END 1
 
-typedef struct s_info
-{
-	int		cmd_cnt;
-	char	**env;
-	int		**fds;
-}	t_info;
-
 typedef struct s_btree
 {
 	struct s_btree	*left;
 	struct s_btree	*right;
 	void			*item;
 }	t_btree;
+
+typedef struct s_info
+{
+	int		cmd_cnt;
+	char	**env;
+	int		**fds;
+	t_btree	*root;
+	t_list	**cmd_list;
+}	t_info;
 
 //create tree
 void	expand_tree_pipe(t_btree *root);
@@ -47,9 +49,9 @@ void	expand_tree_redirect_r(t_btree *root);
 t_list	*get_cmds(t_btree *root);
 
 //pipex
-int		pipex(t_list *cmd_list, char **env);
+void	pipex(t_list **cmd_list, t_btree *root, char **env);
 int		free_fds(int **fds, int i);
-int		exec_pipex(t_info info, t_list *cmd_list);
+int		exec_pipex(t_info info, t_list **cmd_list);
 void	exit_with_error(char *str, int exit_no, t_info info);
 void	free_str_array(char **array);
 char	**get_args(char *argv, char **env, t_info info);
@@ -60,6 +62,8 @@ void	free_node(t_btree *root);
 t_btree	*create_node(void *item);
 void	btree_apply_infix(t_btree *root, void (*applyf)(void *));
 void	btree_apply_suffix(t_btree *root, void (*applyf)(t_btree *));
+void	btree_apply_infix_only_left(t_btree *root, t_info info, void (*applyf)(void *, t_info));
+void	btree_apply_infix_only_right(t_btree *root, t_info info, void (*applyf)(void *, t_info));
 
 //list utils
 void	del(void *item);
