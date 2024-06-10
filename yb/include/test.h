@@ -6,7 +6,7 @@
 /*   By: yublee <yublee@student.42london.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/19 13:55:33 by yublee            #+#    #+#             */
-/*   Updated: 2024/06/10 14:16:23 by yublee           ###   ########.fr       */
+/*   Updated: 2024/06/10 15:04:20 by yublee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,10 +29,11 @@ typedef struct s_btree
 	void			*item;
 }	t_btree;
 
-char	find_special_char(char *item);
 void	expand_tree_pipe(t_btree *root);
+
 void	expand_tree_redirect_l(t_btree *root);
 void	expand_tree_redirect_r(t_btree *root);
+
 void	ft_strtrim_and_free(t_btree *root);
 
 void	print_node(void *item);
