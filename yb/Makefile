@@ -6,7 +6,7 @@
 #    By: yublee <yublee@student.42london.com>       +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/02/19 14:55:22 by yublee            #+#    #+#              #
-#    Updated: 2024/06/10 19:32:08 by yublee           ###   ########.fr        #
+#    Updated: 2024/06/10 22:12:18 by yublee           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -26,14 +26,14 @@ ARFLAGS = rcs
 
 INCLUDE = -I include/
 
-NAME = test
+NAME = mini_minishell
 
 SRC = src/main.c \
 	src/parsing_pipe.c \
 	src/parsing_redirection.c \
 	src/parsing_tree_to_lst.c \
-	src/pipex_init.c \
-	src/pipex_exec.c \
+	src/pipex.c \
+	src/pipex_io.c \
 	src/pipex_utils.c \
 	src/utils_tree.c \
 	src/utils_lst.c \
