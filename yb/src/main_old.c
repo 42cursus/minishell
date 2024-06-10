@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   main.c                                             :+:      :+:    :+:   */
+/*   main_old.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: yublee <yublee@student.42london.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/16 00:34:13 by yublee            #+#    #+#             */
-/*   Updated: 2024/06/10 12:38:20 by yublee           ###   ########.fr       */
+/*   Updated: 2024/06/10 15:11:31 by yublee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,6 +95,7 @@ void	expand_tree_pipe(t_btree *root)
 void	ft_strtrim_and_free(t_btree *root)
 {
 	char	*result;
+
 	result = ft_strtrim(root->item, " ");
 	free(root->item);
 	root->item = result;
