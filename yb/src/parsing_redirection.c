@@ -6,7 +6,7 @@
 /*   By: yublee <yublee@student.42london.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 15:00:45 by yublee            #+#    #+#             */
-/*   Updated: 2024/06/10 15:07:50 by yublee           ###   ########.fr       */
+/*   Updated: 2024/06/10 15:26:21 by yublee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,40 +16,35 @@ static char	*ft_worddup(char *str, char c)
 {
 	int		i;
 	int		j;
-	int		cnt;
 	int		len;
 	char	*result;
 
 	i = 1;
-	cnt = 0;
+	j = 0;
 	if (str[i] == c)
 		i++;
 	while (str[i++] == ' ')
-		cnt++;
+		j++;
 	while (str[i] && str[i] != ' ')
 		i++;
-	len = i - cnt;
+	len = i - j;
 	result = (char *)malloc(len + 1);
-	i = 0;
+	if (!result)
+		exit (1);
+	i = -1;
 	j = 0;
-	while (j < len)
-	{
+	while (j < len && ++i >= 0)
 		if (str[i] != ' ')
 			result[j++] = str[i];
-		i++;
-	}
 	result[j] = 0;
 	return (result);
 }
-//needs malloc protection
 
-static char	*ft_leftoverdup(char *str, char c)
+static int	excluded_len(char *str, char c)
 {
-	int		i;
-	int		j;
-	int		cnt;
-	int		len;
-	char	*result;
+	int	i;
+	int	j;
+	int	cnt;
 
 	cnt = 0;
 	i = 0;
@@ -68,16 +63,27 @@ static char	*ft_leftoverdup(char *str, char c)
 		}
 		i += j;
 	}
-	len = ft_strlen(str) - cnt;
+	return (cnt);
+}
+
+static char	*ft_leftoverdup(char *str, char c)
+{
+	int		i;
+	int		j;
+	int		len;
+	char	*result;
+
+	len = ft_strlen(str) - excluded_len(str, c);
 	result = (char *)malloc(len + 1);
+	if (!result)
+		exit (1);
 	i = 0;
 	j = 0;
-	while (j < len)
+	while (j < len + 1)
 	{
 		if (str[i] == c)
 		{
-			i++;
-			if (str[i] == c)
+			if (str[++i] == c)
 				i++;
 			while (str[i] == ' ')
 				i++;
@@ -86,7 +92,6 @@ static char	*ft_leftoverdup(char *str, char c)
 		}
 		result[j++] = str[i++];
 	}
-	result[j] = 0;
 	return (result);
 }
 
@@ -94,62 +99,56 @@ void	expand_tree_redirect_l(t_btree *root)
 {
 	int		i;
 	char	*str;
-	char	*str_left;
 	char	*str_new;
 	t_btree	*current;
 
 	if (!root || !root->item)
 		return ;
 	str = root->item;
-	i = 0;
-	while (str[i])
+	i = -1;
+	while (str[++i])
 	{
 		if (str[i] == '<')
 		{
-			str_left = ft_worddup(&str[i], '<');
+			str_new = ft_worddup(&str[i], '<');
 			current = root;
 			while (current->left)
 				current = current->left;
-			current->left = create_node(str_left);
+			current->left = create_node(str_new);
 			if (str[i + 1] == '<')
 				i++;
 		}
-		i++;
 	}
 	str_new = ft_leftoverdup(str, '<');
 	free(root->item);
 	root->item = str_new;
 }
-//needs malloc protection
 
 void	expand_tree_redirect_r(t_btree *root)
 {
 	int		i;
 	char	*str;
-	char	*str_right;
 	char	*str_new;
 	t_btree	*current;
 
 	if (!root || !root->item)
 		return ;
 	str = root->item;
-	i = 0;
-	while (str[i])
+	i = -1;
+	while (str[++i])
 	{
 		if (str[i] == '>')
 		{
-			str_right = ft_worddup(&str[i], '>');
+			str_new = ft_worddup(&str[i], '>');
 			current = root;
 			while (current->right)
 				current = current->right;
-			current->right = create_node(str_right);
+			current->right = create_node(str_new);
 			if (str[i + 1] == '>')
 				i++;
 		}
-		i++;
 	}
 	str_new = ft_leftoverdup(str, '>');
 	free(root->item);
 	root->item = str_new;
 }
-//needs malloc protection
