@@ -6,7 +6,7 @@
 /*   By: yublee <yublee@student.42london.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/09 18:56:33 by yublee            #+#    #+#             */
-/*   Updated: 2024/06/09 19:41:02 by yublee           ###   ########.fr       */
+/*   Updated: 2024/06/10 12:26:09 by yublee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 void	print_node(void *item)
 {
-	printf("%s\n", item);
+	printf("%s\n", (char *)item);
 }
 
 void	free_node(t_btree *root)

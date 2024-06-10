@@ -6,7 +6,7 @@
 /*   By: yublee <yublee@student.42london.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/16 00:34:13 by yublee            #+#    #+#             */
-/*   Updated: 2024/06/09 19:05:53 by yublee           ###   ########.fr       */
+/*   Updated: 2024/06/10 12:29:04 by yublee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,6 +99,7 @@ int	main(void)
 	t_btree	*root;
 
 	str_init = "ls -l | wc -l < output | ls >> output2";
+	// str_init = "<<EOF cat | cat > output > output2";
 	str = ft_strdup(str_init);
 	root = create_node(str);
 	expand_tree_pipe(root);
