@@ -6,99 +6,68 @@
 /*   By: yublee <yublee@student.42london.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/16 00:34:13 by yublee            #+#    #+#             */
-/*   Updated: 2024/06/10 14:28:47 by yublee           ###   ########.fr       */
+/*   Updated: 2024/06/10 12:38:20 by yublee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "test.h"
 
-static char	*ft_worddup(char *str, char c)
+char	find_special_char(char *item)
 {
-	int		i;
-	int		j;
-	int		cnt;
-	int		len;
-	char	*result;
+	int	i;
 
-	i = 1;
-	cnt = 0;
-	if (str[i] == c)
-		i++;
-	while (str[i++] == ' ')
-		cnt++;
-	while (str[i] && str[i] != ' ')
-		i++;
-	len = i - cnt;
-	result = (char *)malloc(len + 1);
 	i = 0;
-	j = 0;
-	while (j < len)
+	while (item && item[i])
 	{
-		if (str[i] != ' ')
-			result[j++] = str[i];
-		i++;
-	}
-	result[j] = 0;
-	return (result);
-}
-//needs malloc protection
-
-void	expand_tree_redirect_l(t_btree *root)
-{
-	int		i;
-	char	*str;
-	char	*new;
-	t_btree	*current;
-
-	if (!root || !root->item)
-		return ;
-	str = root->item;
-	i = 0;
-	while (str[i])
-	{
-		if (str[i] == '<')
+		if (item[i] == '<')
 		{
-			new = ft_worddup(&str[i], '<');
-			current = root;
-			while (current->left)
-				current = current->left;
-			current->left = create_node(new);
-			if (str[i + 1] == '<')
-				i++;
+			if (item[++i] == '<')
+				return ('d');
+			else
+				return ('<');
+		}
+		else if (item[i] == '>')
+		{
+			if (item[++i] == '>')
+				return ('a');
+			else
+				return ('>');
 		}
 		i++;
 	}
+	return (0);
 }
-//needs malloc protection
+// d indicates << (deliminator)
+// a indicates >> (append mode)
 
-void	expand_tree_redirect_r(t_btree *root)
+void	expand_tree_redirect(t_btree *root)
 {
-	int		i;
-	char	*str;
-	char	*new;
-	t_btree	*current;
+	char	*right;
+	char	*left;
+	char	c;
+	int		offset;
+	size_t	left_len;
 
-	if (!root || !root->item)
+	c = find_special_char(root->item);
+	if (!c)
 		return ;
-	str = root->item;
-	i = 0;
-	while (str[i])
-	{
-		if (str[i] == '>')
-		{
-			new = ft_worddup(&str[i], '>');
-			printf("new: %s\n", new);
-			current = root;
-			while (current->right)
-				current = current->right;
-			current->right = create_node(new);
-			if (str[i + 1] == '>')
-				i++;
-		}
-		i++;
-	}
+	offset = 1;
+	if (c == 'd' || c == 'a')
+		offset++;
+	if (c == '<' || c == 'd')
+		right = ft_strdup(ft_strchr(root->item, '<') + offset);
+	else
+		right = ft_strdup(ft_strchr(root->item, '>') + offset);
+	left_len = ft_strlen(root->item) - ft_strlen(right) - offset + 1;
+	left = (char *)malloc(left_len);
+	ft_strlcpy(left, root->item, left_len);
+	root->left = create_node(left);
+	root->right = create_node(right);
+	free(root->item);
+	root->item = ft_strdup(&c);
 }
 //needs malloc protection
+//several redirections not handled yet
 
 void	expand_tree_pipe(t_btree *root)
 {
@@ -137,15 +106,13 @@ int	main(void)
 	char	*str;
 	t_btree	*root;
 
-	// str_init = "ls -l | wc -l < output | ls >> output2";
-	str_init = "<i1 <i2 ls -l > output | ls >> output2";
+	str_init = "ls -l | wc -l < output | ls >> output2";
 	// str_init = "<<EOF cat | cat > output > output2";
 	str = ft_strdup(str_init);
 	root = create_node(str);
 	expand_tree_pipe(root);
 	btree_apply_suffix(root, ft_strtrim_and_free);
-	btree_apply_suffix(root, expand_tree_redirect_l);
-	btree_apply_suffix(root, expand_tree_redirect_r);
+	// btree_apply_suffix(root, expand_tree_redirect);
 	btree_apply_infix(root, print_node);
 	btree_apply_suffix(root, free_node);
 }
