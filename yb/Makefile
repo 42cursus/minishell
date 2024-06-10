@@ -6,7 +6,7 @@
 #    By: yublee <yublee@student.42london.com>       +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/02/19 14:55:22 by yublee            #+#    #+#              #
-#    Updated: 2024/06/10 15:08:19 by yublee           ###   ########.fr        #
+#    Updated: 2024/06/10 17:41:03 by yublee           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -31,7 +31,9 @@ NAME = test
 SRC = src/main.c \
 	src/parsing_pipe.c \
 	src/parsing_redirection.c \
-	src/tree_utils.c \
+	src/parsing_tree_to_lst.c \
+	src/utils_tree.c \
+	src/utils_lst.c \
 	src/utils.c \
 	gnl/get_next_line.c \
 	gnl/get_next_line_utils.c \

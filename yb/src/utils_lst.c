@@ -1,22 +1,26 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   utils.c                                            :+:      :+:    :+:   */
+/*   utils_lst.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: yublee <yublee@student.42london.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/06/10 14:59:19 by yublee            #+#    #+#             */
-/*   Updated: 2024/06/10 17:45:48 by yublee           ###   ########.fr       */
+/*   Created: 2024/06/10 17:32:51 by yublee            #+#    #+#             */
+/*   Updated: 2024/06/10 17:45:58 by yublee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-void	ft_strtrim_and_free(t_btree *root)
+void	del(void *item)
 {
-	char	*result;
+	(void)item;
+}
 
-	result = ft_strtrim(root->item, " ");
-	free(root->item);
-	root->item = result;
+void	print_list(void *content)
+{
+	t_btree	*tmp;
+
+	tmp = (t_btree *)content;
+	print_node(tmp->item);
 }
