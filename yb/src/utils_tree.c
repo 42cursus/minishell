@@ -6,7 +6,7 @@
 /*   By: yublee <yublee@student.42london.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/09 18:56:33 by yublee            #+#    #+#             */
-/*   Updated: 2024/06/10 19:05:10 by yublee           ###   ########.fr       */
+/*   Updated: 2024/06/10 21:58:02 by yublee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,22 +43,6 @@ void	btree_apply_infix(t_btree *root, void (*applyf)(void *))
 	btree_apply_infix(root->left, applyf);
 	applyf(root->item);
 	btree_apply_infix(root->right, applyf);
-}
-
-void	btree_apply_infix_only_left(t_btree *root, t_info info, void (*applyf)(void *, t_info))
-{
-	if (root == NULL)
-		return ;
-	btree_apply_infix_only_left(root->left, info, applyf);
-	applyf(root->item, info);
-}
-
-void	btree_apply_infix_only_right(t_btree *root, t_info info, void (*applyf)(void *, t_info))
-{
-	if (root == NULL)
-		return ;
-	btree_apply_infix_only_right(root->right, info, applyf);
-	applyf(root->item, info);
 }
 
 void	btree_apply_suffix(t_btree *root, void (*applyf)(t_btree *))

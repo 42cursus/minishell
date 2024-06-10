@@ -6,7 +6,7 @@
 /*   By: yublee <yublee@student.42london.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/16 00:34:13 by yublee            #+#    #+#             */
-/*   Updated: 2024/06/10 19:39:30 by yublee           ###   ########.fr       */
+/*   Updated: 2024/06/10 21:52:54 by yublee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ int	main(int argc, char **argv, char **env)
 	(void)argv;
 	(void)env;
 	// str_init = "ls -l | wc -l < output | ls >> output2";
-	str_init = "<i1 <i2 ls -l | cat -e | cat -e > output";
+	str_init = "<i1 <i2 ls -l | cat -e | cat -e > output >output2";
 	// str_init = "<<EOF cat | cat > output > output2";
 	// str_init = "<<EOF cat1 | <input1 >output1 | <input2 cat2 >output2 >>output3";
 	str = ft_strdup(str_init);

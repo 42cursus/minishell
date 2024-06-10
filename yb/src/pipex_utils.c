@@ -6,36 +6,11 @@
 /*   By: yublee <yublee@student.42london.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/16 00:34:13 by yublee            #+#    #+#             */
-/*   Updated: 2024/06/10 19:36:26 by yublee           ###   ########.fr       */
+/*   Updated: 2024/06/10 22:02:57 by yublee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
-
-void	exit_with_error(char *str, int exit_no, t_info info)
-{
-	if (info.fds)
-		free_fds(info.fds, info.cmd_cnt -1);
-	if (exit_no == 127)
-	{
-		write(2, str, ft_strlen(str));
-		write(2, ": command not found\n", 20);
-		free(str);
-	}
-	else
-		perror(str);
-	exit(exit_no);
-}
-
-void	free_str_array(char **array)
-{
-	int	i;
-
-	i = 0;
-	while (array[i])
-		free(array[i++]);
-	free(array);
-}
 
 static void	join_path(char **paths, char **args)
 {
