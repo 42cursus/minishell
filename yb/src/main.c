@@ -6,19 +6,22 @@
 /*   By: yublee <yublee@student.42london.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/16 00:34:13 by yublee            #+#    #+#             */
-/*   Updated: 2024/06/10 17:46:10 by yublee           ###   ########.fr       */
+/*   Updated: 2024/06/10 18:08:54 by yublee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-int	main(void)
+int	main(int argc, char **argv, char **env)
 {
 	char	*str_init;
 	char	*str;
 	t_btree	*root;
 	t_list	*cmd_list;
 
+	(void)argc;
+	(void)argv;
+	(void)env;
 	// str_init = "ls -l | wc -l < output | ls >> output2";
 	// str_init = "<i1 <i2 ls -l > output | ls >> output2";
 	// str_init = "<<EOF cat | cat > output > output2";
@@ -38,6 +41,8 @@ int	main(void)
 	cmd_list = get_cmds(root);
 	// print list to check
 	ft_lstiter(cmd_list, print_list);
+	// pass cmd list to pipex
+	pipex(cmd_list, env);
 	// free list
 	ft_lstclear(&cmd_list, del);
 	// free tree

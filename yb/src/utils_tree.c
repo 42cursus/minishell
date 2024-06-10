@@ -6,7 +6,7 @@
 /*   By: yublee <yublee@student.42london.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/09 18:56:33 by yublee            #+#    #+#             */
-/*   Updated: 2024/06/10 17:45:51 by yublee           ###   ########.fr       */
+/*   Updated: 2024/06/10 18:10:58 by yublee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ t_btree	*create_node(void *item)
 
 	node = (t_btree *)malloc(sizeof(t_btree));
 	if (!node)
-		exit (1);
+		exit(EXIT_FAILUARE);
 	node->left = NULL;
 	node->right = NULL;
 	node->item = item;
