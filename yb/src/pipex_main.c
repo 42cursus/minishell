@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   pipex.c                                            :+:      :+:    :+:   */
+/*   pipex_main.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: yublee <yublee@student.42london.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/16 00:37:53 by yublee            #+#    #+#             */
-/*   Updated: 2024/06/10 22:28:10 by yublee           ###   ########.fr       */
+/*   Updated: 2024/06/11 15:46:31 by yublee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,27 +50,26 @@ static int	**create_pipeline(int cnt)
 	return (fds);
 }
 
-static void	child_process(int i, t_list *current, t_info info)
+static void	wait_if_heredoc(void *content)
 {
-	t_btree	*cmd;
-	char	*cmd_str;
-	char	**args;
+	t_btree	*tmp;
+	char	*str;
 
-	cmd = (t_btree *)current->content;
-	get_input(cmd, i, info);
-	get_output(cmd, i, info);
-	cmd_str = cmd->item;
-	if (cmd_str[0] == 0)
-		exit (EXIT_SUCCESS);
-	args = get_args(cmd_str, info.env, info);
-	if (execve(args[0], args, info.env) == -1)
+	tmp = (t_btree *)content;
+	tmp = tmp->left;
+	while (tmp)
 	{
-		free_str_array(args);
-		exit_with_error("execve", EXIT_FAILURE, info);
+		str = (char *)tmp->item;
+		if (str && str[0] == '<' && str[1] == '<')
+		{
+			wait(NULL);
+			break ;
+		}
+		tmp = tmp->left;
 	}
 }
 
-void	exec_pipex(t_info info, t_list **cmd_list, int *status)
+static void	exec_pipex(t_info info, t_list **cmd_list, int *status)
 {
 	int		i;
 	pid_t	pid;
@@ -82,13 +81,14 @@ void	exec_pipex(t_info info, t_list **cmd_list, int *status)
 	{
 		pid = fork();
 		if (pid < 0)
-			exit_with_error("fork", EXIT_FAILURE, info);
+			exit_with_message("fork", EXIT_FAILURE, info);
 		if (pid == 0)
 			child_process(i, current, info);
 		if (i != 0)
 			close(info.fds[i - 1][READ_END]);
 		if (i != info.cmd_cnt - 1)
 			close(info.fds[i][WRITE_END]);
+		wait_if_heredoc(current->content);
 		current = current->next;
 	}
 	waitpid(pid, status, 0);

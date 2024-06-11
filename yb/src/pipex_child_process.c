@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   pipex_utils.c                                      :+:      :+:    :+:   */
+/*   pipex_child_process.c                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: yublee <yublee@student.42london.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/16 00:34:13 by yublee            #+#    #+#             */
-/*   Updated: 2024/06/10 22:02:57 by yublee           ###   ########.fr       */
+/*   Updated: 2024/06/11 15:48:43 by yublee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,7 @@ static void	check_path(char **paths, char **args)
 	}
 }
 
-char	**get_args(char *argv, char **env, t_info info)
+static char	**get_args(char *argv, char **env, t_info info)
 {
 	char	**args;
 	int		i;
@@ -72,8 +72,28 @@ char	**get_args(char *argv, char **env, t_info info)
 		tmp = ft_strdup(args[0]);
 		free_str_array(args);
 		free_str_array(paths);
-		exit_with_error(tmp, 127, info);
+		exit_with_message(tmp, 127, info);
 	}
 	free_str_array(paths);
 	return (args);
+}
+
+void	child_process(int i, t_list *current, t_info info)
+{
+	t_btree	*cmd;
+	char	*cmd_str;
+	char	**args;
+
+	cmd = (t_btree *)current->content;
+	get_input(cmd, i, info);
+	get_output(cmd, i, info);
+	cmd_str = cmd->item;
+	if (cmd_str[0] == 0)
+		exit (EXIT_SUCCESS);
+	args = get_args(cmd_str, info.env, info);
+	if (execve(args[0], args, info.env) == -1)
+	{
+		free_str_array(args);
+		exit_with_message("execve", EXIT_FAILURE, info);
+	}
 }

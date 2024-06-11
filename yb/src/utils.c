@@ -6,7 +6,7 @@
 /*   By: yublee <yublee@student.42london.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 14:59:19 by yublee            #+#    #+#             */
-/*   Updated: 2024/06/10 22:12:52 by yublee           ###   ########.fr       */
+/*   Updated: 2024/06/11 15:35:31 by yublee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,20 +25,25 @@ void	free_before_exit(t_info	info)
 {
 	if (info.fds)
 		free_fds(info.fds, info.cmd_cnt - 1);
-	ft_lstclear(info.cmd_list, del);
-	btree_apply_suffix(info.root, free_node);
+	if (info.cmd_list)
+		ft_lstclear(info.cmd_list, del);
+	if (info.root)
+		btree_apply_suffix(info.root, free_node);
 }
 
-void	exit_with_error(char *str, int exit_no, t_info info)
+void	exit_with_message(char *str, int exit_no, t_info info)
 {
-	if (exit_no == 127)
+	if (str)
 	{
-		write(2, str, ft_strlen(str));
-		write(2, ": command not found\n", 20);
-		free(str);
+		if (exit_no == 127)
+		{
+			write(2, str, ft_strlen(str));
+			write(2, ": command not found\n", 20);
+			free(str);
+		}
+		else
+			perror(str);
 	}
-	else
-		perror(str);
 	free_before_exit(info);
 	exit(exit_no);
 }
