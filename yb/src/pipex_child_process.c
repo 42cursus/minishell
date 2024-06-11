@@ -6,7 +6,7 @@
 /*   By: yublee <yublee@student.42london.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/16 00:34:13 by yublee            #+#    #+#             */
-/*   Updated: 2024/06/11 15:48:43 by yublee           ###   ########.fr       */
+/*   Updated: 2024/06/11 16:00:00 by yublee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,8 @@ static void	check_path(char **paths, char **args)
 		{
 			temp = *args;
 			*args = ft_strdup(paths[i]);
+			if (!*args)
+				exit(EXIT_FAILURE);
 			free(temp);
 			break ;
 		}
