@@ -6,7 +6,7 @@
 /*   By: yublee <yublee@student.42london.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/16 00:37:53 by yublee            #+#    #+#             */
-/*   Updated: 2024/06/10 22:11:45 by yublee           ###   ########.fr       */
+/*   Updated: 2024/06/11 15:27:18 by yublee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,8 +16,27 @@ static void	open_input(void *item, t_info info)
 {
 	int		fd_input;
 	char	*str;
+	char	*buf;
 
 	str = (char *)item;
+	if (*(str + 1) == '<')
+	{
+		close(info.fds[0][READ_END]);
+		while (1)
+		{
+			buf = get_next_line(0);
+			if (!ft_strncmp(buf, str + 2, ft_strlen(str + 2)))
+				break ;
+			write(info.fds[0][WRITE_END], buf, ft_strlen(buf));
+			free(buf);
+		}
+		free(buf);
+		close(info.fds[0][WRITE_END]);
+		close(0);
+		buf = get_next_line(0);
+		free_fds(info.fds, info.cmd_cnt - 1);
+		exit(EXIT_SUCCESS);
+	}
 	fd_input = open(str + 1, O_RDONLY);
 	if (fd_input < 0 || dup2(fd_input, STDIN_FILENO) < 0)
 		exit_with_error(str + 1, EXIT_FAILURE, info);
