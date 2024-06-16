@@ -6,7 +6,7 @@
 /*   By: yublee <yublee@student.42london.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/19 13:55:33 by yublee            #+#    #+#             */
-/*   Updated: 2024/06/11 15:46:33 by yublee           ###   ########.fr       */
+/*   Updated: 2024/06/16 23:41:27 by yublee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,6 +39,9 @@ typedef struct s_info
 	t_btree	*root;
 	t_list	**cmd_list;
 }	t_info;
+
+//syntax check
+void	syntax_validation(char *str);
 
 //create tree
 void	expand_tree_pipe(t_btree *root);
