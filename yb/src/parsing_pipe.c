@@ -6,36 +6,60 @@
 /*   By: yublee <yublee@student.42london.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 15:07:25 by yublee            #+#    #+#             */
-/*   Updated: 2024/06/10 18:54:38 by yublee           ###   ########.fr       */
+/*   Updated: 2024/06/16 23:42:48 by yublee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-void	expand_tree_pipe(t_btree *root)
+static void	split_left_right(t_btree *root, char *str, size_t i)
 {
 	char	*right;
 	char	*left;
 	size_t	len;
 
-	if (!ft_strchr(root->item, '|'))
+	right = ft_strdup(&str[i] + 1);
+	if (!right)
+		exit(EXIT_FAILURE);
+	len = ft_strlen(str) - ft_strlen(right);
+	left = (char *)malloc(len);
+	if (!left)
+		exit(EXIT_FAILURE);
+	ft_strlcpy(left, str, len);
+	root->left = create_node(left);
+	root->right = create_node(right);
+	free(str);
+	root->item = ft_strdup("|");
+	if (!root->item)
+		exit(EXIT_FAILURE);
+	expand_tree_pipe(root->right);
+}
+
+void	expand_tree_pipe(t_btree *root)
+{
+	char	*str;
+	char	quote;
+	size_t	len;
+	size_t	i;
+
+	str = root->item;
+	if (!ft_strchr(str, '|'))
 		return ;
-	else
+	len = ft_strlen(str);
+	i = -1;
+	while (++i < len)
 	{
-		right = ft_strdup(ft_strchr(root->item, '|') + 1);
-		if (!right)
-			exit(EXIT_FAILURE);
-		len = ft_strlen(root->item) - ft_strlen(right);
-		left = (char *)malloc(len);
-		if (!left)
-			exit(EXIT_FAILURE);
-		ft_strlcpy(left, root->item, len);
-		root->left = create_node(left);
-		root->right = create_node(right);
-		free(root->item);
-		root->item = ft_strdup("|");
-		if (!root->item)
-			exit(EXIT_FAILURE);
-		expand_tree_pipe(root->right);
+		if (str[i] == '\'' || str[i] == '"')
+		{
+			quote = str[i];
+			while (str[++i] != quote && i < len)
+				;
+			i++;
+		}
+		if (str[i] == '|')
+		{
+			split_left_right(root, str, i);
+			return ;
+		}
 	}
 }

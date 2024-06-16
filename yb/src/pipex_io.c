@@ -6,7 +6,7 @@
 /*   By: yublee <yublee@student.42london.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/16 00:37:53 by yublee            #+#    #+#             */
-/*   Updated: 2024/06/11 15:55:02 by yublee           ###   ########.fr       */
+/*   Updated: 2024/06/16 19:39:15 by yublee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,6 @@ static void	open_input(void *item, t_info info)
 		exit_with_message(str + 1, EXIT_FAILURE, info);
 	close(fd_input);
 }
-//heredoc needs to be added
 
 static void	open_output(void *item, t_info info)
 {
