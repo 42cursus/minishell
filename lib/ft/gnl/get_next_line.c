@@ -6,7 +6,7 @@
 /*   By: yublee <yublee@student.42london.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/21 15:24:09 by yublee            #+#    #+#             */
-/*   Updated: 2024/05/05 11:52:43 by yublee           ###   ########.fr       */
+/*   Updated: 2024/06/26 23:20:16 by yublee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,8 +20,7 @@ char	*ft_store_until_newline(char *stored)
 
 	i = ft_charcheck_get_index(stored, '\n');
 	temp = stored;
-	if (stored)
-		stored = ft_gnl_substr(stored, i, ft_strlen(stored));
+	stored = ft_gnl_substr(stored, i, ft_strlen(stored));
 	free(temp);
 	return (stored);
 }
@@ -70,6 +69,8 @@ char	*get_next_line(int fd)
 	char		*buffer;
 	ssize_t		rd_size;
 
+	if (fd < 0)
+		return (NULL);
 	stored[fd] = ft_initialize(stored[fd], fd);
 	line = ft_gnl_substr(stored[fd], 0,
 			ft_charcheck_get_index(stored[fd], '\n'));
@@ -79,7 +80,7 @@ char	*get_next_line(int fd)
 	{
 		buffer = ft_malloc(BUFFER_SIZE + 1);
 		rd_size = read(fd, buffer, BUFFER_SIZE);
-		if (rd_size <= 0)
+		if (rd_size < 0)
 			return (ft_free(&stored[fd], buffer));
 		stored[fd] = ft_f_strjoin(stored[fd], buffer);
 		if (rd_size > 0)
