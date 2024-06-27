@@ -18,7 +18,7 @@ char	*ft_store_until_newline(char *stored)
 	char	*temp;
 	size_t	i;
 
-	i = ft_charcheck_get_index(stored, '\n');
+	i = ft_chr_idx(stored, '\n');
 	temp = stored;
 	stored = ft_gnl_substr(stored, i, ft_strlen(stored));
 	free(temp);
@@ -46,7 +46,7 @@ char	*ft_initialize(char *stored, int fd)
 	return (stored);
 }
 
-size_t	ft_charcheck_get_index(char *s, char c)
+size_t	ft_chr_idx(char *s, char c)
 {
 	size_t	i;
 
@@ -72,9 +72,8 @@ char	*get_next_line(int fd)
 	if (fd < 0)
 		return (NULL);
 	stored[fd] = ft_initialize(stored[fd], fd);
-	line = ft_gnl_substr(stored[fd], 0,
-			ft_charcheck_get_index(stored[fd], '\n'));
-	if (ft_charcheck_get_index(stored[fd], '\n'))
+	line = ft_gnl_substr(stored[fd], 0, ft_chr_idx(stored[fd], '\n'));
+	if (ft_chr_idx(stored[fd], '\n'))
 		stored[fd] = ft_store_until_newline(stored[fd]);
 	else if (stored[fd])
 	{

@@ -29,7 +29,7 @@ char	*ft_f_strjoin(char *s1, char *s2);
 char	*ft_store_until_newline(char *stored);
 void	*ft_free(char **s1, char *s2);
 char	*ft_initialize(char *stored, int fd);
-size_t	ft_charcheck_get_index(char *s, char c);
+size_t	ft_chr_idx(char *s, char c);
 char	*ft_malloc(size_t n);
 
 #endif
