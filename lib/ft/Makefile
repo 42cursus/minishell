@@ -21,7 +21,7 @@ INCLUDE		= -I. -I./include
 SRCS		:=
 BONUS_SRCS	:=
 BUILD_DIR	= build
-DIRS		= printf std bonus gnl
+DIRS		= printf std bonus gnl string
 
 include $(addsuffix /Makefile.mk,$(DIRS))
 

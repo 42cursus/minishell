@@ -1,28 +1,28 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   pwd.c                                              :+:      :+:    :+:   */
+/*   utils.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yublee <yublee@student.42london.com>       +#+  +:+       +#+        */
+/*   By: abelov <abelov@student.42london.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/06/10 15:11:51 by yublee            #+#    #+#             */
-/*   Updated: 2024/06/10 15:11:52 by yublee           ###   ########.fr       */
+/*   Created: 2024/06/28 18:20:28 by abelov            #+#    #+#             */
+/*   Updated: 2024/06/28 18:20:29 by abelov           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-
 #include "test.h"
 
-int	ft_pwd(void)
+void	sigsegv(int signal)
 {
-	char	cwd[PATH_MAX];
+	(void)signal;
+	ft_putstr("> "FT_CYAN".SIGSEGV"FT_RESET"\n");
+	exit(EXIT_SUCCESS);
+}
 
-	if (getcwd(cwd, PATH_MAX) != NULL)
-		ft_printf("%s\n", cwd);
+void	check(bool succes)
+{
+	if (succes)
+		ft_putstr("> "FT_GREEN".OK "FT_RESET"\n");
 	else
-	{
-		perror("getcwd error");
-		return (1);
-	}
-	return (0);
+	ft_putstr("> "FT_RED".KO "FT_RESET"\n");
 }

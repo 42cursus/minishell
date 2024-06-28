@@ -14,6 +14,7 @@
 # define LIBFT_H
 
 # include <unistd.h>
+# include <stddef.h>
 # include <stdlib.h>
 # include <stdarg.h>
 # include "get_next_line.h"
@@ -40,6 +41,11 @@ int		ft_toupper(int c);
 int		ft_tolower(int c);
 char	*ft_strchr(const char *s, int c);
 char	*ft_strrchr(const char *s, int c);
+char	*ft_strtok(char *str, const char *delim);
+char	*ft_strtok_r(char *str, const char *delim, char **saveptr);
+size_t	ft_strspn(const char *s, const char *accept);
+size_t	ft_strcspn(const char *s, const char *reject);
+size_t	ft_strcspn_reject(const char *s, const char *reject);
 int		ft_strncmp(const char *s1, const char *s2, size_t n);
 void	*ft_memchr(const void *s, int c, size_t n);
 int		ft_memcmp(const void *s1, const void *s2, size_t n);

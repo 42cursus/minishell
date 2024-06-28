@@ -15,7 +15,7 @@ cmake_minimum_required(VERSION 3.8)
 project(minishell C)
 
 set(CMAKE_C_STANDARD 99)
-
+include_directories(include)
 set(FT_CFLAGS
         -Wall -Wextra -Werror -Wimplicit
         -O0  -g3 -gdwarf-3
@@ -36,7 +36,7 @@ set(FT_LIB_FILENAME libft.a)
 set(FT_LIB_DIR "${PROJECT_SOURCE_DIR}/lib/ft")
 
 file(GLOB_RECURSE FT_LIB_HEADERS "${FT_LIB_DIR}/*.h")
-file(GLOB_RECURSE FT_LIB_SOURCES "${FT_LIB_DIR}/*.c")
+file(GLOB_RECURSE FT_LIB_SOURCES "${FT_LIB_DIR}/ft_*.c")
 
 add_custom_target(${FT_LIB_NAME}_target ALL
         COMMAND make -C ${FT_LIB_DIR}
@@ -55,11 +55,15 @@ set_target_properties(${FT_LIB_NAME} PROPERTIES
 
 #==============================================================================#
 
+add_subdirectory(src/sub)
+
 set(TARGET_NAME "${PROJECT_NAME}_exe")
 set(TARGET_LIBRARIES asan ${FT_LIB_NAME})
 
-file(GLOB TARGET_HEADERS "src/*.h")
-file(GLOB TARGET_SOURCES "src/*.c")
+file(GLOB_RECURSE TARGET_HEADERS "src/*.h")
+list(FILTER TARGET_HEADERS EXCLUDE REGEX "sub/*" )
+file(GLOB_RECURSE TARGET_SOURCES "src/*.c")
+list(FILTER TARGET_SOURCES EXCLUDE REGEX "src/sub/*")
 
 add_executable(${TARGET_NAME} ${TARGET_HEADERS} ${TARGET_SOURCES})
 set_target_properties(${TARGET_NAME} PROPERTIES
@@ -78,15 +82,12 @@ target_link_libraries(${TARGET_NAME} "${TARGET_LIBRARIES}")
 # Custom targets
 #==============================================================================#
 add_custom_target(fclean
-        COMMAND make -C ${FT_LIB_DIR} fclean
-        EXCLUDE_FROM_ALL 1)
+        COMMAND make -C ${FT_LIB_DIR} fclean)
 
 add_custom_target(re
         COMMAND make -C ${FT_LIB_DIR} re
-        COMMAND make -C ${PROJECT_SOURCE_DIR} re
-        EXCLUDE_FROM_ALL 1)
+        COMMAND make -C ${PROJECT_SOURCE_DIR} re)
 
-add_custom_target(norm
+add_custom_target(norm ALL
         COMMAND make -C ${FT_LIB_DIR} norm
-        COMMAND make -C ${PROJECT_SOURCE_DIR} norm
-        EXCLUDE_FROM_ALL 1)
+        COMMAND make -C ${PROJECT_SOURCE_DIR} norm)
