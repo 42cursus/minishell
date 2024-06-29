@@ -23,7 +23,7 @@ void	do_init(t_ops *t)
 	t->functions = functions;
 }
 
-int	main(void)
+int	main(int argc, char **argv, char **envp)
 {
 	int i;
 	t_ops	t;
@@ -32,5 +32,6 @@ int	main(void)
 	i = 0;
 	while (i < (int) t.size)
 		t.functions[i++]();
+	ft_env(&(t_exec_ctx){.cmd = "env", .env = envp});
 	return (EX_OK);
 }

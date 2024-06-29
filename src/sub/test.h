@@ -35,6 +35,17 @@
 typedef unsigned int	t_uint;
 # endif
 
+typedef struct s_exec_ctx
+{
+	char	*cmd;
+	struct s_inout
+	{
+		int in;
+		int out;
+		int err;
+	}	fdio;
+	char 	**env;
+}	t_exec_ctx;
 
 int		ft_pwd(void);
 
@@ -54,6 +65,9 @@ typedef struct s_ops
 	size_t size;
 	const t_fun *functions;
 } t_ops;
+
+/* ---------- FUNCTIONS -------------------- */
+int		ft_env(t_exec_ctx *ctx);
 
 /* ---------- UTILS -------------------- */
 void	sigsegv(int signal);

@@ -1,28 +1,20 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   pwd.c                                              :+:      :+:    :+:   */
+/*   ft_env.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yublee <yublee@student.42london.com>       +#+  +:+       +#+        */
+/*   By: abelov <abelov@student.42london.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/06/10 15:11:51 by yublee            #+#    #+#             */
-/*   Updated: 2024/06/10 15:11:52 by yublee           ###   ########.fr       */
+/*   Created: 2024/06/28 18:34:59 by abelov            #+#    #+#             */
+/*   Updated: 2024/06/28 18:34:59 by abelov           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-
 #include "test.h"
 
-int	ft_pwd(void)
+int	ft_env(t_exec_ctx *ctx)
 {
-	char	cwd[PATH_MAX];
-
-	if (getcwd(cwd, PATH_MAX) != NULL)
-		ft_printf("%s\n", cwd);
-	else
-	{
-		perror("getcwd error");
-		return (1);
-	}
+	while (*ctx->env)
+		ft_printf("env: %s\n", *ctx->env++);
 	return (0);
 }
