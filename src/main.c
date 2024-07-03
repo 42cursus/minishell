@@ -40,7 +40,7 @@ int	main(int argc, char **argv, char **env)
 	// create tree according to pipe
 	expand_tree_pipe(root);
 
-	// create subtree according to redirction
+	// create subtree according to redirection
 	btree_apply_suffix(root, expand_tree_redirect);
 
 	// trim spaces
