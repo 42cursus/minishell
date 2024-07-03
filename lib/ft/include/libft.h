@@ -76,11 +76,11 @@ char	*ft_strjoin(char const *s1, char const *s2);
 char	*ft_strtrim(char const *s1, char const *set);
 char	**ft_split(char const *s, char c);
 void	ft_bsort(void *const base, size_t total_elems,
-				 size_t size, __compar_fn_t cmp);
+			size_t size, __compar_fn_t cmp);
 void	ft_qsort(void *const base, size_t total_elems,
-				 size_t size, __compar_fn_t cmp);
+			size_t size, __compar_fn_t cmp);
 void	*ft_bsearch(const void *key, t_obj_arr *object_arr,
-					__compar_fn_t cmp);
+			__compar_fn_t cmp);
 char	*ft_strmapi(char const *s, char (*f)(unsigned int, char));
 void	ft_striteri(char *s, void (*f)(unsigned int, char*));
 void	ft_putchar_fd(char c, int fd);

@@ -28,9 +28,9 @@
  */
 typedef struct s_shell_var
 {
-	char	*k;
-	char	*v;
-	int 	attrs;
+	const char	*k;
+	char		*v;
+	int 		attrs;
 }	t_sh_var;
 
 typedef struct s_exec_ctx

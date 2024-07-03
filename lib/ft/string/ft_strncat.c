@@ -10,7 +10,6 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-
 /**
  * Copy src to dest, truncating or null-padding to always copy n bytes.
  * Return dest.

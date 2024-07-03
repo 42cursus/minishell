@@ -27,7 +27,7 @@ t_sh_var	*ft_shell_parse_env_map(char **env_tab)
 		saveptr = NULL;
 		env_map[map_size].k = ft_strtok_r(ft_strdup(env_tab[map_size]),
 										  "=", &saveptr);
-		env_map[map_size].attrs = ATT_EXPORTED & ATT_IMPORTED;
+		env_map[map_size].attrs = ATT_EXPORTED | ATT_IMPORTED;
 		if (saveptr != NULL)
 			env_map[map_size].v = ft_strdup(saveptr);
 	}
