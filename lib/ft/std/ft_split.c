@@ -79,12 +79,4 @@ char	**ft_split(char const *s, char c)
 	result[i] = NULL;
 	return (result);
 }
-/*
-int main(void)
-{
-    char **result;
-    result = ft_split(" Tripouille", ' ');
-	for (int i = 0; i < 4; i++)
-		printf("%s\n", result[i]);
-}
-*/
+

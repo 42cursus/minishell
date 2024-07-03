@@ -3,21 +3,14 @@
 #                                                         :::      ::::::::    #
 #    Makefile.mk                                        :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: yublee <yublee@student.42london.com>       +#+  +:+       +#+         #
+#    By: abelov <abelov@student.42london.com>       +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2023/12/16 00:38:57 by yublee            #+#    #+#              #
-#    Updated: 2024/07/02 17:57:11 by abelov           ###   ########.fr        #
+#    Created: 2024/07/01 18:15:26 by abelov            #+#    #+#              #
+#    Updated: 2024/07/02 17:55:34 by abelov           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-BONUS_FILES = ft_lstadd_back.c \
-				ft_lstadd_front.c \
-				ft_lstclear.c \
-				ft_lstdelone.c \
-				ft_lstiter.c \
-				ft_lstlast.c \
-				ft_lstmap.c \
-				ft_lstnew.c \
-				ft_lstsize.c
+FILES   = ft_tab_get_size.c \
+			ft_tab_string_join.c
 
-BONUS_SRCS    += $(BONUS_FILES:%.c=$(dir $(lastword $(MAKEFILE_LIST)))%.c)
+SRCS    += $(FILES:%.c=$(dir $(lastword $(MAKEFILE_LIST)))%.c)

@@ -12,7 +12,7 @@
 
 NAME		= libft.a
 CC			= cc
-CFLAGS		= -Wall -Wextra -Werror
+CFLAGS		= -Wall -Wextra -Werror -g3 -gdwarf-3
 RM			= rm -fv
 AR			= ar
 ARFLAGS		= rcs
@@ -21,7 +21,7 @@ INCLUDE		= -I. -I./include
 SRCS		:=
 BONUS_SRCS	:=
 BUILD_DIR	= build
-DIRS		= printf std bonus gnl string
+DIRS		= bonus ctype gnl io printf std string tab
 
 include $(addsuffix /Makefile.mk,$(DIRS))
 

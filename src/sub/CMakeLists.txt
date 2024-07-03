@@ -14,11 +14,14 @@ project(minishell_sub C)
 
 file(GLOB TEST_TARGET_HEADERS "${PROJECT_SOURCE_DIR}/*.h")
 file(GLOB TEST_TARGET_SOURCES "${PROJECT_SOURCE_DIR}/*.c")
+file(GLOB BTINS_TARGET_SOURCES "${PROJECT_SOURCE_DIR}/builtins/*.c")
+file(GLOB UTILS_TARGET_SOURCES "${PROJECT_SOURCE_DIR}/utils/*.c")
+list (APPEND TEST_TARGET_SOURCES "${UTILS_TARGET_SOURCES};${BTINS_TARGET_SOURCES}")
 
 set(TEST_TARGET_NAME "${PROJECT_NAME}_test")
 
 add_executable(${TEST_TARGET_NAME}
         ${TEST_TARGET_HEADERS}
         ${TEST_TARGET_SOURCES})
-
-target_link_libraries(${TEST_TARGET_NAME} asan lsan ${FT_LIB_NAME})
+target_include_directories(${TEST_TARGET_NAME} PRIVATE "${PROJECT_SOURCE_DIR}")
+target_link_libraries(${TEST_TARGET_NAME} asan ${FT_LIB_NAME})

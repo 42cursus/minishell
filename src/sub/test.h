@@ -21,33 +21,36 @@
 # include <linux/limits.h>
 # include "libft.h"
 
-# ifndef T_UINT
-#  define T_UINT
 /**
- * When an expression contains operands of different built-in types,
- * and no explicit casts are present, the compiler uses built-in standard
- * conversions to convert one of the operands so that the types match.
- *
- * See also:
- *	 https://learn.microsoft.com =>
- *	 	=> /en-us/cpp/cpp/type-conversions-and-type-safety-modern-cpp
+ * k => key
+ * v => value
+ * attrs => attributes
  */
-typedef unsigned int	t_uint;
-# endif
+typedef struct s_shell_var
+{
+	char	*k;
+	char	*v;
+	int 	attrs;
+}	t_sh_var;
 
 typedef struct s_exec_ctx
 {
-	char	*cmd;
+	char		*cmd;
 	struct s_inout
 	{
 		int in;
 		int out;
 		int err;
-	}	fdio;
-	char 	**env;
+	}			fdio;
+	t_sh_var	*env_map;
 }	t_exec_ctx;
 
-int		ft_pwd(void);
+# define ATT_EXPORTED	0x0000001	/* export to environment */
+# define ATT_READONLY	0x0000002	/* cannot change */
+# define ATT_INTEGER	0x0000010	/* internal representation is int */
+# define ATT_NOUNSET 	0x0002000	/* cannot unset */
+# define ATT_NOASSIGN	0x0004000	/* assignment not allowed */
+# define ATT_IMPORTED	0x0008000	/* came from environment */
 
 # define FT_RED   "\033[0;31m"
 # define FT_GREEN "\033[0;32m"
@@ -56,20 +59,24 @@ int		ft_pwd(void);
 
 /* ---------- TESTS -------------------- */
 
-void	check(bool succes);
-void	ft_print_title(char *title);
+void		check(bool succes);
+void		ft_print_title(char *title);
 
-typedef int				(*t_fun)(void);
-typedef struct s_ops
+typedef int	(*t_shell_fun)(t_exec_ctx *);
+typedef struct s_shell_op
 {
-	size_t size;
-	const t_fun *functions;
-} t_ops;
+	const char	*instruction;
+	t_shell_fun	fun;
+}	t_shell_op;
 
 /* ---------- FUNCTIONS -------------------- */
-int		ft_env(t_exec_ctx *ctx);
-
+int			ft_env(t_exec_ctx *ctx);
+int			ft_pwd(t_exec_ctx *ctx);
+int			ft_echo(t_exec_ctx *ctx);
+int			ft_export(t_exec_ctx *ctx);
+int			ft_unset(t_exec_ctx *ctx);
 /* ---------- UTILS -------------------- */
-void	sigsegv(int signal);
+void		sigsegv(int signal);
+t_sh_var	*ft_shell_parse_env_map(char **env_tab);
 
 #endif //TEST_H

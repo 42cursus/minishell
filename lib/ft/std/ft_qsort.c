@@ -1,20 +1,19 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_env.c                                           :+:      :+:    :+:   */
+/*   ft_qsort.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: abelov <abelov@student.42london.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/06/28 18:34:59 by abelov            #+#    #+#             */
-/*   Updated: 2024/06/28 18:34:59 by abelov           ###   ########.fr       */
+/*   Created: 2024/06/23 16:53:37 by abelov            #+#    #+#             */
+/*   Updated: 2024/06/23 16:53:38 by abelov           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "test.h"
+#include "libft.h"
 
-int	ft_env(t_exec_ctx *ctx)
+void	ft_qsort(void *const base, size_t total_elems,
+					size_t size, __compar_fn_t cmp)
 {
-	while (*ctx->env)
-		ft_printf("env: %s\n", *ctx->env++);
-	return (0);
+	ft_bsort(base, total_elems, size, cmp);
 }
