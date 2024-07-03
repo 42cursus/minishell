@@ -14,5 +14,6 @@
 
 int	ft_echo(t_exec_ctx *ctx)
 {
+	ft_putendl_fd(ctx->cmdline, ctx->fdio.out);
 	return (0);
 }

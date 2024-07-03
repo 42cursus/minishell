@@ -15,16 +15,16 @@
 char	*ft_strjoin(const char *s1, const char *s2)
 {
 	size_t	charnum;
-	char	*result;
+	char	*new;
 
 	if (!s1 || !s2)
 		return (NULL);
 	charnum = ft_strlen(s1) + ft_strlen(s2);
-	result = (char *)malloc(charnum + 1);
-	if (!result)
+	new = (char *)malloc(charnum + 1);
+	if (!new)
 		return (NULL);
-	*result = '\0';
-	result = ft_strcat(result, s1);
-	result = ft_strcat(result, s2);
-	return (result);
+	*new = '\0';
+	ft_strcat(new, s1);
+	ft_strcat(new, s2);
+	return (new);
 }

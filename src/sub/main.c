@@ -48,13 +48,14 @@ int do_init_ops(t_obj_arr **ops)
 	static t_shell_op	builtins[] = {
 		{.instruction = "pwd", .fun = ft_pwd},
 		{.instruction = "env", .fun = ft_env},
+		{.instruction = "cd", .fun = ft_chdir},
 		{.instruction = "echo", .fun = ft_echo},
 		{.instruction = "export", .fun = ft_export},
 		{.instruction = "unset", .fun = ft_unset}
 	};
 
 	new = (t_obj_arr *) malloc(sizeof(t_obj_arr));
-	if (!ops)
+	if (!new)
 		return (-1);
 	new->base = builtins;
 	new->elem_size = sizeof(builtins[0]);
@@ -83,19 +84,25 @@ int	main(int argc, char **argv, char **envp)
 	t_obj_arr	*ops;
 	t_shell_op	*op;
 	int			errcode;
+	char		*tmp;
 
 	if (argc < 2)
 		return (EX_NOINPUT);
-//	signal(SIGSEGV, sigsegv);
+	signal(SIGSEGV, sigsegv);
 	errcode = do_init_ops(&ops);
 	if (errcode == -1)
-		exit(-1);
+		exit(errcode);
 	errcode = do_init(&global, envp);
 	if (errcode == -1)
-		exit(-1);
-	global->cmd = argv[1];
+		exit(errcode);
+	global->cmdline = argv[1];
 	global->fdio.out = 1;
-	op = ft_bsearch(&(t_shell_op){.instruction = global->cmd}, ops, ft_shell_op_cmp);
+
+	tmp = ft_strdup(global->cmdline);
+	global->command = ft_strdup(ft_strtok(tmp, " "));
+	free(tmp);
+	op = ft_bsearch(&(t_shell_op){.instruction = global->command},
+									ops, ft_shell_op_cmp);
 	if (op != NULL)
 		op->fun(global);
 	return (EX_OK);

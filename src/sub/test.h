@@ -35,7 +35,8 @@ typedef struct s_shell_var
 
 typedef struct s_exec_ctx
 {
-	char		*cmd;
+	char		*command;
+	char		*cmdline;
 	struct s_inout
 	{
 		int in;
@@ -70,6 +71,7 @@ typedef struct s_shell_op
 }	t_shell_op;
 
 /* ---------- FUNCTIONS -------------------- */
+int			ft_chdir(t_exec_ctx *ctx);
 int			ft_env(t_exec_ctx *ctx);
 int			ft_pwd(t_exec_ctx *ctx);
 int			ft_echo(t_exec_ctx *ctx);
