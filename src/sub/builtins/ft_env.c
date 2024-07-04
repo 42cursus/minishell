@@ -14,5 +14,9 @@
 
 int	ft_env(t_exec_ctx *ctx)
 {
+	char *str;
+
+	str = ft_shell_env_map_get("PATH", ctx)->v;
+	ft_putendl_fd(str, ctx->fdio.out);
 	return (0);
 }

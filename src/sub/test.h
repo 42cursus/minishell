@@ -43,7 +43,7 @@ typedef struct s_exec_ctx
 		int out;
 		int err;
 	}			fdio;
-	t_sh_var	*env_map;
+	t_obj_arr	env_map;
 }	t_exec_ctx;
 
 # define ATT_EXPORTED	0x0000001	/* export to environment */
@@ -79,6 +79,7 @@ int			ft_export(t_exec_ctx *ctx);
 int			ft_unset(t_exec_ctx *ctx);
 /* ---------- UTILS -------------------- */
 void		sigsegv(int signal);
-t_sh_var	*ft_shell_parse_env_map(char **env_tab);
+int			ft_shell_parse_env_map(t_obj_arr *map, char **env_tab);
+t_sh_var	*ft_shell_env_map_get(const char *key, t_exec_ctx *ctx);
 
 #endif //TEST_H

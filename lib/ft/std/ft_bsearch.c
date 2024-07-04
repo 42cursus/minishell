@@ -12,8 +12,7 @@
 
 #include "libft.h"
 
-void	*ft_bsearch(const void *key, t_obj_arr *object_arr,
-					__compar_fn_t cmp)
+void	*ft_bsearch_obj(const void *key, t_obj_arr *obj)
 {
 	size_t		lower;
 	size_t		upper;
@@ -22,13 +21,13 @@ void	*ft_bsearch(const void *key, t_obj_arr *object_arr,
 	int			comparison;
 
 	lower = 0;
-	upper = object_arr->total_elems;
+	upper = obj->total_elems;
 	while (lower < upper)
 	{
 		idx = (lower + upper) / 2;
-		ptr = (void *)(((const char *) object_arr->base)
-				+ (idx * object_arr->elem_size));
-		comparison = (*cmp)(key, ptr);
+		ptr = (void *)(((const char *) obj->base)
+				+ (idx * obj->elem_size));
+		comparison = (*obj->cmp_fun)(key, ptr);
 		if (comparison < 0)
 			upper = idx;
 		else if (comparison > 0)
