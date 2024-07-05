@@ -12,60 +12,6 @@
 
 #include "test.h"
 
-int	ft_shell_op_cmp(const void *a, const void *b)
-{
-	const t_shell_op	*op1 = a;
-	const t_shell_op	*op2 = b;
-
-	return (ft_strcmp(op1->instruction,  op2->instruction));
-}
-
-int	ft_shell_var_cmp(const void *a, const void *b)
-{
-	const t_sh_var	*var1 = a;
-	const t_sh_var	*var2 = b;
-
-	return (ft_strcmp(var1->k,  var2->k));
-}
-
-t_sh_var	*ft_shell_env_map_get(const char *key, t_exec_ctx *ctx)
-{
-	t_sh_var	*found;
-
-	found = ft_bsearch_obj(&(t_sh_var){.k = key}, &ctx->env_map);
-	return (found);
-}
-
-int	ft_shell_parse_env_map(t_obj_arr *map, char **env_tab)
-{
-	size_t		i;
-	size_t		map_size;
-	t_sh_var	*env_map;
-	char		*saveptr;
-	char		*tmp;
-
-	map_size = ft_get_tab_size((const void **) env_tab);
-	env_map = (t_sh_var *)malloc(map_size * (sizeof(t_sh_var)));
-	if (!env_map)
-		return (-1);
-	i = -1;
-	while (++i < map_size)
-	{
-		saveptr = NULL;
-		tmp = ft_strdup(env_tab[i]);
-		env_map[i].k = ft_strtok_r(tmp, "=", &saveptr);
-		env_map[i].attrs = ATT_EXPORTED | ATT_IMPORTED;
-		if (saveptr != NULL)
-			env_map[i].v = ft_strdup(saveptr);
-	}
-	map->base = env_map;
-	map->elem_size = sizeof(t_sh_var);
-	map->total_elems = map_size;
-	map->cmp_fun = ft_shell_var_cmp;
-	ft_qsort_obj(map);
-	return (0);
-}
-
 int do_init_ops(t_obj_arr **ops)
 {
 	t_obj_arr			*new;

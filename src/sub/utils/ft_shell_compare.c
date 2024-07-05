@@ -1,30 +1,30 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_env.c                                           :+:      :+:    :+:   */
+/*   ft_shell_compare.c                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: abelov <abelov@student.42london.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/06/28 18:34:59 by abelov            #+#    #+#             */
-/*   Updated: 2024/06/28 18:34:59 by abelov           ###   ########.fr       */
+/*   Created: 2024/07/05 12:49:38 by abelov            #+#    #+#             */
+/*   Updated: 2024/07/05 12:49:39 by abelov           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "test.h"
 
-int	ft_env(t_exec_ctx *ctx)
+int	ft_shell_op_cmp(const void *a, const void *b)
 {
-	char *str;
-	char *optr;
-	char *sptr;
+	const t_shell_op	*op1 = a;
+	const t_shell_op	*op2 = b;
 
-	optr = ft_strdup(ft_shell_env_map_get_entry("PATH", ctx)->v);
-	str = ft_strtok_r(optr, ":", &sptr);
-	while (str)
-	{
-		ft_putendl_fd(str, ctx->fdio.out);
-		str = ft_strtok_r(NULL, ":", &sptr);
-	}
-	free(optr);
-	return (0);
+	return (ft_strcmp(op1->instruction,  op2->instruction));
 }
+
+int	ft_shell_var_cmp(const void *a, const void *b)
+{
+	const t_sh_var	*var1 = a;
+	const t_sh_var	*var2 = b;
+
+	return (ft_strcmp(var1->k,  var2->k));
+}
+
