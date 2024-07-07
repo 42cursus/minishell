@@ -35,8 +35,9 @@ typedef struct s_shell_var
 
 typedef struct s_exec_ctx
 {
-	char		*command;
-	char		*cmdline;
+	char		**argv;
+	int 		argc;
+	int 		flags;
 	struct s_inout
 	{
 		int in;
@@ -80,10 +81,12 @@ int			ft_unset(t_exec_ctx *ctx);
 
 /* ---------- UTILS -------------------- */
 void		sigsegv(int signal);
+int			do_init_ops(t_obj_arr **ops);
+int			do_init(t_exec_ctx	**ctx, char **envp);
 int			ft_shell_op_cmp(const void *a, const void *b);
 int			ft_shell_var_cmp(const void *a, const void *b);
 int			ft_shell_parse_env_map(t_obj_arr *map, char **env_tab);
 t_sh_var	*ft_shell_env_map_get_entry(const char *key, t_exec_ctx *ctx);
-int			ft_shell_env_map_add_entry(t_sh_var var, t_exec_ctx *ctx);
 int			ft_shell_env_map_bind_var(t_sh_var var, t_exec_ctx *ctx);
+int			ft_shell_env_map_unbind_var(t_sh_var var, t_exec_ctx *ctx);
 #endif //TEST_H

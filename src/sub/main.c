@@ -12,44 +12,6 @@
 
 #include "test.h"
 
-int do_init_ops(t_obj_arr **ops)
-{
-	t_obj_arr			*new;
-	static t_shell_op	builtins[] = {
-		{.instruction = "pwd", .fun = ft_pwd},
-		{.instruction = "env", .fun = ft_env},
-		{.instruction = "cd", .fun = ft_chdir},
-		{.instruction = "echo", .fun = ft_echo},
-		{.instruction = "export", .fun = ft_export},
-		{.instruction = "unset", .fun = ft_unset}
-	};
-
-	new = (t_obj_arr *) malloc(sizeof(t_obj_arr));
-	if (!new)
-		return (-1);
-	new->base = builtins;
-	new->elem_size = sizeof(builtins[0]);
-	new->total_elems = sizeof(builtins) / sizeof(builtins[0]);
-	new->cmp_fun = ft_shell_op_cmp;
-	ft_qsort_obj(new);
-	*ops = new;
-	return (0);
-}
-
-int	do_init(t_exec_ctx	**ctx, char **envp)
-{
-	t_exec_ctx	*new;
-
-	new = (t_exec_ctx *) malloc(sizeof(t_exec_ctx));
-	if (!new)
-		return (-1);
-	ft_shell_parse_env_map(&new->env_map, envp);
-	new->env_map.cmp_fun = ft_shell_var_cmp;
-	ft_qsort_obj(&new->env_map);
-	*ctx = new;
-	return (0);
-}
-
 int	ft_shell_destroy_ctx(t_exec_ctx **ctx)
 {
 	int			i;
@@ -64,8 +26,9 @@ int	ft_shell_destroy_ctx(t_exec_ctx **ctx)
 			free(var->v);
 	}
 	free((*ctx)->env_map.base);
-	free((*ctx)->cmdline);
-	free((*ctx)->command);
+	while((*ctx)->argc--)
+		free((*ctx)->argv[(*ctx)->argc]);
+	free((*ctx)->argv);
 	free(*ctx);
 	*ctx = NULL;
 	return (0);
@@ -85,13 +48,10 @@ int	main(int argc, char **argv, char **envp)
 		exit(-1);
 	if (do_init(&global, envp) == -1)
 		exit(-1);
-	global->cmdline = ft_strdup(argv[1]);
 	global->fdio.out = 1;
-
-	tmp = ft_strdup(global->cmdline);
-	global->command = ft_strdup(ft_strtok(tmp, " "));
-	free(tmp);
-	op = ft_bsearch_obj(&(t_shell_op){.instruction = global->command}, ops);
+	global->argv = ft_split(argv[1], ' ');
+	global->argc = ft_get_tab_size(global->argv);
+	op = ft_bsearch_obj(&(t_shell_op){.instruction = global->argv[0]}, ops);
 	if (op != NULL)
 		op->fun(global);
 	ft_shell_destroy_ctx(&global);

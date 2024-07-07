@@ -12,7 +12,6 @@
 
 #include "test.h"
 
-
 int	ft_shell_parse_env_map(t_obj_arr *map, char **env_tab)
 {
 	size_t		i;
@@ -51,6 +50,14 @@ t_sh_var	*ft_shell_env_map_get_entry(const char *key, t_exec_ctx *ctx)
 	return (found);
 }
 
+int	ft_shell_env_map_get_index(const char *key, t_exec_ctx *ctx)
+{
+	t_sh_var	*found;
+
+	found = ft_bsearch_obj(&(t_sh_var){.k = key}, &ctx->env_map);
+	return (-1);
+}
+
 int	ft_shell_env_map_add_entry(t_sh_var var, t_exec_ctx *ctx)
 {
 	t_obj_arr 	*obj;
@@ -73,6 +80,37 @@ int	ft_shell_env_map_add_entry(t_sh_var var, t_exec_ctx *ctx)
 	return (0);
 }
 
+int ft_shell_env_map_del_entry(t_sh_var var, t_exec_ctx *ctx)
+{
+	t_obj_arr 	*obj;
+	t_sh_var 	*new;
+	size_t 		new_size;
+
+	obj = &ctx->env_map;
+	new_size = obj->total_elems * obj->elem_size - obj->elem_size;
+	new = (t_sh_var *) malloc(new_size);
+	if (!new)
+		return (-1);
+	ft_memcpy(new, obj->base, obj->total_elems * obj->elem_size);
+	new[obj->total_elems].k = var.k;
+	new[obj->total_elems].v = var.v;
+	new[obj->total_elems].attrs = var.attrs;
+	free(obj->base);
+	obj->base = new;
+	obj->total_elems++;
+	ft_qsort_obj(obj);
+	return (0);
+}
+
+int	ft_shell_env_map_unbind_var(t_sh_var var, t_exec_ctx *ctx)
+{
+	if (ft_shell_env_map_get_entry(var.k, ctx))
+		return (ft_shell_env_map_del_entry(var, ctx));
+	return (0);
+}
+
+
+
 int	ft_shell_env_map_bind_var(t_sh_var var, t_exec_ctx *ctx)
 {
 	t_sh_var	*found;
@@ -84,7 +122,5 @@ int	ft_shell_env_map_bind_var(t_sh_var var, t_exec_ctx *ctx)
 		found->attrs = var.attrs;
 		return (1);
 	}
-	else
-		ft_shell_env_map_add_entry(var, ctx);
-	return (0);
+	return (ft_shell_env_map_add_entry(var, ctx));
 }
