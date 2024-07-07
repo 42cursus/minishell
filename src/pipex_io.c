@@ -6,7 +6,7 @@
 /*   By: yublee <yublee@student.42london.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/16 00:37:53 by yublee            #+#    #+#             */
-/*   Updated: 2024/06/16 19:39:15 by yublee           ###   ########.fr       */
+/*   Updated: 2024/07/08 00:44:28 by yublee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,7 +64,6 @@ static void	open_output(void *item, t_info info)
 		exit_with_message("dup2", EXIT_FAILURE, info);
 	close(fd_output);
 }
-//heredoc needs to be added
 
 void	get_input(t_btree *cmd, int i, t_info info)
 {

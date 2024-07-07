@@ -6,7 +6,7 @@
 #    By: yublee <yublee@student.42london.com>       +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/02/19 14:55:22 by yublee            #+#    #+#              #
-#    Updated: 2024/06/26 17:35:58 by abelov           ###   ########.fr        #
+#    Updated: 2024/07/08 00:27:19 by yublee           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -33,6 +33,8 @@ SRCS			= src/main.c \
                   	src/pipex_main.c \
                   	src/pipex_child_process.c \
                   	src/pipex_io.c \
+					src/pipex_argv.c \
+                  	src/utils_str.c \
                   	src/utils_tree.c \
                   	src/utils_lst.c \
                   	src/utils.c

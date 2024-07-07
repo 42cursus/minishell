@@ -6,23 +6,11 @@
 /*   By: yublee <yublee@student.42london.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 14:59:19 by yublee            #+#    #+#             */
-/*   Updated: 2024/06/16 23:27:06 by yublee           ###   ########.fr       */
+/*   Updated: 2024/07/07 23:56:53 by yublee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
-
-void	ft_strtrim_and_free(t_btree *root)
-{
-	char	*result;
-
-	if (ft_strlen(root->item) > 0)
-	{
-		result = ft_strtrim(root->item, " ");
-		free(root->item);
-		root->item = result;
-	}
-}
 
 void	free_before_exit(t_info	info)
 {
