@@ -26,12 +26,14 @@ typedef struct s_list
 	struct s_list	*next;
 }	t_list;
 
+typedef __compar_fn_t	t_cmpf;
 typedef struct s_object_arr	t_obj_arr;
 struct s_object_arr
 {
-	const void	*base;
-	size_t		total_elems;
-	size_t		elem_size;
+	void *	base;
+	size_t	total_elems;
+	size_t	elem_size;
+	t_cmpf	cmp_fun;
 };
 
 int		ft_isalpha(int c);
@@ -79,8 +81,8 @@ void	ft_bsort(void *const base, size_t total_elems,
 			size_t size, __compar_fn_t cmp);
 void	ft_qsort(void *const base, size_t total_elems,
 			size_t size, __compar_fn_t cmp);
-void	*ft_bsearch(const void *key, t_obj_arr *object_arr,
-			__compar_fn_t cmp);
+void	*ft_bsearch_obj(const void *key, t_obj_arr *obj);
+void	ft_qsort_obj(t_obj_arr *obj);
 char	*ft_strmapi(char const *s, char (*f)(unsigned int, char));
 void	ft_striteri(char *s, void (*f)(unsigned int, char*));
 void	ft_putchar_fd(char c, int fd);

@@ -14,12 +14,12 @@
 
 int	ft_chdir(t_exec_ctx *ctx)
 {
-	char 	*tmp;
 	char	*path[PATH_MAX];
 
-	tmp = ft_strdup(ctx->cmdline);
-	ft_strtok(tmp, " ");
-	ft_strncpy((char *) path, ft_strtok(NULL, " "), PATH_MAX);
+	if (ctx->argv[1])
+		ft_strncpy((char *) path, ctx->argv[1], PATH_MAX);
+	else
+		ft_strncpy((char *) path, ft_shell_env_map_get_entry("HOME", ctx)->v, PATH_MAX);
 	ft_putendl_fd(ft_strjoin("changing directory to: ", path),ctx->fdio.out);
 	return (chdir(path));
 }

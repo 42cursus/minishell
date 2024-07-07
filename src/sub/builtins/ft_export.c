@@ -14,5 +14,12 @@
 
 int	ft_export(t_exec_ctx *ctx)
 {
+	char *str;
+	char *optr;
+	char *sptr1;
+	char *saveptr;
+	t_sh_var var;
+
+
 	return (0);
 }
