@@ -6,7 +6,7 @@
 /*   By: yublee <yublee@student.42london.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 15:00:45 by yublee            #+#    #+#             */
-/*   Updated: 2024/07/08 04:03:00 by yublee           ###   ########.fr       */
+/*   Updated: 2024/07/08 21:44:05 by yublee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ static size_t	skip_word(char *str, size_t i, char c)
 		i++;
 	while (str[i] == ' ')
 		i++;
-	while (str[i] && str[i] != ' ')
+	while (str[i] && str[i] != ' ' && str[i] != '<' && str[i] != '>')
 		i++;
 	return (i);
 }
@@ -67,11 +67,11 @@ char	*ft_leftoverdup(char *str, char *str_sub, char c)
 	j = 0;
 	while (j < len)
 	{
-		if (str_sub[i] == c)
+		while (str_sub[i] == c)
 			i = skip_word(str_sub, i, c);
 		result[j++] = str[i++];
 	}
-	result[j] = 0;
+	result[len] = 0;
 	return (result);
 }
 
@@ -88,7 +88,7 @@ char	*ft_worddup(char *str, char c)
 		i++;
 	while (str[i++] == ' ')
 		j++;
-	while (str[i] && str[i] != ' ')
+	while (str[i] && str[i] != ' ' && str[i] != '<' && str[i] != '>')
 		i++;
 	len = i - j;
 	result = (char *)malloc(len + 1);
