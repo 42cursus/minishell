@@ -6,7 +6,7 @@
 /*   By: yublee <yublee@student.42london.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/19 13:55:33 by yublee            #+#    #+#             */
-/*   Updated: 2024/07/08 00:21:58 by yublee           ###   ########.fr       */
+/*   Updated: 2024/07/08 03:08:04 by yublee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,7 @@ void	syntax_validation(char *str);
 //create tree
 void	expand_tree_pipe(t_btree *root);
 void	expand_tree_redirect(t_btree *root);
-char	*ft_leftoverdup(char *str, char c);
+char	*ft_leftoverdup(char *str, char *str_sub, char c);
 char	*ft_worddup(char *str, char c);
 
 //create command list
@@ -71,7 +71,8 @@ void	del(void *item);
 void	print_list(void *content);
 
 //str utils
-char	**ft_split_str_with_quotes(char const *s, char c);
+// char	**ft_split_str_with_quotes(char *s, char c);
+char	*str_with_substituted_quotes(char *s, char c);
 void	ft_strtrim_and_free(t_btree *root);
 
 //utils

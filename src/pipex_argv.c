@@ -6,7 +6,7 @@
 /*   By: yublee <yublee@student.42london.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/07 23:40:12 by yublee            #+#    #+#             */
-/*   Updated: 2024/07/08 00:30:39 by yublee           ###   ########.fr       */
+/*   Updated: 2024/07/08 01:54:07 by yublee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,7 +60,7 @@ char	**get_argv(char *str, char **env, t_info info)
 	char	**paths;
 
 	i = 0;
-	argv = ft_split_str_with_quotes(str, ' ');
+	argv = ft_split(str, ' ');
 	if (!access(argv[0], X_OK))
 		return (argv);
 	while (!ft_strnstr(env[i], "PATH", 4))

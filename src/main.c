@@ -6,7 +6,7 @@
 /*   By: yublee <yublee@student.42london.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/16 00:34:13 by yublee            #+#    #+#             */
-/*   Updated: 2024/07/07 23:38:21 by yublee           ###   ########.fr       */
+/*   Updated: 2024/07/08 04:16:58 by yublee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ int	main(int argc, char **argv, char **env)
 	// str_init = "<<input cat | ls > output > output2";
 	// str_init = "<<EOF cat | cat -e >output >>output2";
 	// str_init = "  |<input cat | echo -n 't|es\"|\"\"t' >output | cat -e >>output |";
-	str_init = "<input cat | echo -n 't|es\"|\"\"t <input <<input >output >>output' >output | cat -e >>output"; // needs to discuss what to do in this case
+	str_init = "<'input' cat | echo -n '<t|es\"|\"\"t <input <<input >output >>output>'\"test\">output|cat -e >>output";
 	// str_init = "<<EOF cat1 | <input1 >output1 | <input2 cat2 >output2 >>output3";
 	syntax_validation(str_init);
 
@@ -47,7 +47,7 @@ int	main(int argc, char **argv, char **env)
 	btree_apply_suffix(root, ft_strtrim_and_free);
 
 	// print tree to check
-	// btree_apply_infix(root, print_node);
+	btree_apply_infix(root, print_node);
 
 	// get the command list according to pipe
 	cmd_list = get_cmds(root);
