@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# ============================================================
+# Section: Initialization
+
+# Basic text colors
 BLACK='\033[0;30m'
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -31,97 +35,219 @@ BG_CYAN='\033[46m'
 BG_WHITE='\033[47m'
 BG_GREY='\033[100m'
 
+# compile the program
 current_dir=$(pwd)
 cd ../
 make
 cd "$current_dir" 
 
-#create set input and output file
-
-
-directory="t"
-if [ ! -d "$directory" ]; then
-    mkdir "$directory"
-    echo "Directory $directory created."
+# create input directory and files
+dir="t" #test
+if [ ! -d "$dir" ]; then
+    mkdir "$dir"
+    echo "Directory $dir created."
+else
+	rm "${dir}"/*
 fi
 
 in=(
-	"$directory/i0"
-	"$directory/i1"
-	"$directory/i2"
-	"$directory/i3"
+	"$dir/i0"
+	"$dir/i1"
+	"$dir/i2"
+	"$dir/i3"
 )
 
 for input_file in "${in[@]}"; do
 	if [ ! -f "$input_file" ]; then
-    touch "$input_file"
-    echo "Test input file created: $input_file"
+ 	   touch "$input_file"
 	fi
+    # echo "Test input file created: $input_file"
 done
 
+# set file names
+
 out=(
-	"$directory/o0"
-	"$directory/o1"
-	"$directory/o2"
-	"$directory/o3"
+	"$dir/o0"
+	"$dir/o1"
+	"$dir/o2"
+	"$dir/o3"
 )
 
-filename="args"
+args_file="args.txt"
 
-# for user input
-if [[ $# -gt 0 ]]; then
-	string=( "$@" )
-	printf "${BOLD_YELLOW}input:\n${YELLOW}$string\n"
-	printf "${BOLD_GREEN}tree:\n${NC}"
+#preset test strings
 
-	valgrind --leak-check=full --show-leak-kinds=all -s --log-file="$directory"/valgrind_output.txt ../minishell "$string"
-	# valgrind --leak-check=full --show-leak-kinds=all -s  ../minishell "$string"
-
-	if [ -f "$filename" ]; then
-		printf "${BOLD_GREEN}args:${NC}\n"
-		cat "$filename"
-	else
-		echo "$filename does not exist."
-	fi
-
-	if grep -q "ERROR SUMMARY: [^0][0-9]* errors" "$directory"/valgrind_output.txt || grep -q "LEAK SUMMARY" "$directory"/valgrind_output.txt; then
-		printf "${BOLD_RED}Memory errors detected${NC}\n\n"
-		# grep "ERROR SUMMARY: [^0][0-9]* errors" "$directory"/valgrind_output.txt
-	else
-		printf "${BOLD_GREEN}Memory [OK]${NC}\n\n"
-	fi
-	exit 0
-else
-	test_strings=(
+preset_strings=(
+#case 1
 		"basic"
 		"ls -l | <<EOF wc -l >${out[0]} | <${in[1]} ls >> ${out[1]}"
+#case 2
 		"several ios with/without space and different order"
 		"ls -l | >${out[0]}<${in[0]}<${in[1]}<${in[2]} wc -l | <<EOF ls >>     ${out[1]} >${out[2]}"
-		"starting with pipe"
+#case 3
+		"starting with pipe" #3
 		"| <${in[0]} wc -l >${out[0]} | ls >> ${out[1]}"
+#case 4
 		"starting with pipe with space"
 		"  | <${in[0]} wc -l >${out[0]} | ls >> ${out[1]}"
+#case 5
 		"finishing with pipe"
 		"<${in[0]} wc -l >${out[0]} | ls >> ${out[1]} | "
+#case 6
 		"finishing with pipe with space"
 		"<${in[0]} wc -l >${out[0]} | ls >> ${out[1]} |"
+#case 7
 		"no command given"
 		"<<EOF cat | <${in[0]} >${out[0]} | <${in[1]} cat >${out[1]} >>${out[2]}"
+#case 8
 		"pipe and quotes in quotes"
 		"echo -n 't|es\"|\"\"t' >${out[0]} | cat -e >>${out[1]}"
+#case 9
 		"several quotes without space in between"
 		"echo -n 't|es\"|\"\"t'\"test\" >${out[0]} | cat -e >>${out[1]}"
+#case 10
 		"several quotes with space in between"
 		"echo -n '    t|es\"   |\"\"t    ' 'test' >${out[0]} | cat -e >>${out[1]}"
+#case 11
 		"quote in file name"
-		"<'input' cat | echo -n >t1/'output' >>${out[0]}"
+		"<'input' cat | echo -n >non-existing/'output' >>${out[0]}"
+#case 12
 		"quote in here doc"
 		"<<'input' cat | echo -n >>${out[0]}"
+#case 13
 		"incomplete quote"
 		"<'input' cat | echo -n \"hi 'hi' >>${out[0]}"
 	)
+
+#ser variables
+
+starting_num=0
+user=false
+
+# ============================================================
+# ============================================================
+# Section: Test Category
+
+
+# exit if too many argument
+if [[ $# -gt 1 ]]; then
+    echo "$0 only takes one or 0 argument"
+    exit 1
 fi
 
+#in case of no input, ask for a user input
+if [[ $# -eq 0 ]]; then
+	echo "Please enter a command:"
+	read -r user_input
+	string=("user input" "$user_input")
+	size=2
+	user=true
+fi
+
+#in case of one input
+
+if [[ $# -eq 1 ]]; then
+	cases=$1
+	string=("${preset_strings[@]}")
+
+	if [[ "$cases" = "all" ]]; then
+		size=${#string[@]}
+	else
+		if ! [[ "$cases" =~ ^[0-9]+$ ]]; then
+			echo "Invalid input. Please enter 'all' or valid number."
+			exit 1
+		else
+			starting_num=$((cases*2 - 2))
+			size=$((starting_num + 2))
+		fi
+	fi
+fi
+
+# ============================================================
+# ============================================================
+# Section: Test
+
+for ((i = starting_num; i<size; i +=2)); do
+	if ((i+1 < size)); then
+
+#clean outputs from a previous case
+	for output_file in "${out[@]}"; do
+		if [ -f "$dir/$output_file" ]; then
+			rm "$dir/$output_file"
+		fi
+	done
+
+	string1=${string[$i]}
+	printf "${BOLD_PURPLE}case $((i/2 + 1)) [$string1]${NC}"
+
+	string2=${string[$((i+1))]}
+	printf "\n${BOLD_YELLOW}input:\n${YELLOW}$string2\n"
+
+	# to print out tree
+	printf "${BOLD_GREEN}output:\n${NC}"
+
+	valgrind --leak-check=full --show-leak-kinds=all -s --log-file="$dir"/val_case$((i/2 + 1)) ../minishell "$string2"
+
+	if [ -f "$args_file" ]; then
+		printf "${BOLD_GREEN}args:${NC}\n"
+		cat "$args_file"
+	else
+		echo "$args_file does not exist."
+	fi
+
+	for output_file in "${out[@]}"; do
+		if [ -f "$dir/$output_file" ]; then
+			cp "$dir/$output_file" "$dir/$output_file_case$((i/2 + 1))"
+		fi
+	done
+
+	if grep -q "ERROR SUMMARY: [^0][0-9]* errors" "$dir"/val_case$((i/2 + 1)) || grep -q "LEAK SUMMARY" "$dir"/val_case$((i/2 + 1)); then
+		printf "${BOLD_RED}Memory errors detected${NC}\n\n"
+	else
+		printf "${BOLD_GREEN}Memory [OK]${NC}\n"
+	fi
+
+	if [[ user=false ]]; then
+
+		eval "$string2" 1>"/dev/null" 2>"/dev/null"
+		printf "${BOLD_WHITE}Bash: ${NC}\n"
+		diff=NA
+
+		for output_file in "${out[@]}"; do
+			if [ -f "$dir/$output_file" ]; then
+				diff=true
+				diff "$directrory/$output_file" "$dir/$output_file_case$((i/2 + 1))" 2>"/dev/null" 1>"$dir/bash_diff_case$((i/2 + 1))"
+				if [[ $? -eq 1 ]]; then
+					diff=false
+					printf "${BOLD_RED}[KO] ${NC}\n"
+					cat "$dir/bash_diff_case$((i/2 + 1))"
+					break
+				else
+					diff=NA
+					break
+				fi
+			fi
+		done
+
+		if [ "$diff" = true ]; then
+			printf "${BOLD_GREEN}[OK]${NC}\n"
+		elif [ "$diff" = false ]; then
+			:
+		else
+			printf "${BOLD_WHITE}[N/A]\n"
+		fi
+
+		for output_file in "${out[@]}"; do
+			if [ -f "$dir/$output_file" ]; then
+				cp "$dir/$output_file" "$dir/$output_file_case$((i/2 + 1))_bash"
+				# rm "$dir/$output_file"
+			fi
+		done
+	fi
+	printf "\n"
+	# sleep 1
+	fi
+done
 
 # add_line_breaks() {
 #     local input="$1"
@@ -132,41 +258,13 @@ fi
 #     done <<< "$input"
 #     echo -e "$output"
 # }
+# formatted_output=$(add_line_breaks "$output")
+# printf "${BOLD_GREEN}tree:\n${NC}${formatted_output}\n"
 
+# ============================================================
+# ============================================================
+# Section: Cleaning up
 
-
-
-#test starts
-for ((i = 0; i<${#test_strings[@]}; i +=2)); do
-	if ((i+1 < ${#test_strings[@]})); then
-
-	string1=${test_strings[$i]}
-	string2=${test_strings[$((i+1))]}
-	printf "${BOLD_PURPLE}case $((i/2 + 1)) [$string1]${NC}"
-	printf "\n${BOLD_YELLOW}input:\n${YELLOW}$string2\n"
-
-	# output=$(./minishell "$string2" 2>&1)
-	printf "${BOLD_GREEN}tree:\n${NC}"
-	# formatted_output=$(add_line_breaks "$output")
-	# printf "${BOLD_GREEN}tree:\n${NC}${formatted_output}\n"
-
-	valgrind --leak-check=full --show-leak-kinds=all -s --log-file="$directory"/valgrind_output$((i/2 + 1)).txt ../minishell "$string2"
-
-	if [ -f "$filename" ]; then
-		printf "${BOLD_GREEN}args:${NC}\n"
-		cat "$filename"
-	else
-		echo "$filename does not exist."
-	fi
-
-	if grep -q "ERROR SUMMARY: [^0][0-9]* errors" "$directory"/valgrind_output$((i/2 + 1)).txt || grep -q "LEAK SUMMARY" "$directory"/valgrind_output$((i/2 + 1)).txt; then
-		printf "${BOLD_RED}Memory errors detected${NC}\n\n"
-	else
-		printf "${BOLD_GREEN}Memory [OK]${NC}\n\n"
-	fi
-	# sleep 1
-	fi
-
-done
-
-rm args
+if [ -f "$args_file" ]; then
+	rm $args_file
+fi

@@ -6,7 +6,7 @@
 /*   By: yublee <yublee@student.42london.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/16 00:37:53 by yublee            #+#    #+#             */
-/*   Updated: 2024/07/09 14:59:56 by yublee           ###   ########.fr       */
+/*   Updated: 2024/07/09 15:23:04 by yublee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,14 +61,16 @@ static void	open_output(void *item, t_info info)
 {
 	int		fd_output;
 	char	*str;
+	char	*file_name;
 
 	str = (char *)item;
 	if (*(str + 1) == '>')
-		fd_output = open(str + 2, O_WRONLY | O_APPEND | O_CREAT, 0666);
+		file_name = str + 2;
 	else
-		fd_output = open(str + 1, O_WRONLY | O_TRUNC | O_CREAT, 0666);
+		file_name = str + 1;
+	fd_output = open(file_name, O_WRONLY | O_APPEND | O_CREAT, 0666);
 	if (fd_output < 0)
-		exit_with_message("output", EXIT_FAILURE, info);
+		exit_with_message(file_name, EXIT_FAILURE, info);
 	if (dup2(fd_output, STDOUT_FILENO) < 0)
 		exit_with_message("dup2", EXIT_FAILURE, info);
 	close(fd_output);
