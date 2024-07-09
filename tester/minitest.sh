@@ -196,8 +196,8 @@ for ((i = starting_num; i<size; i +=2)); do
 	fi
 
 	for output_file in "${out[@]}"; do
-		if [ -f "$dir/$output_file" ]; then
-			cp "$dir/$output_file" "$dir/$output_file_case$((i/2 + 1))"
+		if [ -f "$output_file" ]; then
+			cp "$output_file" "${output_file}_case$((i/2 + 1))"
 		fi
 	done
 
@@ -214,9 +214,9 @@ for ((i = starting_num; i<size; i +=2)); do
 		diff=NA
 
 		for output_file in "${out[@]}"; do
-			if [ -f "$dir/$output_file" ]; then
+			if [ -f "$output_file" ]; then
 				diff=true
-				diff "$directrory/$output_file" "$dir/$output_file_case$((i/2 + 1))" 2>"/dev/null" 1>"$dir/bash_diff_case$((i/2 + 1))"
+				diff "$output_file" "${output_file}_case$((i/2 + 1))" 2>"/dev/null" 1>"$dir/bash_diff_case$((i/2 + 1))"
 				if [[ $? -eq 1 ]]; then
 					diff=false
 					printf "${BOLD_RED}[KO] ${NC}\n"
@@ -238,9 +238,9 @@ for ((i = starting_num; i<size; i +=2)); do
 		fi
 
 		for output_file in "${out[@]}"; do
-			if [ -f "$dir/$output_file" ]; then
-				cp "$dir/$output_file" "$dir/$output_file_case$((i/2 + 1))_bash"
-				# rm "$dir/$output_file"
+			if [ -f "$output_file" ]; then
+				cp "$output_file" "${output_file}_case$((i/2 + 1))_bash"
+				rm "$output_file"
 			fi
 		done
 	fi
@@ -266,5 +266,5 @@ done
 # Section: Cleaning up
 
 if [ -f "$args_file" ]; then
-	rm $args_file
+	rm "./$args_file"
 fi
