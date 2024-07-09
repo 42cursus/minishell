@@ -6,7 +6,7 @@
 /*   By: yublee <yublee@student.42london.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/07 23:40:12 by yublee            #+#    #+#             */
-/*   Updated: 2024/07/09 02:12:11 by yublee           ###   ########.fr       */
+/*   Updated: 2024/07/09 14:57:32 by yublee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,7 +62,7 @@ char	**get_argv(char *str, char **env, t_info info)
 
 	i = 0;
 	argv = ft_split_str_with_quotes(str, ' ');
-	fd = open("args", O_WRONLY | O_APPEND); //only for test
+	fd = open("args.txt", O_WRONLY | O_APPEND); //only for test
 	for (int i = 0; argv[i]; i++) //only for test
 		dprintf(fd, "arg[%d]:%s\n", i, argv[i]); //only for test
 	dprintf(fd, "----------------------------\n"); //only for test

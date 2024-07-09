@@ -6,7 +6,7 @@
 #    By: yublee <yublee@student.42london.com>       +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/02/19 14:55:22 by yublee            #+#    #+#              #
-#    Updated: 2024/07/08 00:27:19 by yublee           ###   ########.fr        #
+#    Updated: 2024/07/09 15:11:02 by yublee           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -20,9 +20,9 @@ MANDATORY_FLAGS	:= -Wall -Wextra -Werror -Wimplicit
 CFLAGS			= $(MANDATORY_FLAGS) $(DEBUG_FLAGS) $(OPTIMIZE_FLAGS) $(INCLUDE_FLAGS)
 
 LIBFT_DIR		=  ./lib/ft
-LIBFT_LIB		=  $(LIBFT_PATH)/libft.a
+LIBFT_LIB		=  $(LIBFT_DIR)/libft.a
 LIBS			:= $(LIBFT)
-LINK_FLAGS		:= -L $(LIBFT_PATH) -lft
+LINK_FLAGS		:= -L $(LIBFT_DIR) -lft
 
 SRCS			= src/main.c \
                   	src/syntax_validation.c \
@@ -33,7 +33,7 @@ SRCS			= src/main.c \
                   	src/pipex_main.c \
                   	src/pipex_child_process.c \
                   	src/pipex_io.c \
-					src/pipex_argv.c \
+                  	src/pipex_argv.c \
                   	src/utils_str.c \
                   	src/utils_tree.c \
                   	src/utils_lst.c \
