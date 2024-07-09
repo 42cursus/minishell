@@ -76,6 +76,8 @@ out=(
 args_file="args.txt"
 
 #preset test strings
+#guide: use ${in[0~3]} for input file name
+#       and ${out[0~3]} for output file name
 
 preset_strings=(
 #case 1
@@ -117,6 +119,12 @@ preset_strings=(
 #case 13
 		"incomplete quote"
 		"<'input' cat | echo -n \"hi 'hi' >>${out[0]}"
+#case 14
+		"nonexisting command"
+		"ls -l | nonexist >${out[0]}"
+#case 15
+		"existing command with a wrong directory"
+		"ls -l | /cat -e >${out[0]}"
 	)
 
 #ser variables
@@ -204,20 +212,22 @@ for ((i = starting_num; i<size; i +=2)); do
 	if grep -q "ERROR SUMMARY: [^0][0-9]* errors" "$dir"/val_case$((i/2 + 1)) || grep -q "LEAK SUMMARY" "$dir"/val_case$((i/2 + 1)); then
 		printf "${BOLD_RED}Memory errors detected${NC}\n\n"
 	else
-		printf "${BOLD_GREEN}Memory [OK]${NC}\n"
+		printf "${BOLD_GREEN}Memory: [OK]${NC}\n"
 	fi
 
 	if [[ user=false ]]; then
 
 		eval "$string2" 1>"/dev/null" 2>"/dev/null"
-		printf "${BOLD_WHITE}Bash: ${NC}\n"
+		printf "${BOLD_GREEN}Bash: ${NC}"
 		diff=NA
 
 		for output_file in "${out[@]}"; do
 			if [ -f "$output_file" ]; then
 				diff=true
-				diff "$output_file" "${output_file}_case$((i/2 + 1))" 2>"/dev/null" 1>"$dir/bash_diff_case$((i/2 + 1))"
-				if [[ $? -eq 1 ]]; then
+				diff "$output_file" "${output_file}_case$((i/2 + 1))"  1>"$dir/bash_diff_case$((i/2 + 1))"
+				if [[ $? -eq 0 ]]; then
+					:
+				elif [[ $? -eq 1 ]]; then
 					diff=false
 					printf "${BOLD_RED}[KO] ${NC}\n"
 					cat "$dir/bash_diff_case$((i/2 + 1))"

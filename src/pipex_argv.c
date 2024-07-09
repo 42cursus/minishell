@@ -6,7 +6,7 @@
 /*   By: yublee <yublee@student.42london.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/07 23:40:12 by yublee            #+#    #+#             */
-/*   Updated: 2024/07/09 14:57:32 by yublee           ###   ########.fr       */
+/*   Updated: 2024/07/09 23:28:59 by yublee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ static void	join_path(char **paths, char **args)
 	}
 }
 
-static void	check_path(char **paths, char **args)
+static void	get_accessible_path(char **paths, char **args)
 {
 	int		i;
 	char	*temp;
@@ -69,11 +69,14 @@ char	**get_argv(char *str, char **env, t_info info)
 	if (!access(argv[0], X_OK))
 		return (argv);
 	while (!ft_strnstr(env[i], "PATH", 4))
-		i++;
+			i++;
 	path = ft_strnstr(env[i], "PATH", 4) + 5;
 	paths = ft_split(path, ':');
-	join_path(paths, &argv[0]);
-	check_path(paths, &argv[0]);
+	if (argv[0][0] != '/')
+	{
+		join_path(paths, &argv[0]);
+		get_accessible_path(paths, &argv[0]);
+	}
 	if (access(argv[0], X_OK))
 	{
 		tmp = ft_strdup(argv[0]);

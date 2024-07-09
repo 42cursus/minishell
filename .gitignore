@@ -21,8 +21,8 @@ outfile
 cmake_build
 
 #for test
-tester
 !tester/minitest.sh
+tester
 args.txt
 input_tmp
 
