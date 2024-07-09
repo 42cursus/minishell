@@ -6,7 +6,7 @@
 /*   By: yublee <yublee@student.42london.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/19 13:55:33 by yublee            #+#    #+#             */
-/*   Updated: 2024/07/08 03:08:04 by yublee           ###   ########.fr       */
+/*   Updated: 2024/07/08 21:46:44 by yublee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,7 +71,7 @@ void	del(void *item);
 void	print_list(void *content);
 
 //str utils
-// char	**ft_split_str_with_quotes(char *s, char c);
+char	**ft_split_str_with_quotes(char *s, char c);
 char	*str_with_substituted_quotes(char *s, char c);
 void	ft_strtrim_and_free(t_btree *root);
 

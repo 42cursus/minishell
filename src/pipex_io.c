@@ -6,7 +6,7 @@
 /*   By: yublee <yublee@student.42london.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/16 00:37:53 by yublee            #+#    #+#             */
-/*   Updated: 2024/07/08 00:44:28 by yublee           ###   ########.fr       */
+/*   Updated: 2024/07/09 03:36:54 by yublee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,20 +15,29 @@
 static void	read_til_delimiter(char *str, t_info info)
 {
 	char	*buf;
+	int		tty_fd;
+	int		new_fd; //need to rethink
 
-	close(info.fds[0][READ_END]);
+	tty_fd = open("/dev/tty", O_RDONLY);
+	new_fd = open("input", O_RDWR | O_TRUNC | O_CREAT, 0777);
+	if (tty_fd < 0)
+		exit_with_message(str + 1, EXIT_FAILURE, info);
 	while (1)
 	{
-		buf = get_next_line(0);
+		write(1,"> ",2);
+		buf = get_next_line(tty_fd); //readline instead?
 		if (!ft_strncmp(buf, str + 2, ft_strlen(str + 2)))
 			break ;
-		write(info.fds[0][WRITE_END], buf, ft_strlen(buf));
+		write(new_fd, buf, ft_strlen(buf));
 		free(buf);
 	}
 	free(buf);
-	close(info.fds[0][WRITE_END]);
-	close(0);
-	buf = get_next_line(0);
+	new_fd = open("input", O_RDWR);
+	if (dup2(new_fd, STDIN_FILENO) < 0)
+		exit_with_message("here doc", EXIT_FAILURE, info);
+	close(tty_fd);
+	close(new_fd);
+	unlink("input");//only for test
 }
 
 static void	open_input(void *item, t_info info)
@@ -40,7 +49,7 @@ static void	open_input(void *item, t_info info)
 	if (*(str + 1) == '<')
 	{
 		read_til_delimiter(str, info);
-		exit_with_message(NULL, EXIT_SUCCESS, info);
+		return ;
 	}
 	fd_input = open(str + 1, O_RDONLY);
 	if (fd_input < 0 || dup2(fd_input, STDIN_FILENO) < 0)

@@ -6,7 +6,7 @@
 /*   By: yublee <yublee@student.42london.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/16 00:34:13 by yublee            #+#    #+#             */
-/*   Updated: 2024/07/08 19:45:55 by yublee           ###   ########.fr       */
+/*   Updated: 2024/07/09 03:53:29 by yublee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,10 +16,11 @@ int	main(int argc, char **argv, char **env)
 {
 	char	*str;
 	t_btree	*root;
-	// t_list	*cmd_list;
+	t_list	*cmd_list;
 
 	(void)argc;
 	(void)env;
+	open("args", O_TRUNC | O_CREAT, 0777); //only for test
 	if (argv[1])
 	{
 		syntax_validation(argv[1]);
@@ -40,18 +41,18 @@ int	main(int argc, char **argv, char **env)
 
 		// print tree to check
 		btree_apply_infix(root, print_node);
+		printf("----------------------------\n");
 
-		open("args", O_TRUNC);
 		// get the command list according to pipe
-		// cmd_list = get_cmds(root);
+		cmd_list = get_cmds(root);
 
 		// print list to check
 		// ft_lstiter(cmd_list, print_list);
 
 		// pass cmd list to pipex
-		// pipex(&cmd_list, root, env);
+		pipex(&cmd_list, root, env);
 
 		//free only when testing
-		btree_apply_suffix(root, free_node);
+		// btree_apply_suffix(root, free_node);
 	}
 }
