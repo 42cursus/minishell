@@ -6,7 +6,7 @@
 /*   By: yublee <yublee@student.42london.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/19 13:55:33 by yublee            #+#    #+#             */
-/*   Updated: 2024/07/08 21:46:44 by yublee           ###   ########.fr       */
+/*   Updated: 2024/07/10 02:11:09 by yublee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,7 +57,7 @@ void	pipex(t_list **cmd_list, t_btree *root, char **env);
 void	get_input(t_btree *cmd, int i, t_info info);
 void	get_output(t_btree *cmd, int i, t_info info);
 void	child_process(int i, t_list *current, t_info info);
-char	**get_argv(char *str, char **env, t_info info);
+char	**get_argv(char *str, char **env);
 
 //tree utils
 void	print_node(void *item);

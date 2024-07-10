@@ -81,8 +81,8 @@ args_file="args.txt"
 
 preset_strings=(
 #case 1
-		"basic"
-		"ls -l | <<EOF wc -l >${out[0]} | <${in[1]} ls >> ${out[1]}"
+		"<< & >>"
+		"ls -l | <<EOF wc -l >${out[0]} | <${in[1]} ls >${out[1]} >> ${out[1]}"
 #case 2
 		"several ios with/without space and different order"
 		"ls -l | >${out[0]}<${in[0]}<${in[1]}<${in[2]} wc -l | <<EOF ls >>     ${out[1]} >${out[2]}"
@@ -206,6 +206,7 @@ for ((i = starting_num; i<size; i +=2)); do
 	for output_file in "${out[@]}"; do
 		if [ -f "$output_file" ]; then
 			cp "$output_file" "${output_file}_case$((i/2 + 1))"
+			rm "$output_file"
 		fi
 	done
 
