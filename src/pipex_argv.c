@@ -6,7 +6,7 @@
 /*   By: yublee <yublee@student.42london.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/07 23:40:12 by yublee            #+#    #+#             */
-/*   Updated: 2024/07/10 02:30:22 by yublee           ###   ########.fr       */
+/*   Updated: 2024/07/10 03:00:55 by yublee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,9 +40,33 @@ static void	join_argv_to_valid_path(char **paths, char **argv)
 	}
 }
 
-static void	remove_paired_comma(char **argv)
+static char	*remove_paired_quotes(char *str)
 {
-	(void)argv;
+	char	*new;
+	char	quote;
+	size_t	i;
+	size_t	j;
+
+	new = ft_strdup(str);
+	if (!new)
+		exit(EXIT_FAILURE);
+	i = 0;
+	j = 0;
+	while (str[i])
+	{
+		if (str[i] == '\'' || str[i] == '"')
+		{
+			quote = str[i++];
+			while (str[i] != quote)
+				new[j++] = str[i++];
+			i++;
+		}
+		else
+			new[j++] = str[i++];
+	}
+	while (j < ft_strlen(str) + 1)
+		new[j++] = 0;
+	return (new);
 }
 
 static char	*find_type(char **argv, char **paths)
@@ -55,7 +79,8 @@ static char	*find_type(char **argv, char **paths)
 	str = *argv;
 	if (str[0] == '\"' || str[0] == '\'')
 	{
-		remove_paired_comma(argv);
+		*argv = remove_paired_quotes(str);
+		free(str);
 		return ("str");
 	}
 	i = -1;
