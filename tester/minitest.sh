@@ -203,8 +203,10 @@ for ((i = starting_num; i<size; i +=2)); do
 		echo "$args_file does not exist."
 	fi
 
+	myoutput=false
 	for output_file in "${out[@]}"; do
 		if [ -f "$output_file" ]; then
+			myoutput=true
 			cp "$output_file" "${output_file}_case$((i/2 + 1))"
 			rm "$output_file"
 		fi
@@ -220,10 +222,11 @@ for ((i = starting_num; i<size; i +=2)); do
 
 		eval "$string2" 1>"/dev/null" 2>"/dev/null"
 		printf "${BOLD_GREEN}Bash: ${NC}"
+		bashoutput=false
 		diff=NA
-
 		for output_file in "${out[@]}"; do
 			if [ -f "$output_file" ]; then
+				bashoutput=true
 				diff=true
 				diff "$output_file" "${output_file}_case$((i/2 + 1))"  1>"$dir/bash_diff_case$((i/2 + 1))"
 				if [[ $? -eq 0 ]]; then
@@ -244,8 +247,10 @@ for ((i = starting_num; i<size; i +=2)); do
 			printf "${BOLD_GREEN}[OK]${NC}\n"
 		elif [ "$diff" = false ]; then
 			:
+		elif [ "$diff" = "NA" ] && [ "$bashoutput" = false ] && [ "$myoutput" = false ]; then
+			printf "${BOLD_WHITE}[BOTH NO OUTPUT]\n"
 		else
-			printf "${BOLD_WHITE}[N/A]\n"
+			printf "${BOLD_RED}[KO]\n"
 		fi
 
 		for output_file in "${out[@]}"; do
