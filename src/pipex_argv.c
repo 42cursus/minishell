@@ -6,7 +6,7 @@
 /*   By: yublee <yublee@student.42london.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/07 23:40:12 by yublee            #+#    #+#             */
-/*   Updated: 2024/07/10 03:00:55 by yublee           ###   ########.fr       */
+/*   Updated: 2024/07/11 17:58:00 by yublee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,9 +111,9 @@ char	**get_argv(char *str, char **env)
 		i++;
 	argv_type = (char **)malloc(sizeof(char *)*(i + 1));
 	i = 0;
-	while (!ft_strnstr(env[i], "PATH", 4))
+	while (!ft_strnstr(env[i], "PATH=", 5))
 		i++;
-	path = ft_strnstr(env[i], "PATH", 4) + 5;
+	path = ft_strnstr(env[i], "PATH=", 5) + 5;
 	paths = ft_split(path, ':');
 	i = -1;
 	while (argv[++i])
