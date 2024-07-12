@@ -6,7 +6,7 @@
 /*   By: yublee <yublee@student.42london.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/07 23:56:28 by yublee            #+#    #+#             */
-/*   Updated: 2024/07/09 02:33:51 by yublee           ###   ########.fr       */
+/*   Updated: 2024/07/12 17:45:12 by yublee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,7 +76,7 @@ char	**ft_split_str_with_quotes(char *s, char c)
 
 	if (!s)
 		return (NULL);
-	s_sub = str_with_substituted_quotes(s, c);
+	s_sub = mask_quoted_part(s, c);
 	result = (char **)malloc((ft_wordcount(s_sub, c) + 1) * sizeof(char *));
 	if (!result)
 		exit(EXIT_FAILURE);
@@ -96,7 +96,7 @@ char	**ft_split_str_with_quotes(char *s, char c)
 	return (result);
 }
 
-char	*str_with_substituted_quotes(char *s, char c)
+char	*mask_quoted_part(char *s, char c)
 {
 	char	*s_tmp;
 	size_t	i;

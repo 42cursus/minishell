@@ -6,7 +6,7 @@
 /*   By: yublee <yublee@student.42london.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/16 00:37:53 by yublee            #+#    #+#             */
-/*   Updated: 2024/07/09 15:23:04 by yublee           ###   ########.fr       */
+/*   Updated: 2024/07/12 17:49:07 by yublee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,10 +16,10 @@ static void	read_til_delimiter(char *str, t_info info)
 {
 	char	*buf;
 	int		tty_fd;
-	int		new_fd; //need to rethink
+	int		new_fd;
 
 	tty_fd = open("/dev/tty", O_RDONLY);
-	new_fd = open("input_tmp", O_RDWR | O_TRUNC | O_CREAT, 0777);
+	new_fd = open("/tmp/heredoc_input", O_RDWR | O_TRUNC | O_CREAT, 0777);
 	if (tty_fd < 0)
 		exit_with_message(str + 1, EXIT_FAILURE, info);
 	while (1)
@@ -32,12 +32,12 @@ static void	read_til_delimiter(char *str, t_info info)
 		free(buf);
 	}
 	free(buf);
-	new_fd = open("input_tmp", O_RDWR);
+	new_fd = open("/tmp/heredoc_input", O_RDWR);
 	if (dup2(new_fd, STDIN_FILENO) < 0)
 		exit_with_message("here doc", EXIT_FAILURE, info);
 	close(tty_fd);
 	close(new_fd);
-	unlink("input_tmp");//only for test
+	unlink("/tmp/heredoc_input");
 }
 
 static void	open_input(void *item, t_info info)

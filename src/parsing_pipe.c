@@ -6,7 +6,7 @@
 /*   By: yublee <yublee@student.42london.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 15:07:25 by yublee            #+#    #+#             */
-/*   Updated: 2024/07/08 03:58:00 by yublee           ###   ########.fr       */
+/*   Updated: 2024/07/12 17:44:12 by yublee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,7 @@ void	expand_tree_pipe(t_btree *root)
 	size_t	i;
 
 	str = root->item;
-	str_sub = str_with_substituted_quotes(str, 'c');
+	str_sub = mask_quoted_part(str, 'c');
 	if (!ft_strchr(str_sub, '|'))
 	{
 		free(str_sub);

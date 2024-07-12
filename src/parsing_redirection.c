@@ -6,7 +6,7 @@
 /*   By: yublee <yublee@student.42london.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 15:00:45 by yublee            #+#    #+#             */
-/*   Updated: 2024/07/08 21:42:47 by yublee           ###   ########.fr       */
+/*   Updated: 2024/07/12 17:45:57 by yublee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,11 +61,11 @@ void	expand_tree_redirect(t_btree *root)
 	if (!root || !root->item)
 		return ;
 	str = root->item;
-	str_sub = str_with_substituted_quotes(str, 'c');
+	str_sub = mask_quoted_part(str, 'c');
 	expand_left_right(root, str_sub, str);
 	str_new = ft_leftoverdup(str, str_sub, '<');
 	free(str_sub);
-	str_sub = str_with_substituted_quotes(str_new, 'c');
+	str_sub = mask_quoted_part(str_new, 'c');
 	tmp = str_new;
 	str_new = ft_leftoverdup(str_new, str_sub, '>');
 	free(tmp);
