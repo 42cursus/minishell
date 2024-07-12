@@ -6,7 +6,7 @@
 /*   By: yublee <yublee@student.42london.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 15:00:45 by yublee            #+#    #+#             */
-/*   Updated: 2024/06/25 18:03:52 by yublee           ###   ########.fr       */
+/*   Updated: 2024/07/12 17:45:57 by yublee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,29 +31,21 @@ static void	add_left_right(t_btree *root, char c, char *str_new)
 	}
 }
 
-static void	expand_left_right(t_btree *root, char *str)
+static void	expand_left_right(t_btree *root, char *str_sub, char *str)
 {
 	size_t	i;
-	char	quote;
 	char	c;
 	char	*str_new;
 
 	i = -1;
-	while (str[++i])
+	while (str_sub[++i])
 	{
-		if (str[i] == '\'' || str[i] == '"')
+		if (str_sub[i] == '<' || str_sub[i] == '>')
 		{
-			quote = str[i];
-			while (str[++i] && str[i] != quote)
-				;
-			i++;
-		}
-		if (str[i] == '<' || str[i] == '>')
-		{
-			c = str[i];
+			c = str_sub[i];
 			str_new = ft_worddup(&str[i], c);
 			add_left_right(root, c, str_new);
-			if (str[i + 1] == c)
+			if (str_sub[i + 1] == c)
 				i++;
 		}
 	}
@@ -62,17 +54,22 @@ static void	expand_left_right(t_btree *root, char *str)
 void	expand_tree_redirect(t_btree *root)
 {
 	char	*str;
+	char	*str_sub;
 	char	*tmp;
 	char	*str_new;
 
 	if (!root || !root->item)
 		return ;
 	str = root->item;
-	expand_left_right(root, str);
-	str_new = ft_leftoverdup(str, '<');
+	str_sub = mask_quoted_part(str, 'c');
+	expand_left_right(root, str_sub, str);
+	str_new = ft_leftoverdup(str, str_sub, '<');
+	free(str_sub);
+	str_sub = mask_quoted_part(str_new, 'c');
 	tmp = str_new;
-	str_new = ft_leftoverdup(str_new, '>');
+	str_new = ft_leftoverdup(str_new, str_sub, '>');
 	free(tmp);
 	free(root->item);
+	free(str_sub);
 	root->item = str_new;
 }

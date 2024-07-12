@@ -6,7 +6,7 @@
 /*   By: yublee <yublee@student.42london.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/16 00:37:53 by yublee            #+#    #+#             */
-/*   Updated: 2024/06/11 15:46:31 by yublee           ###   ########.fr       */
+/*   Updated: 2024/07/09 02:39:43 by yublee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,7 @@ static int	**create_pipeline(int cnt)
 	return (fds);
 }
 
-static void	wait_if_heredoc(void *content)
+static int	wait_if_heredoc(void *content)
 {
 	t_btree	*tmp;
 	char	*str;
@@ -61,12 +61,10 @@ static void	wait_if_heredoc(void *content)
 	{
 		str = (char *)tmp->item;
 		if (str && str[0] == '<' && str[1] == '<')
-		{
-			wait(NULL);
-			break ;
-		}
+			return (-1);
 		tmp = tmp->left;
 	}
+	return (0);
 }
 
 static void	exec_pipex(t_info info, t_list **cmd_list, int *status)
@@ -82,13 +80,15 @@ static void	exec_pipex(t_info info, t_list **cmd_list, int *status)
 		pid = fork();
 		if (pid < 0)
 			exit_with_message("fork", EXIT_FAILURE, info);
+		if (wait_if_heredoc(current->content))
+			waitpid(pid, status, 0);
+		sleep(1); //only for test
 		if (pid == 0)
 			child_process(i, current, info);
 		if (i != 0)
 			close(info.fds[i - 1][READ_END]);
 		if (i != info.cmd_cnt - 1)
 			close(info.fds[i][WRITE_END]);
-		wait_if_heredoc(current->content);
 		current = current->next;
 	}
 	waitpid(pid, status, 0);

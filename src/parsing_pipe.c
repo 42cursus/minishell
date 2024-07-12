@@ -6,7 +6,7 @@
 /*   By: yublee <yublee@student.42london.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 15:07:25 by yublee            #+#    #+#             */
-/*   Updated: 2024/06/16 23:42:48 by yublee           ###   ########.fr       */
+/*   Updated: 2024/07/12 17:44:12 by yublee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,28 +38,27 @@ static void	split_left_right(t_btree *root, char *str, size_t i)
 void	expand_tree_pipe(t_btree *root)
 {
 	char	*str;
-	char	quote;
+	char	*str_sub;
 	size_t	len;
 	size_t	i;
 
 	str = root->item;
-	if (!ft_strchr(str, '|'))
+	str_sub = mask_quoted_part(str, 'c');
+	if (!ft_strchr(str_sub, '|'))
+	{
+		free(str_sub);
 		return ;
+	}
 	len = ft_strlen(str);
 	i = -1;
 	while (++i < len)
 	{
-		if (str[i] == '\'' || str[i] == '"')
-		{
-			quote = str[i];
-			while (str[++i] != quote && i < len)
-				;
-			i++;
-		}
-		if (str[i] == '|')
+		if (str_sub[i] == '|')
 		{
 			split_left_right(root, str, i);
+			free(str_sub);
 			return ;
 		}
 	}
+	free(str_sub);
 }
