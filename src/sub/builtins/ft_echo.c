@@ -12,12 +12,17 @@
 
 #include "test.h"
 
-int	ft_echo(t_exec_ctx *ctx)
+int	ft_echo(t_ctx *ctx)
 {
-	int argc;
+	int i;
 
-	argc = ctx->argc;
-	while (argc--)
-		ft_putendl_fd(ctx->argv[ctx->argc], ctx->fdio.out);
+	i = 1;
+	ft_putstr_fd(ctx->argv[i], ctx->fdio.out);
+	while (++i < ctx->argc)
+	{
+		ft_putchar_fd(' ', ctx->fdio.out);
+		ft_putstr_fd(ctx->argv[i], ctx->fdio.out);
+	}
+	ft_putchar_fd('\n', ctx->fdio.out);
 	return (0);
 }

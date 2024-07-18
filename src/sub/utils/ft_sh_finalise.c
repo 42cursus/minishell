@@ -1,25 +1,35 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_chdir.c                                         :+:      :+:    :+:   */
+/*   ft_sh_finalise.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: abelov <abelov@student.42london.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/07/03 00:48:31 by abelov            #+#    #+#             */
-/*   Updated: 2024/07/03 00:48:32 by abelov           ###   ########.fr       */
+/*   Created: 2024/07/18 14:24:46 by abelov            #+#    #+#             */
+/*   Updated: 2024/07/18 14:24:47 by abelov           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "test.h"
 
-int	ft_chdir(t_ctx *ctx)
+int	ft_sh_destroy_ctx(t_ctx **ctx)
 {
-	char	*path[PATH_MAX];
+	int i;
+	t_sh_var *var;
 
-	if (ctx->argv[1])
-		ft_strncpy((char *) path, ctx->argv[1], PATH_MAX);
-	else
-		ft_strncpy((char *) path, ft_shell_env_map_get_entry("HOME", ctx)->v, PATH_MAX);
-	ft_putendl_fd(ft_strjoin("changing directory to: ", path),ctx->fdio.out);
-	return (chdir(path));
+	i = -1;
+	while (++i < (*ctx)->env_map.total_elems)
+	{
+		var = &((t_sh_var *) (*ctx)->env_map.base)[i];
+		free((void *) var->k);
+		if (var->v != NULL)
+			free(var->v);
+	}
+	free((*ctx)->env_map.base);
+	while ((*ctx)->argc--)
+		free((*ctx)->argv[(*ctx)->argc]);
+	free((*ctx)->argv);
+	free(*ctx);
+	*ctx = NULL;
+	return (0);
 }

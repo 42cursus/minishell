@@ -12,7 +12,8 @@
 
 #include "test.h"
 
-int	ft_exit(t_exec_ctx *ctx)
+int	ft_exit(t_ctx *ctx)
 {
+	ft_sh_destroy_ctx(&ctx);
 	return (0);
 }

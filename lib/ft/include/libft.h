@@ -39,6 +39,7 @@ struct s_object_arr
 int		ft_isalpha(int c);
 int		ft_isdigit(int c);
 int		ft_isalnum(int c);
+int		ft_isspace(int c);
 int		ft_isascii(int c);
 int		ft_isprint(int c);
 size_t	ft_strlen(const char *s);
@@ -92,6 +93,7 @@ void	ft_putnbr_fd(int n, int fd);
 
 /* tab */
 size_t	ft_get_tab_size(void const **tab);
+char	*ft_strjoin2(char const **strs, size_t nmemb, char *sep);
 char	*ft_tab_string_join(char const **str_tab);
 /* bonus */
 t_list	*ft_lstnew(void *content);

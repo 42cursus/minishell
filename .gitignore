@@ -12,6 +12,7 @@
 
 minishell
 mini_minishell
+**/minishell_sub
 resources/
 gdb.txt
 scratch/

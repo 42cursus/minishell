@@ -1,25 +1,29 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_chdir.c                                         :+:      :+:    :+:   */
+/*   ft_sh_compare.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: abelov <abelov@student.42london.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/07/03 00:48:31 by abelov            #+#    #+#             */
-/*   Updated: 2024/07/03 00:48:32 by abelov           ###   ########.fr       */
+/*   Created: 2024/07/05 12:49:38 by abelov            #+#    #+#             */
+/*   Updated: 2024/07/18 14:22:30 by abelov           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "test.h"
 
-int	ft_chdir(t_ctx *ctx)
+int	ft_sh_op_cmp(const void *a, const void *b)
 {
-	char	*path[PATH_MAX];
+	const t_shell_op	*op1 = a;
+	const t_shell_op	*op2 = b;
 
-	if (ctx->argv[1])
-		ft_strncpy((char *) path, ctx->argv[1], PATH_MAX);
-	else
-		ft_strncpy((char *) path, ft_shell_env_map_get_entry("HOME", ctx)->v, PATH_MAX);
-	ft_putendl_fd(ft_strjoin("changing directory to: ", path),ctx->fdio.out);
-	return (chdir(path));
+	return (ft_strcmp(op1->instruction,  op2->instruction));
+}
+
+int	ft_sh_var_cmp(const void *a, const void *b)
+{
+	const t_sh_var	*var1 = a;
+	const t_sh_var	*var2 = b;
+
+	return (ft_strcmp(var1->k,  var2->k));
 }

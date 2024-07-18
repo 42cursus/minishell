@@ -12,16 +12,13 @@
 
 #include "test.h"
 
-int	ft_pwd(t_exec_ctx *ctx)
+int	ft_pwd(t_ctx *ctx)
 {
 	char	cwd[PATH_MAX];
 
 	if (getcwd(cwd, PATH_MAX) != NULL)
 		ft_putendl_fd(cwd, ctx->fdio.out);
 	else
-	{
-		perror("getcwd error");
-		return (1);
-	}
+		return (perror("getcwd error"), 1);
 	return (0);
 }

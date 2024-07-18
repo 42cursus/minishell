@@ -1,18 +1,18 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_shell_env_map.c                                 :+:      :+:    :+:   */
+/*   ft_sh_env_map.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: abelov <abelov@student.42london.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/05 12:48:06 by abelov            #+#    #+#             */
-/*   Updated: 2024/07/05 12:48:07 by abelov           ###   ########.fr       */
+/*   Updated: 2024/07/18 14:21:56 by abelov           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "test.h"
 
-int	ft_shell_parse_env_map(t_obj_arr *map, char **env_tab)
+int	ft_sh_parse_env_map(t_obj_arr *map, char **env_tab)
 {
 	size_t		i;
 	size_t		map_size;
@@ -37,12 +37,12 @@ int	ft_shell_parse_env_map(t_obj_arr *map, char **env_tab)
 	map->base = env_map;
 	map->elem_size = sizeof(t_sh_var);
 	map->total_elems = map_size;
-	map->cmp_fun = ft_shell_var_cmp;
+	map->cmp_fun = ft_sh_var_cmp;
 	ft_qsort_obj(map);
 	return (0);
 }
 
-t_sh_var	*ft_shell_env_map_get_entry(const char *key, t_exec_ctx *ctx)
+t_sh_var	*ft_shell_env_map_get_entry(const char *key, t_ctx *ctx)
 {
 	t_sh_var	*found;
 
@@ -50,7 +50,7 @@ t_sh_var	*ft_shell_env_map_get_entry(const char *key, t_exec_ctx *ctx)
 	return (found);
 }
 
-int	ft_shell_env_map_get_index(const char *key, t_exec_ctx *ctx)
+int	ft_shell_env_map_get_index(const char *key, t_ctx *ctx)
 {
 	t_sh_var	*found;
 
@@ -58,7 +58,7 @@ int	ft_shell_env_map_get_index(const char *key, t_exec_ctx *ctx)
 	return (-1);
 }
 
-int	ft_shell_env_map_add_entry(t_sh_var var, t_exec_ctx *ctx)
+int	ft_shell_env_map_add_entry(t_sh_var var, t_ctx *ctx)
 {
 	t_obj_arr 	*obj;
 	t_sh_var 	*new;
@@ -80,7 +80,7 @@ int	ft_shell_env_map_add_entry(t_sh_var var, t_exec_ctx *ctx)
 	return (0);
 }
 
-int ft_shell_env_map_del_entry(t_sh_var var, t_exec_ctx *ctx)
+int ft_shell_env_map_del_entry(t_sh_var var, t_ctx *ctx)
 {
 	t_obj_arr 	*obj;
 	t_sh_var 	*new;
@@ -102,7 +102,7 @@ int ft_shell_env_map_del_entry(t_sh_var var, t_exec_ctx *ctx)
 	return (0);
 }
 
-int	ft_shell_env_map_unbind_var(t_sh_var var, t_exec_ctx *ctx)
+int	ft_shell_env_map_unbind_var(t_sh_var var, t_ctx *ctx)
 {
 	if (ft_shell_env_map_get_entry(var.k, ctx))
 		return (ft_shell_env_map_del_entry(var, ctx));
@@ -111,7 +111,7 @@ int	ft_shell_env_map_unbind_var(t_sh_var var, t_exec_ctx *ctx)
 
 
 
-int	ft_shell_env_map_bind_var(t_sh_var var, t_exec_ctx *ctx)
+int	ft_shell_env_map_bind_var(t_sh_var var, t_ctx *ctx)
 {
 	t_sh_var	*found;
 

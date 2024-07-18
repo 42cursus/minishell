@@ -17,15 +17,14 @@
  * bytes. If s is longer than nb, only nb bytes are copied,
  * and a terminating null byte ('\0') is added.
  */
-char	*ft_strndup(const char *s, unsigned int nb)
+char	*ft_strndup(const char *src, unsigned int nb)
 {
-	char			*dest;
-	const size_t	srclen = ft_strlen(s);
+	char	*dst;
 
-	dest = (char *)malloc(srclen + 1);
-	if (dest == NULL)
+	if (!src)
 		return (NULL);
-	*dest = '\0';
-	ft_strncpy(dest, s, nb);
-	return (dest);
+	dst = ft_strnew(ft_strlen(src));
+	if (!dst)
+		return (NULL);
+	return (ft_strncpy(dst, src, nb));
 }

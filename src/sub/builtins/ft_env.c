@@ -12,7 +12,7 @@
 
 #include "test.h"
 
-int	ft_env(t_exec_ctx *ctx)
+int	ft_env(t_ctx *ctx)
 {
 	char *str;
 	char *optr;
