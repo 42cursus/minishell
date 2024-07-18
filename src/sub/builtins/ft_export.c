@@ -16,24 +16,21 @@
 int	ft_export(t_ctx *ctx)
 {
 	char 		*str;
-	char		*tmp;
 	char		*sptr;
 	t_sh_var 	var;
-	int			ret_val;
 
-	ret_val = 0;
+	if (ctx->argc == 1)
+		return (ft_env(ctx));
 	var = (t_sh_var){.k = NULL, .v = NULL};
 	str = ft_strdup(*(ctx->argv));
 	while (str && !ft_strchr(str, '='))
 	{
 		var.k = ft_strtok_r(str, "=", &sptr);
-		tmp = ft_strtok_r(NULL, "=", &sptr);
-		if (tmp)
-			var.v = ft_strdup(tmp);
+		if (sptr != NULL)
+			var.v = ft_strdup(sptr);
 		var.attrs = ATT_EXPORTED;
 		str = *(ctx->argv);
+		ft_sh_env_map_bind_var(var, ctx);
 	}
-	if (str)
-		return (FT_EXPORT_ERR_NOT_A_VAR);
 	return (0);
 }

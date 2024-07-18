@@ -10,15 +10,22 @@
 /*                                                                            */
 /* ************************************************************************** */
 
+#include <readline.h>
 #include "test.h"
 
+/**
+ * readline is messy and generates too many leaks
+ * generating-suppressions-for-memory-leaks
+ * https://stackoverflow.com/questions/17159578/
+ */
 int	ft_sh_destroy_ctx(t_ctx **ctx)
 {
 	int i;
 	t_sh_var *var;
 
 	i = -1;
-	while (++i < (*ctx)->env_map.total_elems)
+	rl_clear_history();
+	while (++i < (int)(*ctx)->env_map.total_elems)
 	{
 		var = &((t_sh_var *) (*ctx)->env_map.base)[i];
 		free((void *) var->k);

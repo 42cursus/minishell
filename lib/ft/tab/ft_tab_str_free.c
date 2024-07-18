@@ -1,24 +1,26 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_exit.c                                          :+:      :+:    :+:   */
+/*   ft_tab_str_free.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: abelov <abelov@student.42london.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/07/03 00:50:15 by abelov            #+#    #+#             */
-/*   Updated: 2024/07/03 00:50:16 by abelov           ###   ########.fr       */
+/*   Created: 2024/06/10 19:37:35 by abelov            #+#    #+#             */
+/*   Updated: 2024/07/02 19:57:46 by abelov           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <readline.h>
-#include "test.h"
+#include <stdlib.h>
 
-int	ft_exit(t_ctx *ctx)
+void	ft_tab_str_free(char **str_tab)
 {
-	if (ctx->argc == 1)
+	int	i;
+
+	if (str_tab != NULL)
 	{
-		ft_sh_destroy_ctx(&ctx);
-		exit(0);
+		i = -1;
+		while (str_tab[++i] != NULL)
+			free(str_tab[i]);
+		free(str_tab);
 	}
-	return (-1);
 }

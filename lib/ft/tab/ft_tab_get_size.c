@@ -1,18 +1,18 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_get_tab_size.c                                  :+:      :+:    :+:   */
+/*   ft_tab_get_size.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: abelov <abelov@student.42london.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/26 22:16:45 by abelov            #+#    #+#             */
-/*   Updated: 2024/05/27 00:15:01 by abelov           ###   ########.fr       */
+/*   Updated: 2024/07/18 22:42:54 by abelov           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft.h"
 
-size_t	ft_get_tab_size(void const **tab)
+size_t	ft_tab_get_size(void const **tab)
 {
 	size_t	size;
 

@@ -10,7 +10,10 @@
 #                                                                              #
 # **************************************************************************** #
 
-FILES   = ft_tab_get_size.c \
-			ft_tab_string_join.c
+FILES   = ft_tab_count_if.c \
+			ft_tab_foreach.c \
+			ft_tab_get_size.c \
+			ft_tab_str_free.c \
+			ft_tab_str_join.c
 
 SRCS    += $(FILES:%.c=$(dir $(lastword $(MAKEFILE_LIST)))%.c)

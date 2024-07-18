@@ -20,6 +20,7 @@ replace-git-emails.sh
 infile
 outfile
 cmake_build
+memcheck.log
 
 #for test
 !tester/minitest.sh

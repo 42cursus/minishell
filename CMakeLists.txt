@@ -58,7 +58,9 @@ set_target_properties(${FT_LIB_NAME} PROPERTIES
 add_subdirectory(src/sub)
 
 set(TARGET_NAME "${PROJECT_NAME}_exe")
-set(TARGET_LIBRARIES asan ${FT_LIB_NAME})
+set(TARGET_LIBRARIES
+        asan
+        ${FT_LIB_NAME})
 
 file(GLOB_RECURSE TARGET_HEADERS "src/*.h")
 list(FILTER TARGET_HEADERS EXCLUDE REGEX "sub/*" )
@@ -77,6 +79,7 @@ target_compile_options(${TARGET_NAME} PRIVATE
 )
 target_include_directories(${TARGET_NAME} PRIVATE "${PROJECT_SOURCE_DIR}/include")
 target_link_libraries(${TARGET_NAME} "${TARGET_LIBRARIES}")
+target_link_options(${TARGET_NAME} PRIVATE -fsanitize=address)
 
 #==============================================================================#
 # Custom targets

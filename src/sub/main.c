@@ -23,22 +23,23 @@ char *ft_sh_lookup_pathname(t_ctx *ctx)
 	char	*str;
 	char	*dup;
 	char	*sptr;
-	char	*join;
 	int 	not_found;
-	char 	*pathname;
+	char	pathname[PATH_MAX];
 
 	not_found = 1;
-	pathname = ctx->argv[0];
-	dup = ft_strdup(ft_shell_env_map_get_entry("PATH", ctx)->v);
+	dup = ft_strdup(ft_sh_env_map_get_entry("PATH", ctx)->v);
 	str = ft_strtok_r(dup, ":", &sptr);
 	while (not_found && str)
 	{
-		pathname = ft_strjoin2((const char *[]){str, ctx->argv[0]}, 2, "/");
+		pathname[0] = '\0';
+		ft_strncpy(pathname, str, PATH_MAX);
+		ft_strncpy(pathname, "/", PATH_MAX);
+		ft_strncpy(pathname, ctx->argv[0], PATH_MAX);
 		not_found = access(pathname, X_OK);
 		str = ft_strtok_r(NULL, ":", &sptr);
 	}
 	free(dup);
-	return (pathname);
+	return (ft_strdup(pathname));
 }
 
 int ft_sh_launch(t_ctx *ctx)
@@ -55,7 +56,7 @@ int ft_sh_launch(t_ctx *ctx)
 		exit(EXIT_FAILURE);
 	}
 	else if (pid < 0)
-		perror("ft_sh: Error forking");			// Error forking
+		perror("ft_sh: error forking");			// Error forking
 	else
 	{
 		waitpid(pid, &status, WUNTRACED);		// Parent process
@@ -117,16 +118,18 @@ int ft_sh_loop(t_ctx *ctx, t_obj_arr *ops)
 	while (!status)
 	{
 		line = ft_sh_read_line();
-		if (line && *line)
+		if (line)
 		{
-			add_history(line);
-			if(ft_sh_split_line(line, ctx))
-				break ;
-			status = ft_sh_execute(ops, ctx);
+			if (*line != 0)
+			{
+				add_history(line);
+				if (ft_sh_split_line(line, ctx))
+					break;
+				status = ft_sh_execute(ops, ctx);
+			}
 		}
 		else
 			printf("\n");
-		free(line);
 	}
 	return (status);
 }
@@ -136,14 +139,12 @@ int ft_sh_loop(t_ctx *ctx, t_obj_arr *ops)
  * https://www.geeksforgeeks.org/making-linux-shell-c/
  * https://stackoverflow.com/questions/38792542/readline-h-history-usage-in-c
  */
-
 int main(int argc, char **argv, char **envp)
 {
-	t_ctx *global;
-	t_obj_arr *ops;
+	t_ctx		*global;
+	t_obj_arr	*ops;
 
-
-	if (do_init(&global, envp, &ops) == -1)
+	if (ft_sh_do_init(&global, envp, &ops) == -1)
 		exit(-1);
 	global->argv = argv;
 	global->argc = argc;

@@ -92,9 +92,12 @@ void	ft_putendl_fd(char *s, int fd);
 void	ft_putnbr_fd(int n, int fd);
 
 /* tab */
-size_t	ft_get_tab_size(void const **tab);
+int		ft_tab_count_if(void **tab, int length, int (*f)(void *));
+void	ft_tab_foreach(int *tab, int length, void (*f)(int));
+size_t	ft_tab_get_size(void const **tab);
+void	ft_tab_str_free(char **str_tab);
 char	*ft_strjoin2(char const **strs, size_t nmemb, char *sep);
-char	*ft_tab_string_join(char const **str_tab);
+char	*ft_tab_str_join(char const **str_tab);
 /* bonus */
 t_list	*ft_lstnew(void *content);
 void	ft_lstadd_front(t_list **lst, t_list *new);

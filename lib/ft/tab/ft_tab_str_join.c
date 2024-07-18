@@ -45,10 +45,10 @@ char	*ft_strjoin2(char const **strs, size_t nmemb, char *sep)
 	return (new);
 }
 
-char	*ft_tab_string_join(char const **str_tab)
+char	*ft_tab_str_join(char const **str_tab)
 {
 	size_t	size;
 
-	size = ft_get_tab_size((const void **) str_tab);
+	size = ft_tab_get_size((const void **) str_tab);
 	return (ft_strjoin2(str_tab, size, " "));
 }

@@ -24,11 +24,22 @@ find_package(Threads REQUIRED)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(readline REQUIRED IMPORTED_TARGET readline)
 
+set(TARGET_LIBRARIES
+        asan
+        ${FT_LIB_NAME}
+        Threads::Threads
+        PkgConfig::readline)
+
 add_executable(${TEST_TARGET_NAME}
         ${TEST_TARGET_HEADERS}
         ${TEST_TARGET_SOURCES})
 target_include_directories(${TEST_TARGET_NAME} PRIVATE "${PROJECT_SOURCE_DIR}")
-target_link_libraries(${TEST_TARGET_NAME} asan ${FT_LIB_NAME} Threads::Threads PkgConfig::readline)
+target_link_libraries(${TEST_TARGET_NAME} "${TARGET_LIBRARIES}")
+target_compile_options(${TEST_TARGET_NAME} PRIVATE
+        -fno-omit-frame-pointer
+        -fsanitize=address
+        "${FT_CFLAGS}")
 set_target_properties(${TEST_TARGET_NAME} PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}"
         OUTPUT_NAME "${PROJECT_NAME}")
+#target_link_options(${TEST_TARGET_NAME} PRIVATE -fsanitize=address)

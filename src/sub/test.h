@@ -22,6 +22,11 @@
 # include <linux/limits.h>
 # include "libft.h"
 
+# include <signal.h>
+# include <readline.h>
+
+typedef struct sigaction	t_sigaction;
+
 /**
  * k => key
  * v => value
@@ -75,8 +80,6 @@ typedef struct s_exec_ctx
 #define FT_WHITE "\e[0;37m"
 #define FT_RESET "\e[0;m"
 
-#define FT_EXPORT_ERR_NOT_A_VAR 3
-
 /* ---------- TESTS -------------------- */
 
 void		check(bool succes);
@@ -100,12 +103,13 @@ int			ft_exit(t_ctx *ctx);
 
 /* ---------- UTILS -------------------- */
 void		sigsegv(int signal);
-int			do_init(t_ctx	**ctx, char **envp, t_obj_arr **ops);
+int			ft_sh_do_init(t_ctx	**ctx, char **envp, t_obj_arr **ops);
 int			ft_sh_op_cmp(const void *a, const void *b);
 int			ft_sh_var_cmp(const void *a, const void *b);
 int			ft_sh_parse_env_map(t_obj_arr *map, char **env_tab);
-t_sh_var	*ft_shell_env_map_get_entry(const char *key, t_ctx *ctx);
-int			ft_shell_env_map_bind_var(t_sh_var var, t_ctx *ctx);
-int			ft_shell_env_map_unbind_var(t_sh_var var, t_ctx *ctx);
+char		**ft_sh_render_envp(t_ctx *ctx);
+t_sh_var	*ft_sh_env_map_get_entry(const char *key, t_ctx *ctx);
+int			ft_sh_env_map_bind_var(t_sh_var var, t_ctx *ctx);
+int			ft_sh_env_map_unbind_var(t_sh_var var, t_ctx *ctx);
 int			ft_sh_destroy_ctx(t_ctx **ctx);
 #endif //TEST_H

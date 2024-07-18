@@ -14,12 +14,6 @@
 
 int	ft_unset(t_ctx *ctx)
 {
-	char *str;
-	char *optr;
-	char *sptr1;
-	char *saveptr;
-	t_sh_var var;
-
-
+	(void)ctx;
 	return (0);
 }

@@ -14,7 +14,7 @@
 
 int do_init_ops(t_obj_arr **ops)
 {
-	t_obj_arr			*new;
+	static t_obj_arr	obj;
 	static t_shell_op	builtins[] = {
 			{.instruction = "pwd", .fun = ft_pwd},
 			{.instruction = "env", .fun = ft_env},
@@ -25,22 +25,14 @@ int do_init_ops(t_obj_arr **ops)
 			{.instruction = "exit", .fun = ft_exit}
 	};
 
-	new = (t_obj_arr *) malloc(sizeof(t_obj_arr));
-	if (!new)
-		return (-1);
-	new->base = builtins;
-	new->elem_size = sizeof(builtins[0]);
-	new->total_elems = sizeof(builtins) / sizeof(builtins[0]);
-	new->cmp_fun = ft_sh_op_cmp;
-	ft_qsort_obj(new);
-	*ops = new;
+	obj.base = builtins;
+	obj.elem_size = sizeof(builtins[0]);
+	obj.total_elems = sizeof(builtins) / sizeof(builtins[0]);
+	obj.cmp_fun = ft_sh_op_cmp;
+	ft_qsort_obj(&obj);
+	*ops = &obj;
 	return (0);
 }
-
-# include <signal.h>
-#include <readline.h>
-
-typedef struct sigaction	t_sigaction;
 
 void	sig_handler(int sig, siginfo_t *info, void *ctx)
 {
@@ -58,13 +50,12 @@ void	sig_handler(int sig, siginfo_t *info, void *ctx)
 	}
 	else if (sig == SIGQUIT)
 		printf("SIGQUIT");
-	else;
 }
 /**
  * https://stackoverflow.com/questions/61452938/
  * https://docs.rtems.org/releases/4.5.1-pre3/toolsdoc/gdb-5.0-docs/readline/readline00030.html
  */
-int do_init(t_ctx **ctx, char **envp, t_obj_arr **ops)
+int ft_sh_do_init(t_ctx **ctx, char **envp, t_obj_arr **ops)
 {
 	int 	ret_val;
 	t_ctx	*new;
@@ -103,7 +94,7 @@ int do_init(t_ctx **ctx, char **envp, t_obj_arr **ops)
  */
 void	ft_sh_init_welcome(void)
 {
-	printf("\033[H\033[J");
+//	printf("\033[H\033[J");
 	printf("\n******************"
 		   "************************");
 	printf("\n\n\t***** 42 MINISHELL *****");

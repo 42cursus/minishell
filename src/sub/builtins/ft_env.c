@@ -14,17 +14,18 @@
 
 int	ft_env(t_ctx *ctx)
 {
-	char *str;
-	char *optr;
-	char *sptr;
+	ssize_t i;
+	char	*str;
+	char	**envp;
 
-	optr = ft_strdup(ft_shell_env_map_get_entry("PATH", ctx)->v);
-	str = ft_strtok_r(optr, ":", &sptr);
+	i = 0;
+	envp = ft_sh_render_envp(ctx);
+	str = envp[i];
 	while (str)
 	{
-		ft_putendl_fd(str, ctx->fdio.out);
-		str = ft_strtok_r(NULL, ":", &sptr);
+		printf("%s\n", str);
+		str = envp[++i];
 	}
-	free(optr);
+	ft_tab_str_free(envp);
 	return (0);
 }
