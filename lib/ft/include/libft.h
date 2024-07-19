@@ -49,6 +49,7 @@ void	ft_bzero(void *s, size_t n);
 void	*ft_memcpy(void *dest, const void *src, size_t n);
 void	*ft_memmove(void *dest, const void *src, size_t n);
 char	*ft_strcat(char *dest, const char *src);
+char	*ft_strpcat(char *dest, const char *src);
 char	*ft_strcpy(char *dest, const char *src);
 char	*ft_strncpy(char *dest, const char *src, unsigned int n);
 char	*ft_strncat(char *dest, const char *src, unsigned int nb);

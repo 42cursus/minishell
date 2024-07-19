@@ -16,6 +16,7 @@ char	*ft_strjoin(const char *s1, const char *s2)
 {
 	size_t	charnum;
 	char	*new;
+	char	*p;
 
 	if (!s1 || !s2)
 		return (NULL);
@@ -24,7 +25,7 @@ char	*ft_strjoin(const char *s1, const char *s2)
 	if (!new)
 		return (NULL);
 	*new = '\0';
-	ft_strcat(new, s1);
-	ft_strcat(new, s2);
+	p = ft_strpcat(new, s1);
+	ft_strpcat(p, s2);
 	return (new);
 }

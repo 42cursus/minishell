@@ -28,18 +28,21 @@ int	ft_sh_lookup_pathname(t_ctx *ctx)
 
 	pathname = ctx->pathname;
 	not_found = -1;
-	dup = ft_strdup(ft_sh_env_map_get_entry("PATH", ctx)->v);
-	str = ft_strtok_r(dup, ":", &sptr);
-	while ((not_found == -1) && str)
+	pathname[0] = '\0';
+	if (ctx->argv[0][0] == '/' || ctx->argv[0][0] == '.')
+		not_found = access(ft_strncpy(pathname, ctx->argv[0], PATH_MAX), X_OK);
+	else
 	{
-		pathname[0] = '\0';
-		ft_strncpy(pathname, str, PATH_MAX);
-		ft_strncat(pathname, "/", PATH_MAX);
-		ft_strncat(pathname, ctx->argv[0], PATH_MAX);
-		not_found = access(pathname, X_OK);
-		str = ft_strtok_r(NULL, ":", &sptr);
+		dup = ft_strdup(ft_sh_env_map_get_entry("PATH", ctx)->v);
+		str = ft_strtok_r(dup, ":", &sptr);
+		while ((not_found == -1) && str)
+		{
+			snprintf(pathname, PATH_MAX, "%s/%s", str, ctx->argv[0]);
+			not_found = access(pathname, X_OK);
+			str = ft_strtok_r(NULL, ":", &sptr);
+		}
+		free(dup);
 	}
-	free(dup);
 	return (not_found);
 }
 
@@ -92,7 +95,7 @@ int ft_sh_execute(t_obj_arr *ops, t_ctx *ctx)
 
 enum { MAXC = 128 };
 
-char *ft_sh_read_line(void)
+char *ft_sh_read_line(t_ctx *ctx)
 {
 	char 	ps[MAXC] = "";
 	char	*pwd;
@@ -102,8 +105,8 @@ char *ft_sh_read_line(void)
 	static int		count = 1;
 
 	line = NULL;
-	p = getenv("USER");
-	pwd = getenv("PWD");
+	p = ft_sh_env_map_get_entry("USER", ctx)->v;
+	pwd = ft_sh_env_map_get_entry("PWD", ctx)->v;
 
 	fmt = "[%d] "FT_GREEN"%s"FT_RESET"@"FT_BLUE"%s"FT_RESET"> ";
 	sprintf(ps, fmt, count, p, pwd);
@@ -127,7 +130,7 @@ int ft_sh_loop(t_ctx *ctx, t_obj_arr *ops)
 	using_history();    /* initialize history */
 	while (!status)
 	{
-		line = ft_sh_read_line();
+		line = ft_sh_read_line(ctx);
 		if (line)
 		{
 			if (*line != 0)
