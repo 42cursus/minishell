@@ -32,10 +32,14 @@ int	ft_sh_split_line(char *input, t_ctx *ctx)
 
 	arg_count = 0;
 	if (ctx->argv)
+	{
+		while (ctx->argc--)
+			free(ctx->argv[ctx->argc]);
 		ctx->argv = (free(ctx->argv), NULL);
+	}
 	ctx->argv = (char **)malloc(ARG_MAX);
 	if (!ctx->argv)
-		return (-1);
+		return (free(input), -1);
 	while (*p)
 	{
 		while (ft_isspace(*p)) // Skip leading spaces

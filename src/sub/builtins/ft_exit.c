@@ -17,7 +17,7 @@ int	ft_exit(t_ctx *ctx)
 {
 	if (ctx->argc == 1)
 	{
-		ft_sh_destroy_ctx(&ctx);
+		ft_sh_destroy_ctx(ctx);
 		exit(0);
 	}
 	return (-1);

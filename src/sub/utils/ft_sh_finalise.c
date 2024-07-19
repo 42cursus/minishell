@@ -18,25 +18,24 @@
  * generating-suppressions-for-memory-leaks
  * https://stackoverflow.com/questions/17159578/
  */
-int	ft_sh_destroy_ctx(t_ctx **ctx)
+int	ft_sh_destroy_ctx(t_ctx *ctx)
 {
 	int i;
 	t_sh_var *var;
 
 	i = -1;
 	rl_clear_history();
-	while (++i < (int)(*ctx)->env_map.total_elems)
+	while (++i < (int)ctx->env_map.total_elems)
 	{
-		var = &((t_sh_var *) (*ctx)->env_map.base)[i];
+		var = &((t_sh_var *) ctx->env_map.base)[i];
 		free((void *) var->k);
 		if (var->v != NULL)
 			free(var->v);
 	}
-	free((*ctx)->env_map.base);
-	while ((*ctx)->argc--)
-		free((*ctx)->argv[(*ctx)->argc]);
-	free((*ctx)->argv);
-	free(*ctx);
-	*ctx = NULL;
+	free(ctx->env_map.base);
+	while (ctx->argc--)
+		free(ctx->argv[ctx->argc]);
+	free(ctx->argv);
+	free(ctx);
 	return (0);
 }

@@ -51,6 +51,7 @@ typedef struct s_exec_ctx
 	}			fdio;
 	t_obj_arr	env_map;
 	char *const	*envp;
+	char 		pathname[PATH_MAX];
 }	t_ctx;
 
 # define ATT_EXPORTED	0x0000001	/* export to environment */
@@ -111,5 +112,5 @@ char		**ft_sh_render_envp(t_ctx *ctx);
 t_sh_var	*ft_sh_env_map_get_entry(const char *key, t_ctx *ctx);
 int			ft_sh_env_map_bind_var(t_sh_var var, t_ctx *ctx);
 int			ft_sh_env_map_unbind_var(t_sh_var var, t_ctx *ctx);
-int			ft_sh_destroy_ctx(t_ctx **ctx);
+int			ft_sh_destroy_ctx(t_ctx *ctx);
 #endif //TEST_H

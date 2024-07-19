@@ -18,28 +18,29 @@
 int		ft_sh_split_line(char *input, t_ctx *ctx);
 void	ft_sh_init_welcome(void);
 
-char *ft_sh_lookup_pathname(t_ctx *ctx)
+int	ft_sh_lookup_pathname(t_ctx *ctx)
 {
 	char	*str;
 	char	*dup;
 	char	*sptr;
 	int 	not_found;
-	char	pathname[PATH_MAX];
+	char	*pathname;
 
-	not_found = 1;
+	pathname = ctx->pathname;
+	not_found = -1;
 	dup = ft_strdup(ft_sh_env_map_get_entry("PATH", ctx)->v);
 	str = ft_strtok_r(dup, ":", &sptr);
-	while (not_found && str)
+	while ((not_found == -1) && str)
 	{
 		pathname[0] = '\0';
 		ft_strncpy(pathname, str, PATH_MAX);
-		ft_strncpy(pathname, "/", PATH_MAX);
-		ft_strncpy(pathname, ctx->argv[0], PATH_MAX);
+		ft_strncat(pathname, "/", PATH_MAX);
+		ft_strncat(pathname, ctx->argv[0], PATH_MAX);
 		not_found = access(pathname, X_OK);
 		str = ft_strtok_r(NULL, ":", &sptr);
 	}
 	free(dup);
-	return (ft_strdup(pathname));
+	return (not_found);
 }
 
 int ft_sh_launch(t_ctx *ctx)
@@ -47,22 +48,30 @@ int ft_sh_launch(t_ctx *ctx)
 	pid_t	pid;
 	int		status;
 
-	pid = fork();
-	if (pid == 0)
+	if (!ft_sh_lookup_pathname(ctx))
 	{
-		if (execve(ft_sh_lookup_pathname(ctx),
-				   ctx->argv, ctx->envp) == -1)	// Child process
-			perror("ft_sh: error in execve");
-		exit(EXIT_FAILURE);
+		pid = fork();
+		if (pid == 0)
+		{
+			if (execve(ctx->pathname,
+					   ctx->argv, ctx->envp))    // Child process
+			{
+				perror("ft_sh: error in execve");
+				ft_sh_destroy_ctx(ctx);
+				exit(EXIT_FAILURE);
+			}
+		}
+		else if (pid < 0)
+			perror("ft_sh: error forking");            // Error forking
+		else
+		{
+			waitpid(pid, &status, WUNTRACED);        // Parent process
+			while (!WIFEXITED(status) && !WIFSIGNALED(status))
+				waitpid(pid, &status, WUNTRACED);
+		}
 	}
-	else if (pid < 0)
-		perror("ft_sh: error forking");			// Error forking
 	else
-	{
-		waitpid(pid, &status, WUNTRACED);		// Parent process
-		while (!WIFEXITED(status) && !WIFSIGNALED(status))
-			waitpid(pid, &status, WUNTRACED);
-	}
+		printf("%s: command not found\n", ctx->argv[0]);
 	return (0);
 }
 
@@ -99,7 +108,8 @@ char *ft_sh_read_line(void)
 	fmt = "[%d] "FT_GREEN"%s"FT_RESET"@"FT_BLUE"%s"FT_RESET"> ";
 	sprintf(ps, fmt, count, p, pwd);
 	line = readline(ps);
-	count++;
+	if (line && *line)
+		count++;
 	return (line);
 }
 
@@ -127,6 +137,8 @@ int ft_sh_loop(t_ctx *ctx, t_obj_arr *ops)
 					break;
 				status = ft_sh_execute(ops, ctx);
 			}
+			else
+				free(line);
 		}
 		else
 			printf("\n");
@@ -150,7 +162,7 @@ int main(int argc, char **argv, char **envp)
 	global->argc = argc;
 	global->envp = envp;
 	ft_sh_loop(global, ops);
-	ft_sh_destroy_ctx(&global);
-	free(ops);
+	ft_sh_destroy_ctx(global);
+	global = NULL;
 	return (EX_OK);
 }
