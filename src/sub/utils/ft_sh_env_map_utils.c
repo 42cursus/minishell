@@ -44,16 +44,15 @@ char	**ft_sh_render_envp(t_ctx *ctx)
 	char		**new;
 
 	map = ctx->env_map;
-	new = (char **)malloc(map.total_elems * sizeof(char *) + 1);
-	if (new != NULL)
+	new = (char **)malloc((map.total_elems + 1) * sizeof(char *));
+	if (!new)
+		return (NULL);
+	i = -1;
+	while (++i < (int)map.total_elems)
 	{
-		i = -1;
-		while (++i < (int)map.total_elems)
-		{
-			var = map.base + (i * map.elem_size);
-			new[i] = ft_strjoin2((const char *[]){var->k, var->v}, 2, "=");
-		}
-		new[i] = NULL;
+		var = map.base + (i * map.elem_size);
+		new[i] = ft_strjoin2((const char *[]){var->k, var->v}, 2, "=");
 	}
+	new[i] = NULL;
 	return (new);
 }

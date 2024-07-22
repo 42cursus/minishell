@@ -49,7 +49,12 @@ void	sig_handler(int sig, siginfo_t *info, void *ctx)
 		rl_redisplay();
 	}
 	else if (sig == SIGQUIT)
-		printf("SIGQUIT");
+	{
+		printf("SIGQUIT\n");
+		rl_on_new_line();
+		rl_replace_line("", 0);
+		rl_redisplay();
+	}
 }
 
 void	ft_sh_set_signal(t_ctx *const *ctx)
