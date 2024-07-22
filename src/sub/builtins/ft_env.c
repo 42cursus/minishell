@@ -14,7 +14,7 @@
 
 int	ft_env(t_ctx *ctx)
 {
-	ssize_t i;
+	ssize_t	i;
 	char	*str;
 	char	**envp;
 

@@ -22,7 +22,10 @@ int	ft_sh_is_legal_identifier(const char *name)
 	const char		*s;
 	unsigned char	c;
 
-	if (!name || !(c = *name) || ((ft_isalnum(c) || (c == '_')) == 0))
+	if (!name)
+		return (0);
+	c = *name;
+	if (!c || ((ft_isalnum(c) || (c == '_')) == 0))
 		return (0);
 	s = name + 1;
 	while (*s != 0)
@@ -36,15 +39,15 @@ int	ft_sh_is_legal_identifier(const char *name)
 
 int	ft_unset(t_ctx *ctx)
 {
-	int 		i;
-	char 		*str;
+	int		i;
+	char	*str;
 
 	i = 0;
 	while (++i < ctx->argc)
 	{
 		str = ctx->argv[i];
 		if (ft_sh_is_legal_identifier(str))
-			ft_sh_env_map_unbind_var((t_sh_var) {.k = str}, ctx);
+			ft_sh_env_map_unbind_var((t_sh_var){.k = str}, ctx);
 		else
 			perror("not a valid identifier");
 	}

@@ -14,7 +14,7 @@
 
 int	ft_echo(t_ctx *ctx)
 {
-	int i;
+	int	i;
 
 	i = 1;
 	ft_putstr_fd(ctx->argv[i], ctx->fdio.out);

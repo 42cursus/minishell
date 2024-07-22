@@ -14,9 +14,9 @@
 
 int	ft_export(t_ctx *ctx)
 {
-	char 		*str;
+	char		*str;
 	char		*sptr;
-	t_sh_var 	var;
+	t_sh_var	var;
 
 	if (ctx->argc == 1)
 		return (ft_env(ctx));
