@@ -65,7 +65,11 @@ int ft_sh_launch(t_ctx *ctx)
 			}
 		}
 		else if (pid < 0)
+		{
 			perror("ft_sh: error forking");            // Error forking
+			ft_sh_destroy_ctx(ctx);
+			exit(EXIT_FAILURE);
+		}
 		else
 		{
 			waitpid(pid, &status, WUNTRACED);        // Parent process
@@ -95,18 +99,21 @@ int ft_sh_execute(t_obj_arr *ops, t_ctx *ctx)
 
 enum { MAXC = 128 };
 
+/**
+ * https://stackoverflow.com/questions/38792542/readline-h-history-usage-in-c
+ */
 char *ft_sh_read_line(t_ctx *ctx)
 {
-	char 	ps[MAXC] = "";
-	char	*pwd;
-	char	*p;
-	char	*line;
-	char	*fmt;
-	static int		count = 1;
+	char 		ps[MAXC] = "";
+	char		*pwd;
+	char		*p;
+	char		*line;
+	char		*fmt;
+	static int	count = 1;
 
 	line = NULL;
-	p = ft_sh_env_map_get_entry("USER", ctx)->v;
-	pwd = ft_sh_env_map_get_entry("PWD", ctx)->v;
+	p = ft_sh_env_map_get_val("USER", ctx);
+	pwd = ft_sh_env_map_get_val("PWD", ctx);
 
 	fmt = "[%d] "FT_GREEN"%s"FT_RESET"@"FT_BLUE"%s"FT_RESET"> ";
 	sprintf(ps, fmt, count, p, pwd);
@@ -152,20 +159,23 @@ int ft_sh_loop(t_ctx *ctx, t_obj_arr *ops)
 /**
  * https://brennan.io/2015/01/16/write-a-shell-in-c/
  * https://www.geeksforgeeks.org/making-linux-shell-c/
- * https://stackoverflow.com/questions/38792542/readline-h-history-usage-in-c
  */
 int main(int argc, char **argv, char **envp)
 {
+	int 		exitcode;
 	t_ctx		*global;
 	t_obj_arr	*ops;
 
-	if (ft_sh_do_init(&global, envp, &ops) == -1)
-		exit(-1);
-	global->argv = argv;
-	global->argc = argc;
-	global->envp = envp;
-	ft_sh_loop(global, ops);
+	if (ft_sh_do_init(&global, envp, &ops) != -1)
+	{
+		global->argv = argv;
+		global->argc = argc;
+		global->envp = envp;
+		exitcode = ft_sh_loop(global, ops);
+	}
+	else
+		exitcode = EXIT_FAILURE;
 	ft_sh_destroy_ctx(global);
 	global = NULL;
-	return (EX_OK);
+	return (exitcode);
 }

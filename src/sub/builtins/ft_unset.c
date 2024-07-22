@@ -12,8 +12,41 @@
 
 #include "test.h"
 
+/**
+ * Return 1 if this token is a legal shell `identifier'; that is, it consists
+ * solely of letters, digits, and underscores, and does not begin with a
+ * digit.
+ */
+int	ft_sh_is_legal_identifier(const char *name)
+{
+	const char		*s;
+	unsigned char	c;
+
+	if (!name || !(c = *name) || ((ft_isalnum(c) || (c == '_')) == 0))
+		return (0);
+	s = name + 1;
+	while (*s != 0)
+	{
+		c = *s++;
+		if ((ft_isalnum(c) || c == '_') == 0)
+			return (0);
+	}
+	return (1);
+}
+
 int	ft_unset(t_ctx *ctx)
 {
-	(void)ctx;
+	int 		i;
+	char 		*str;
+
+	i = 0;
+	while (++i < ctx->argc)
+	{
+		str = ctx->argv[i];
+		if (ft_sh_is_legal_identifier(str))
+			ft_sh_env_map_unbind_var((t_sh_var) {.k = str}, ctx);
+		else
+			perror("not a valid identifier");
+	}
 	return (0);
 }

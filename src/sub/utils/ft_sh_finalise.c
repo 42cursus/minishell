@@ -20,8 +20,8 @@
  */
 int	ft_sh_destroy_ctx(t_ctx *ctx)
 {
-	int i;
-	t_sh_var *var;
+	int			i;
+	t_sh_var	*var;
 
 	i = -1;
 	rl_clear_history();

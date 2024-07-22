@@ -24,5 +24,5 @@ void	check(bool succes)
 	if (succes)
 		ft_putstr("> "FT_GREEN".OK "FT_RESET"\n");
 	else
-	ft_putstr("> "FT_RED".KO "FT_RESET"\n");
+		ft_putstr("> "FT_RED".KO "FT_RESET"\n");
 }

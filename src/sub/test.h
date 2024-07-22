@@ -25,6 +25,8 @@
 # include <signal.h>
 # include <readline.h>
 
+enum  { VAR_MAX = 256 };
+
 typedef struct sigaction	t_sigaction;
 
 /**
@@ -109,7 +111,11 @@ int			ft_sh_op_cmp(const void *a, const void *b);
 int			ft_sh_var_cmp(const void *a, const void *b);
 int			ft_sh_parse_env_map(t_obj_arr *map, char **env_tab);
 char		**ft_sh_render_envp(t_ctx *ctx);
+int			ft_sh_env_map_del_entry(t_sh_var var, t_ctx *ctx);
+int			ft_sh_env_map_add_entry(t_sh_var var, t_ctx *ctx);
 t_sh_var	*ft_sh_env_map_get_entry(const char *key, t_ctx *ctx);
+char		*ft_sh_env_map_get_val(const char *key, t_ctx *ctx);
+int			ft_sh_env_map_get_index(const char *key, t_ctx *ctx);
 int			ft_sh_env_map_bind_var(t_sh_var var, t_ctx *ctx);
 int			ft_sh_env_map_unbind_var(t_sh_var var, t_ctx *ctx);
 int			ft_sh_destroy_ctx(t_ctx *ctx);
