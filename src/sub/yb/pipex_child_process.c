@@ -11,14 +11,18 @@
 /* ************************************************************************** */
 
 #include "minishell.h"
+#include "test.h"
 
-void	child_process(int i, t_list *current, t_info info)
+int child_process(int i, t_list *current, t_info info)
 {
 	t_btree	*cmd;
 	char	*cmd_str;
 	char	*tmp;
 	char	**argv;
+	int 	ret_val;
+	t_shell_op	*op;
 
+	ret_val = 0;
 	cmd = (t_btree *)current->content;
 	get_input(cmd, i, info);
 	get_output(cmd, i, info);
@@ -26,15 +30,26 @@ void	child_process(int i, t_list *current, t_info info)
 	if (cmd_str[0] == 0)
 		exit_with_message(NULL, EXIT_SUCCESS, info);
 	argv = get_argv(cmd_str, info.env);
-	if (access(argv[0], X_OK))
+	op = ft_bsearch_obj(&(t_shell_op){.instruction = argv[0]}, info.ops);
+	if (op != NULL)
 	{
-		tmp = ft_strdup(argv[0]);
-		free_str_array(argv);
-		exit_with_message(tmp, 127, info);
+		info.ctx->argv = argv;
+		info.ctx->argc = (int)ft_tab_get_size((const void **) argv);
+		ret_val = op->fun(info.ctx);
 	}
-	if (execve(argv[0], argv, info.env) == -1)
+	else
 	{
-		free_str_array(argv);
-		exit_with_message("execve", EXIT_FAILURE, info);
+		if (access(argv[0], X_OK))
+		{
+			tmp = ft_strdup(argv[0]);
+			free_str_array(argv);
+			exit_with_message(tmp, 127, info);
+		}
+		if (execve(argv[0], argv, info.env) == -1)
+		{
+			free_str_array(argv);
+			exit_with_message("execve", EXIT_FAILURE, info);
+		}
 	}
+	return (ret_val);
 }

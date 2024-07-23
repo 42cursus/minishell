@@ -21,6 +21,8 @@
 # include <sys/wait.h>
 # include "libft.h"
 # include "get_next_line.h"
+#include "test.h"
+
 # define READ_END 0
 # define WRITE_END 1
 
@@ -33,11 +35,13 @@ typedef struct s_btree
 
 typedef struct s_info
 {
-	int		cmd_cnt;
-	char	**env;
-	int		**fds;
-	t_btree	*root;
-	t_list	**cmd_list;
+	int			cmd_cnt;
+	char		**env;
+	int			**fds;
+	t_btree		*root;
+	t_list		**cmd_list;
+	t_ctx		*ctx;
+	t_obj_arr	*ops;
 }	t_info;
 
 //syntax check
@@ -53,10 +57,10 @@ char	*ft_worddup(char *str, char c);
 t_list	*get_cmds(t_btree *root);
 
 //pipex
-void	pipex(t_list **cmd_list, t_btree *root, char **env);
+void	pipex(t_list **cmd_list, t_btree *root, t_ctx *ctx, t_obj_arr *ops);
 void	get_input(t_btree *cmd, int i, t_info info);
 void	get_output(t_btree *cmd, int i, t_info info);
-void	child_process(int i, t_list *current, t_info info);
+int 	child_process(int i, t_list *current, t_info info);
 char	**get_argv(char *str, char **env);
 
 //tree utils

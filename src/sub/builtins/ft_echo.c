@@ -17,12 +17,12 @@ int	ft_echo(t_ctx *ctx)
 	int	i;
 
 	i = 1;
-	ft_putstr_fd(ctx->argv[i], ctx->fdio.out);
+	ft_putstr_fd(ctx->argv[i], STDOUT_FILENO);
 	while (++i < ctx->argc)
 	{
-		ft_putchar_fd(' ', ctx->fdio.out);
-		ft_putstr_fd(ctx->argv[i], ctx->fdio.out);
+		ft_putchar_fd(' ', STDOUT_FILENO);
+		ft_putstr_fd(ctx->argv[i], STDOUT_FILENO);
 	}
-	ft_putchar_fd('\n', ctx->fdio.out);
+	ft_putchar_fd('\n', STDOUT_FILENO);
 	return (0);
 }

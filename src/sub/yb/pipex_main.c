@@ -12,11 +12,14 @@
 
 #include "minishell.h"
 
-static t_info	get_info(t_list **cmd_list, t_btree *root, char **env)
+static t_info	get_info(t_list **cmd_list, t_btree *root,
+						  t_ctx *ctx, t_obj_arr *ops)
 {
 	t_info	info;
 
-	info.env = env;
+	info.env = ft_sh_render_envp(ctx);
+	info.ops = ops;
+	info.ctx = ctx;
 	info.cmd_cnt = ft_lstsize(*cmd_list);
 	info.cmd_list = cmd_list;
 	info.root = root;
@@ -82,7 +85,7 @@ static void	exec_pipex(t_info info, t_list **cmd_list, int *status)
 			exit_with_message("fork", EXIT_FAILURE, info);
 		if (wait_if_heredoc(current->content))
 			waitpid(pid, status, 0);
-		sleep(1); //only for test
+//		sleep(1); //only for test
 		if (pid == 0)
 			child_process(i, current, info);
 		if (i != 0)
@@ -92,19 +95,19 @@ static void	exec_pipex(t_info info, t_list **cmd_list, int *status)
 		current = current->next;
 	}
 	waitpid(pid, status, 0);
-	free_before_exit(info);
-	while (wait(NULL) != -1)
-		;
+//	free_before_exit(info);
+//	while (wait(NULL) != -1)
+//		;
 }
 
-void	pipex(t_list **cmd_list, t_btree *root, char **env)
+void	pipex(t_list **cmd_list, t_btree *root, t_ctx *ctx, t_obj_arr *ops)
 {
 	t_info	info;
 	int		status;
 
 	status = 0;
-	info = get_info(cmd_list, root, env);
+	info = get_info(cmd_list, root, ctx, ops);
 	info.fds = create_pipeline(info.cmd_cnt - 1);
 	exec_pipex(info, cmd_list, &status);
-	exit(WEXITSTATUS(status));
+//	exit(WEXITSTATUS(status));
 }

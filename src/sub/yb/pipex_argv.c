@@ -71,7 +71,7 @@ static char	*remove_paired_quotes(char *str)
 
 static char	*find_type(char **argv, char **paths)
 {
-	static char	*builtins[5] = {"pwd", "env", "cd", "export", "unset"};
+	static char	*builtins[] = {"echo", "pwd", "env", "cd", "export", "unset", "exit"};
 	int			i;
 	char		*str;
 
@@ -120,7 +120,7 @@ char	**get_argv(char *str, char **env)
 		argv_type[i] = find_type(&argv[i], paths);
 	argv_type[i] = NULL;
 	fd = open("args.txt", O_WRONLY | O_APPEND); //only for test
-	for (int i = 0; argv[i]; i++) //only for test
+	for (i = 0; argv[i]; i++) //only for test
 		dprintf(fd, "arg[%d]:%s (%s)\n", i, argv[i], argv_type[i]); //only for test
 	dprintf(fd, "----------------------------\n"); //only for test
 	free_str_array(paths);

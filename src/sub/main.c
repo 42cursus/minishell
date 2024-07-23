@@ -10,117 +10,53 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <sys/wait.h>
 #include <history.h>
 #include <readline.h>
+#include "minishell.h"
 #include "test.h"
 
-int		ft_sh_split_line(char *input, t_ctx *ctx);
 void	ft_sh_init_welcome(void);
+int		ft_sh_execute(t_obj_arr *ops, t_ctx *ctx);
 
-int	ft_sh_lookup_pathname(t_ctx *ctx)
+int ft_sh_execute_yb(t_obj_arr *ops, char *line, t_ctx *ctx)
 {
 	char	*str;
-	char	*dup;
-	char	*sptr;
-	int 	not_found;
-	char	*pathname;
+	t_btree	*root;
+	t_list	*cmd_list;
 
-	pathname = ctx->pathname;
-	not_found = -1;
-	pathname[0] = '\0';
-	if (ctx->argv[0][0] == '/' || ctx->argv[0][0] == '.')
-		not_found = access(ft_strncpy(pathname, ctx->argv[0], PATH_MAX), X_OK);
-	else
-	{
-		dup = ft_strdup(ft_sh_env_map_get_entry("PATH", ctx)->v);
-		str = ft_strtok_r(dup, ":", &sptr);
-		while ((not_found == -1) && str)
-		{
-			snprintf(pathname, PATH_MAX, "%s/%s", str, ctx->argv[0]);
-			not_found = access(pathname, X_OK);
-			str = ft_strtok_r(NULL, ":", &sptr);
-		}
-		free(dup);
-	}
-	return (not_found);
-}
+	(void)ops;
+	syntax_validation(line);
 
-int ft_sh_launch(t_ctx *ctx)
-{
-	pid_t	pid;
-	int		status;
+	str = ft_strdup(line);
+	if (!str)
+		return (-1);
+	root = create_node(str);
 
-	if (!ft_sh_lookup_pathname(ctx))
-	{
-		pid = fork();
-		if (pid == 0)
-		{
-			if (execve(ctx->pathname,
-					   ctx->argv, ctx->envp))    // Child process
-			{
-				perror("ft_sh: error in execve");
-				ft_sh_destroy_ctx(ctx);
-				exit(EXIT_FAILURE);
-			}
-		}
-		else if (pid < 0)
-		{
-			perror("ft_sh: error forking");            // Error forking
-			ft_sh_destroy_ctx(ctx);
-			exit(EXIT_FAILURE);
-		}
-		else
-		{
-			waitpid(pid, &status, WUNTRACED);        // Parent process
-			while (!WIFEXITED(status) && !WIFSIGNALED(status))
-				waitpid(pid, &status, WUNTRACED);
-		}
-	}
-	else
-		printf("%s: command not found\n", ctx->argv[0]);
+	// create tree according to pipe
+	expand_tree_pipe(root);
+
+	// create subtree according to redirection
+	btree_apply_suffix(root, expand_tree_redirect);
+
+	// trim spaces
+	btree_apply_suffix(root, ft_strtrim_and_free);
+
+	// print tree to check
+	// btree_apply_infix(root, print_node);
+	// printf("----------------------------\n");
+
+	// get the command list according to pipe
+	cmd_list = get_cmds(root);
+
+	// print list to check
+	// ft_lstiter(cmd_list, print_list);
+
+	// pass cmd list to pipex
+	pipex(&cmd_list, root, ctx, ops);
+
+	//free only when testing
+	// btree_apply_suffix(root, free_node);
 	return (0);
-}
-
-int ft_sh_execute(t_obj_arr *ops, t_ctx *ctx)
-{
-	int 		ret_val;
-	t_shell_op	*op;
-
-	if (ctx->argv == NULL || ctx->argv[0] == NULL)
-		return (0);
-	op = ft_bsearch_obj(&(t_shell_op) {.instruction = ctx->argv[0]}, ops);
-	if (op != NULL)
-		ret_val = op->fun(ctx);
-	else
-		ret_val = ft_sh_launch(ctx);
-	return (ret_val);
-}
-
-enum { MAXC = 128 };
-
-/**
- * https://stackoverflow.com/questions/38792542/readline-h-history-usage-in-c
- */
-char *ft_sh_read_line(t_ctx *ctx)
-{
-	char 		ps[MAXC] = "";
-	char		*pwd;
-	char		*p;
-	char		*line;
-	char		*fmt;
-	static int	count = 1;
-
-	line = NULL;
-	p = ft_sh_env_map_get_val("USER", ctx);
-	pwd = ft_sh_env_map_get_val("PWD", ctx);
-
-	fmt = "[%d] "FT_GREEN"%s"FT_RESET"@"FT_BLUE"%s"FT_RESET"> ";
-	sprintf(ps, fmt, count, p, pwd);
-	line = readline(ps);
-	if (line && *line)
-		count++;
-	return (line);
 }
 
 int ft_sh_loop(t_ctx *ctx, t_obj_arr *ops)
@@ -143,9 +79,9 @@ int ft_sh_loop(t_ctx *ctx, t_obj_arr *ops)
 			if (*line != 0)
 			{
 				add_history(line);
-				if (ft_sh_split_line(line, ctx))
-					break;
-				status = ft_sh_execute(ops, ctx);
+//				if (ft_sh_split_line(line, ctx))
+//					break;
+				status = ft_sh_execute_yb(ops, line, ctx);
 			}
 			else
 				free(line);

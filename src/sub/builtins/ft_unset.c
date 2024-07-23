@@ -16,6 +16,8 @@
  * Return 1 if this token is a legal shell `identifier'; that is, it consists
  * solely of letters, digits, and underscores, and does not begin with a
  * digit.
+ * @see 3.235 Name:
+ * https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap03.html
  */
 int	ft_sh_is_legal_identifier(const char *name)
 {

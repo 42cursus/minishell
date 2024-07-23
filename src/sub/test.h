@@ -25,7 +25,8 @@
 # include <signal.h>
 # include <readline.h>
 
-enum  { VAR_MAX = 256 };
+enum	{ VAR_MAX = 256 };
+enum	{ MAXC = 128 };
 
 typedef struct sigaction	t_sigaction;
 
@@ -106,6 +107,8 @@ int			ft_exit(t_ctx *ctx);
 
 /* ---------- UTILS -------------------- */
 void		sigsegv(int signal);
+int			ft_sh_split_line(char *input, t_ctx *ctx);
+char		*ft_sh_read_line(t_ctx *ctx);
 int			ft_sh_do_init(t_ctx	**ctx, char **envp, t_obj_arr **ops);
 int			ft_sh_op_cmp(const void *a, const void *b);
 int			ft_sh_var_cmp(const void *a, const void *b);
