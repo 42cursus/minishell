@@ -51,14 +51,20 @@ int	ft_sh_do_split(char *p, t_ctx *ctx)
 }
 
 /**
- * http://www.oilshell.org/blog/2016/11/01.html
- * https://www.engr.mun.ca/~theo/Misc/exp_parsing.htm
- * https://eli.thegreenplace.net
- * 	/2010/01/02/top-down-operator-precedence-parsing
- * https://eli.thegreenplace.net
- * 	/2012/08/02/parsing-expressions-by-precedence-climbing
- * https://eli.thegreenplace.net
- * 	/2009/03/20/a-recursive-descent-parser-with-an-infix-expression-evaluator
+ * These are the maximum length and maximum number of strings passed to the
+ * execve() system call.  MAX_ARG_STRLEN is essentially random but serves to
+ * prevent the kernel from being unduly impacted by misaddressed pointers.
+ * MAX_ARG_STRINGS is chosen to fit in a signed 32-bit integer.
+ * #include <linux/binfmts.h>
+ * #define MAX_ARG_STRLEN (PAGE_SIZE * 32)
+ * #define MAX_ARG_STRINGS 0x7FFFFFFF
+ *
+ * There are also different ways to learn the upper limit
+ *      command: getconf ARG_MAX
+ *      system call: sysconf(_SC_ARG_MAX)
+ *      system header: ARG_MAX in e.g. <[sys/]limits.h>
+ *      GNU xargs: xargs --show-limits
+ * @see: https://www.in-ulm.de/~mascheck/various/argmax/
  */
 int	ft_sh_split_line(char *input, t_ctx *ctx)
 {
