@@ -23,6 +23,17 @@ This project is about creating a simple shell.
         9>>memcheck.log
   ```
 
+### Lexer-parser
+- [Shell Grammar](https://pubs.opengroup.org/onlinepubs/9699919799/utilities/V3_chap02.html#tag_18_10)
+- [Token Recognition](https://pubs.opengroup.org/onlinepubs/9699919799/utilities/V3_chap02.html#tag_18_03)
+- [vsinha CS-252 Fall 2013](https://github.com/vsinha/shell/blob/master/shell.l)
+- [offirgolan lexical analyzer for shell](https://github.com/offirgolan/Shell/blob/master/shell.l)
+
+### Bison:
+```bash
+bison --report=state shell.y
+```
+
 ### Useful links:
 
 - [Pratt Parsing](http://www.oilshell.org/blog/2016/11/01.html)
@@ -31,5 +42,8 @@ This project is about creating a simple shell.
 - [Recursive Descent](https://www.engr.mun.ca/~theo/Misc/exp_parsing.htm)
 - [A recursive descent with infix expression](https://eli.thegreenplace.net/2009/03/20/a-recursive-descent-parser-with-an-infix-expression-evaluator)
 - [Shell Implementation of Pipelines](https://www.cs.uleth.ca/~holzmann/C/system/shell_does_pipeline.pdf)
-- [Shell Grammar](https://pubs.opengroup.org/onlinepubs/9699919799/utilities/V3_chap02.html#tag_18_10)
-- [Token Recognition](https://pubs.opengroup.org/onlinepubs/9699919799/utilities/V3_chap02.html#tag_18_03)
+- [Let’s Build a Linux Shell](https://medium.com/swlh/lets-build-a-linux-shell-part-iii-a472c0102849)
+
+### Other implementations:
+- [Thomas Wagner's minishell](https://github.com/twagger/minishell)
+- [Toni Schmitt's minishell](https://github.com/toni-schmitt/minishell)
