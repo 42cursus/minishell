@@ -17,18 +17,15 @@
 void	ft_sh_init_welcome(void);
 int		ft_sh_execute(t_obj_arr *ops, t_ctx *ctx);
 
-int ft_sh_loop(t_ctx *ctx, t_obj_arr *ops)
+int	ft_sh_loop(t_ctx *ctx, t_obj_arr *ops)
 {
 	char	*line;
 	int		status;
 
 	ft_sh_init_welcome();
 	status = 0;
-//	if (ctx->argc > 1)
-//		ctx->argv = ft_split(ctx->argv[1], ' ');
-//	status = ft_sh_execute(ops, ctx);
 	ctx->argv = NULL;
-	using_history();    /* initialize history */
+	using_history();
 	while (!status)
 	{
 		line = ft_sh_read_line(ctx);
@@ -38,7 +35,7 @@ int ft_sh_loop(t_ctx *ctx, t_obj_arr *ops)
 			{
 				add_history(line);
 				if (ft_sh_split_line(line, ctx))
-					break;
+					break ;
 				status = ft_sh_execute(ops, ctx);
 			}
 			else

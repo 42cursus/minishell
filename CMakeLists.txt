@@ -13,7 +13,7 @@
 cmake_minimum_required(VERSION 3.8)
 
 project(minishell C)
-
+set(CMAKE_VERBOSE_MAKEFILE ON)
 set(CMAKE_C_STANDARD 99)
 include_directories(include)
 set(FT_CFLAGS
@@ -54,6 +54,12 @@ set_target_properties(${FT_LIB_NAME} PROPERTIES
         INTERFACE_INCLUDE_DIRECTORIES "${FT_LIB_DIR};${FT_LIB_DIR}/include")
 
 #==============================================================================#
+
+if(IS_DIRECTORY "${PROJECT_SOURCE_DIR}/scratch")
+    if(EXISTS "${PROJECT_SOURCE_DIR}/scratch/CMakeLists.txt")
+        add_subdirectory(scratch)
+    endif()
+endif()
 
 file(GLOB_RECURSE TARGET_HEADERS "src/*.h")
 list(FILTER TARGET_HEADERS EXCLUDE REGEX "sub/*" )
@@ -97,6 +103,6 @@ add_custom_target(re
         COMMAND make -C ${FT_LIB_DIR} re
         COMMAND make -C ${PROJECT_SOURCE_DIR} re)
 
-add_custom_target(norm ALL
+add_custom_target(norm
         COMMAND make -C ${FT_LIB_DIR} norm
         COMMAND make -C ${PROJECT_SOURCE_DIR} norm)

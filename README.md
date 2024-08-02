@@ -24,25 +24,58 @@ This project is about creating a simple shell.
   ```
 
 ### Lexer-parser
-- [Shell Grammar](https://pubs.opengroup.org/onlinepubs/9699919799/utilities/V3_chap02.html#tag_18_10)
+
+Traditionally, syntax analysis is divided into a lexical scanner and a (context-free) parser.
+A scanner divides an input string consisting of characters into a string of tokens.
+
+Tokenizing is breaking up a string in chunks. The lexical properties of the chunks are defined by the lexer rules.
+Such a chunk is like a word in a sentence. This tokenization is usually based on regular expression matching.
+To choose between overlapping matches a number of standard lexical disambiguation rules are used.
+(Advanced feature: A lexer can be put in a certain state, after seeing a certain input.
+These states can determine which rules are enabled/disabled.)
+Each lexer rule gets an identifier called a token, typically an integer.
+So the output of the lexer is a stream of tokens (integers) 
+that represent the regular expressions it has seen in the input string.
+This output also allows seeing what part of the input string was recognized for each token.
+Lexer rules can overlap. Simple precedence logic applies to decide which rules will be matched. 
+Internally a lexer (like lex or flex) has a generated state-machine that keeps track of all this.
 - [Token Recognition](https://pubs.opengroup.org/onlinepubs/9699919799/utilities/V3_chap02.html#tag_18_03)
-- [vsinha CS-252 Fall 2013](https://github.com/vsinha/shell/blob/master/shell.l)
-- [offirgolan lexical analyzer for shell](https://github.com/offirgolan/Shell/blob/master/shell.l)
+
+A next step is feeding these tokens to a parser which has grammatical rules that define
+what order of tokens form valid input.
+- [Shell Grammar](https://pubs.opengroup.org/onlinepubs/9699919799/utilities/V3_chap02.html#tag_18_10)
+- [Scannerless Generalized LR Parsers](https://www.researchgate.net/publication/221302593_Disambiguation_Filters_for_Scannerless_Generalized_LR_Parsers)
 
 ### Bison:
 ```bash
 bison --report=state shell.y
 ```
-
-### Useful links:
-
+- [Parsing - wiki](https://en.wikipedia.org/wiki/Parsing)
 - [Pratt Parsing](http://www.oilshell.org/blog/2016/11/01.html)
 - [Top-Down operator precedence](https://eli.thegreenplace.net/2010/01/02/top-down-operator-precedence-parsing)
 - [Precedence Climbing](https://eli.thegreenplace.net/2012/08/02/parsing-expressions-by-precedence-climbing)
 - [Recursive Descent](https://www.engr.mun.ca/~theo/Misc/exp_parsing.htm)
 - [A recursive descent with infix expression](https://eli.thegreenplace.net/2009/03/20/a-recursive-descent-parser-with-an-infix-expression-evaluator)
-- [Shell Implementation of Pipelines](https://www.cs.uleth.ca/~holzmann/C/system/shell_does_pipeline.pdf)
 - [Let’s Build a Linux Shell](https://medium.com/swlh/lets-build-a-linux-shell-part-iii-a472c0102849)
+- [Scannerless parsing](https://en.wikipedia.org/wiki/Scannerless_parsing)
+- [BNF for parsing AND lexing](https://stackoverflow.com/a/66533353/6501644)
+
+###  Shell variable expansion:
+- [3.5 Shell Expansions - gnu.org](https://www.gnu.org/software/bash/manual/html_node/Shell-Expansions.html)
+
+### Syntax trees:
+A concrete syntax tree matches what the grammar rules say is the syntax.
+The purpose of the abstract syntax tree is have a "simple" representation of what's essential in "the syntax tree".
+
+- [AST vs BST](https://stackoverflow.com/questions/1888854/#1916687)
+
+### Executing:
+- [Shell Implementation of Pipelines](https://www.cs.uleth.ca/~holzmann/C/system/shell_does_pipeline.pdf)
+
+### Useful links:
+- [vsinha CS-252 Fall 2013](https://github.com/vsinha/shell/blob/master/shell.l)
+- [offirgolan lexical analyzer for shell](https://github.com/offirgolan/Shell/blob/master/shell.l)
+- [DMSToolkit](https://www.semanticdesigns.com/Products/DMS/DMSToolkit.html)
 
 ### Other implementations:
 - [Thomas Wagner's minishell](https://github.com/twagger/minishell)
