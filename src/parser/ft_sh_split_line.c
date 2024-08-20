@@ -82,6 +82,5 @@ int	ft_sh_split_line(char *input, t_ctx *ctx)
 	arg_count = ft_sh_do_split(input, ctx);
 	ctx->argv[arg_count] = NULL;
 	ctx->argc = arg_count;
-	free(input);
 	return (0);
 }

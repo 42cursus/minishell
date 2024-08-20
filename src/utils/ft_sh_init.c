@@ -21,8 +21,7 @@ int	do_init_ops(t_obj_arr **ops)
 	{.instruction = "cd", .fun = ft_chdir},
 	{.instruction = "echo", .fun = ft_echo},
 	{.instruction = "export", .fun = ft_export},
-	{.instruction = "unset", .fun = ft_unset},
-	{.instruction = "exit", .fun = ft_exit}
+	{.instruction = "unset", .fun = ft_unset}
 	};
 
 	obj.base = builtins;
@@ -43,14 +42,14 @@ void	sig_handler(int sig, siginfo_t *info, void *ctx)
 	(void)sipid;
 	if (sig == SIGINT)
 	{
-		printf("SIGINT\n");
+		printf("\tSIGINT\n");
 		rl_on_new_line();
 		rl_replace_line("", 0);
 		rl_redisplay();
 	}
 	else if (sig == SIGQUIT)
 	{
-		printf("SIGQUIT\n");
+		printf("\tSIGQUIT\n");
 		rl_on_new_line();
 		rl_replace_line("", 0);
 		rl_redisplay();
@@ -91,9 +90,6 @@ int	ft_sh_do_init(t_ctx **ctx, char **envp, t_obj_arr **ops)
 	ft_sh_parse_env_map(&new->env_map, envp);
 	new->env_map.cmp_fun = ft_sh_var_cmp;
 	ft_qsort_obj(&new->env_map);
-	new->fdio.in = 0;
-	new->fdio.out = 1;
-	new->fdio.err = 2;
 	*ctx = new;
 	return (0);
 }

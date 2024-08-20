@@ -23,14 +23,14 @@ void	ft_chdir_update_env_vars(t_ctx *ctx, char *oldpwd,
 		pwd = (free(pwd), ft_strdup(cwd));
 	var = ft_sh_env_map_get_entry("PWD", ctx);
 	if (var)
-		var->v = (free(var->v), pwd);
+		var->v = (free((void *)var->v), pwd);
 	else
 		ft_sh_env_map_bind_var((t_sh_var){.k = ft_strdup("PWD"),
 			.v = pwd}, ctx);
 	var = NULL;
 	var = ft_sh_env_map_get_entry("OLDPWD", ctx);
 	if (var)
-		var->v = (free(var->v), oldpwd);
+		var->v = (free((void *)var->v), oldpwd);
 	else
 		ft_sh_env_map_bind_var((t_sh_var){.k = ft_strdup("OLDPWD"),
 			.v = oldpwd}, ctx);
@@ -58,11 +58,11 @@ int	ft_chdir(t_ctx *ctx)
 		else
 		{
 			//TODO: fix error handling
-			dprintf(ctx->fdio.err, "minsh: cd: HOME not set");
+			dprintf(STDERR_FILENO, "minsh: cd: HOME not set");
 			return (free(oldpwd), -1);
 		}
 	}
-	dprintf(ctx->fdio.out, "changing directory to: %s\n", path);
+	dprintf(STDOUT_FILENO, "changing directory to: %s\n", path);
 	if (chdir(path) != 0)
 		return (free(oldpwd), -1);
 	ft_chdir_update_env_vars(ctx, oldpwd, path, cwd);

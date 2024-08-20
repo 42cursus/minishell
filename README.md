@@ -27,6 +27,8 @@ This project is about creating a simple shell.
 
 Traditionally, syntax analysis is divided into a lexical scanner and a (context-free) parser.
 A scanner divides an input string consisting of characters into a string of tokens.
+A sequence of input characters t h a t comprises a single token is called a lexeme.
+Thus, lexical analyzer insulates a parser from the lexeme representation of tokens.
 
 Tokenizing is breaking up a string in chunks. The lexical properties of the chunks are defined by the lexer rules.
 Such a chunk is like a word in a sentence. This tokenization is usually based on regular expression matching.
@@ -40,6 +42,9 @@ This output also allows seeing what part of the input string was recognized for 
 Lexer rules can overlap. Simple precedence logic applies to decide which rules will be matched. 
 Internally a lexer (like lex or flex) has a generated state-machine that keeps track of all this.
 - [Token Recognition](https://pubs.opengroup.org/onlinepubs/9699919799/utilities/V3_chap02.html#tag_18_03)
+- [vsinha CS-252 Fall 2013](https://github.com/vsinha/shell/blob/master/shell.l)
+- [offirgolan lexical analyzer for shell](https://github.com/offirgolan/Shell/blob/master/shell.l)
+
 
 A next step is feeding these tokens to a parser which has grammatical rules that define
 what order of tokens form valid input.
@@ -73,10 +78,11 @@ The purpose of the abstract syntax tree is have a "simple" representation of wha
 - [Shell Implementation of Pipelines](https://www.cs.uleth.ca/~holzmann/C/system/shell_does_pipeline.pdf)
 
 ### Useful links:
-- [vsinha CS-252 Fall 2013](https://github.com/vsinha/shell/blob/master/shell.l)
-- [offirgolan lexical analyzer for shell](https://github.com/offirgolan/Shell/blob/master/shell.l)
+- [LALR(1) grammars](https://stackoverflow.com/questions/49493005/is-every-ll1-grammar-also-a-lalr1-grammar)
 - [DMSToolkit](https://www.semanticdesigns.com/Products/DMS/DMSToolkit.html)
 
 ### Other implementations:
 - [Thomas Wagner's minishell](https://github.com/twagger/minishell)
 - [Toni Schmitt's minishell](https://github.com/toni-schmitt/minishell)
+- [Open Edu Hub - OSdev - minishell](https://github.com/open-education-hub/operating-systems/tree/main/content/assignments/minishell)
+- [Vincent Sanders's GNU dbm](https://github.com/pexip/os-gdbm/blob/upstream/1.23/tools/lex.l)

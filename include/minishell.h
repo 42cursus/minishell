@@ -21,6 +21,7 @@
 # include <asm-generic/errno.h>
 # include <linux/limits.h>
 # include "libft.h"
+# include "parser.h"
 
 # include <signal.h>
 # include <readline.h>
@@ -38,24 +39,11 @@ typedef struct sigaction	t_sigaction;
 typedef struct s_shell_var
 {
 	const char	*k;
-	char		*v;
+	const char	*v;
 	int 		attrs;
 }	t_sh_var;
 
-typedef struct s_exec_ctx
-{
-	char		**argv;
-	int 		argc;
-	struct s_inout
-	{
-		int in;
-		int out;
-		int err;
-	}			fdio;
-	t_obj_arr	env_map;
-	char *const	*envp;
-	char 		pathname[PATH_MAX];
-}	t_ctx;
+
 
 # define ATT_EXPORTED	0x0000001	/* export to environment */
 # define ATT_READONLY	0x0000002	/* cannot change */
@@ -103,7 +91,6 @@ int			ft_pwd(t_ctx *ctx);
 int			ft_echo(t_ctx *ctx);
 int			ft_export(t_ctx *ctx);
 int			ft_unset(t_ctx *ctx);
-int			ft_exit(t_ctx *ctx);
 
 /* ---------- UTILS -------------------- */
 void		sigsegv(int signal);
@@ -114,6 +101,7 @@ int			ft_sh_op_cmp(const void *a, const void *b);
 int			ft_sh_var_cmp(const void *a, const void *b);
 int			ft_sh_parse_env_map(t_obj_arr *map, char **env_tab);
 char		**ft_sh_render_envp(t_ctx *ctx);
+int ft_sh_launch(t_ctx *ctx, simple_cmd_t *s);
 int			ft_sh_env_map_del_entry(t_sh_var var, t_ctx *ctx);
 int			ft_sh_env_map_add_entry(t_sh_var var, t_ctx *ctx);
 t_sh_var	*ft_sh_env_map_get_entry(const char *key, t_ctx *ctx);

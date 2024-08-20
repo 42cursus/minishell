@@ -17,7 +17,7 @@ int	ft_pwd(t_ctx *ctx)
 	char	cwd[PATH_MAX];
 
 	if (getcwd(cwd, PATH_MAX) != NULL)
-		ft_putendl_fd(cwd, ctx->fdio.out);
+		ft_putendl_fd(cwd, STDOUT_FILENO);
 	else
 		return (perror("getcwd error"), 1);
 	return (0);

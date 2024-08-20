@@ -25,15 +25,16 @@ int	ft_sh_destroy_ctx(t_ctx *ctx)
 
 	i = -1;
 	rl_clear_history();
+	printf("exit\n");
 	while (++i < (int)ctx->env_map.total_elems)
 	{
 		var = &((t_sh_var *) ctx->env_map.base)[i];
 		free((void *) var->k);
 		if (var->v != NULL)
-			free(var->v);
+			free((void *)var->v);
 	}
 	free(ctx->env_map.base);
-	while (ctx->argc--)
+	while (ctx->argc-- > 0)
 		free(ctx->argv[ctx->argc]);
 	free(ctx->argv);
 	free(ctx);

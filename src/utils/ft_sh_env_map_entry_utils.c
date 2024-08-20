@@ -15,7 +15,7 @@
 int	ft_sh_env_map_free_entry(t_sh_var *var)
 {
 	if (var)
-		(free(var->v), free((void *)var->k));
+		(free((void *)var->v), free((void *)var->k));
 	return (0);
 }
 

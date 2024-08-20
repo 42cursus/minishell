@@ -10,4 +10,16 @@
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "minishell.h"
 
+int	ft_sh_tokenize(t_obj_arr *ops, t_ctx *ctx)
+{
+	(void)ops;
+	int i;
+
+	i = -1;
+	while (++i < ctx->argc)
+		ft_putstr_eol(ctx->argv[i], "\n");
+
+	return (0);
+}

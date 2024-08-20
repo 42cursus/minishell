@@ -13,20 +13,25 @@
 #include <history.h>
 #include <readline.h>
 #include "minishell.h"
+#include "cmd.h"
 
 void	ft_sh_init_welcome(void);
 int		ft_sh_execute(t_obj_arr *ops, t_ctx *ctx);
+int		ft_sh_tokenize(t_obj_arr *ops, t_ctx *ctx);
 
-int	ft_sh_loop(t_ctx *ctx, t_obj_arr *ops)
+
+int	ft_sh_loop(t_ctx *ctx)
 {
 	char	*line;
 	int		status;
+	cmd_t *root = NULL;
 
 	ft_sh_init_welcome();
 	status = 0;
 	ctx->argv = NULL;
+	ctx->argc = 0;
 	using_history();
-	while (!status)
+	while (status != SHELL_EXIT)
 	{
 		line = ft_sh_read_line(ctx);
 		if (line)
@@ -34,15 +39,19 @@ int	ft_sh_loop(t_ctx *ctx, t_obj_arr *ops)
 			if (*line != 0)
 			{
 				add_history(line);
-				if (ft_sh_split_line(line, ctx))
-					break ;
-				status = ft_sh_execute(ops, ctx);
+				root = NULL;
+				/* We might have not read the entire line... */
+				if (!parse_line(line, &root))
+					/* There was an error parsing the command. */
+					fprintf(stderr, "Error while parsing command!\n");
+				root->ctx = ctx;
+				status = parse_command(root, 0, NULL);
+				free_parse_memory();
 			}
-			else
-				free(line);
+			free(line);
 		}
 		else
-			printf("\n");
+			status = SHELL_EXIT;
 	}
 	return (status);
 }
@@ -61,8 +70,8 @@ int main(int argc, char **argv, char **envp)
 	{
 		global->argv = argv;
 		global->argc = argc;
-		global->envp = envp;
-		exitcode = ft_sh_loop(global, ops);
+		global->ops = ops;
+		exitcode = ft_sh_loop(global);
 	}
 	else
 		exitcode = EXIT_FAILURE;

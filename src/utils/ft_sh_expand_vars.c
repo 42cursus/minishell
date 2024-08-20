@@ -38,7 +38,7 @@ char	*ft_sh_expand_single_var(t_ctx *ctx, char *src)
 	dst = new;
 	while (*src)
 	{
-		if (*src == '$' && *(src + 1) && ft_isalnum(*(src + 1)))
+		if (*src == '$' && *(src + 1) && (ft_isalnum(*(src + 1)) || *(src + 1) == '_'))
 		{
 			var_start = ++src; /* Skip the '$' */
 			while (*src && (ft_isalnum(*src) || *src == '_'))
