@@ -31,7 +31,7 @@ int	ft_sh_lookup_pathname(t_ctx *ctx)
 		not_found = access(ft_strncpy(pathname, ctx->argv[0], PATH_MAX), X_OK);
 	else
 	{
-		dup = ft_strdup(ft_sh_env_map_get_entry("PATH", ctx)->v);
+		dup = ft_strdup(ft_sh_env_map_get_val("PATH", ctx));
 		str = ft_strtok_r(dup, ":", &sptr);
 		while ((not_found == -1) && str)
 		{

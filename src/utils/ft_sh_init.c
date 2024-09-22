@@ -70,7 +70,6 @@ void	ft_sh_set_signal(t_ctx *const *ctx)
 		ft_sh_destroy_ctx(*ctx);
 		exit(EXIT_FAILURE);
 	}
-	signal(SIGSEGV, sigsegv);
 }
 
 /**
