@@ -17,8 +17,6 @@ void parse_error(const char *str, const int where)
 	fprintf(stderr, "Parse error near %d: %s\n", where, str);
 }
 
-
-
 static int parse_simple(simple_cmd_t *s, int level, cmd_t *father)
 {
 	int status;

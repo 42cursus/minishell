@@ -40,6 +40,17 @@ int	ft_sh_lookup_pathname(t_ctx *ctx)
 			str = ft_strtok_r(NULL, ":", &sptr);
 		}
 		free(dup);
+//		if (dup)
+//		{
+//			str = ft_strtok_r(dup, ":", &sptr);
+//			while ((not_found == -1) && str)
+//			{
+//				snprintf(pathname, PATH_MAX, "%s/%s", str, ctx->argv[0]);
+//				not_found = access(pathname, X_OK);
+//				str = ft_strtok_r(NULL, ":", &sptr);
+//			}
+//			free(dup);
+//		}
 	}
 	return (not_found);
 }
@@ -61,12 +72,12 @@ static void shell_redirect_stdin(simple_cmd_t *s)
 
 static void shell_redirect_stdout(simple_cmd_t *s)
 {
-	char path[1024];
+	char path[PATH_MAX];
 
-	snprintf(path, sizeof(path), "%s", s->out->string);
+	snprintf(path, PATH_MAX, "%s", s->out->string);
 
 	if (s->out->next_part)
-		strcat(path, get_word(s->out->next_part, s->ctx));
+		ft_strcat(path, get_word(s->out->next_part, s->ctx));
 
 	int flags = O_WRONLY | O_CREAT;
 
@@ -83,6 +94,8 @@ static void shell_redirect_stdout(simple_cmd_t *s)
 
 static void shell_redirect_stderr(simple_cmd_t *s)
 {
+	int fd;
+	int flags;
 	char path[1024];
 
 	snprintf(path, sizeof(path), "%s", s->err->string);
@@ -90,35 +103,17 @@ static void shell_redirect_stderr(simple_cmd_t *s)
 	if (s->err->next_part)
 		strcat(path, get_word(s->err->next_part, s->ctx));
 
-	int flags = O_WRONLY | O_CREAT;
-
+	flags = O_WRONLY | O_CREAT;
 	if (s->out || s->io_flags == IO_REGULAR)
-		flags = flags | O_TRUNC;
+		flags |= O_TRUNC;
 	else
-		flags = flags | O_APPEND;
+		flags |= O_APPEND;
 
-	int fd = open(path, flags, 0644);
+	fd = open(path, flags, 0644);
 
 	dup2(fd, STDERR_FILENO);
 	close(fd);
 }
-
-#ifdef USE_SHELL_REDIRECT_FUN
-static void shell_redirect(simple_cmd_t *s)
-{
-	int stdin_fd = dup(STDIN_FILENO);
-	int stdout_fd = dup(STDOUT_FILENO);
-	int stderr_fd = dup(STDERR_FILENO);
-
-	s->in ? shell_redirect_stdin(s) : NULL;
-	s->out ? shell_redirect_stdout(s) : NULL;
-	s->err ? shell_redirect_stderr(s) : NULL;
-
-	dup2(stdin_fd, STDIN_FILENO);
-	dup2(stdout_fd, STDOUT_FILENO);
-	dup2(stderr_fd, STDERR_FILENO);
-}
-#endif
 
 int ft_sh_launch(t_ctx *ctx, simple_cmd_t *s)
 {
@@ -133,9 +128,14 @@ int ft_sh_launch(t_ctx *ctx, simple_cmd_t *s)
 			if (execve(ctx->pathname, ctx->argv,
 					   ft_sh_render_envp(ctx)))    // Child process
 			{
-				s->in ? shell_redirect_stdin(s) : NULL;
-				s->out ? shell_redirect_stdout(s) : NULL;
-				s->err ? shell_redirect_stderr(s) : NULL;
+				if (s->in)
+					shell_redirect_stdin(s);
+
+				if (s->out)
+					shell_redirect_stdout(s);
+
+				if (s->err)
+					shell_redirect_stderr(s);
 
 				perror("ft_sh: error in execve");
 				return (SHELL_EXIT);
@@ -163,12 +163,14 @@ int	ft_sh_execute(t_obj_arr *ops, t_ctx *ctx)
 	int 		ret_val;
 	t_shell_op	*op;
 
-	if (ctx->argv == NULL || ctx->argv[0] == NULL)
-		return (0);
-	op = ft_bsearch_obj(&(t_shell_op) {.instruction = ctx->argv[0]}, ops);
-	if (op != NULL)
-		ret_val = op->fun(ctx);
-	else
-		ret_val = ft_sh_launch(ctx, NULL);
+	ret_val = 0;
+	if (ctx->argc > 0)
+	{
+		op = ft_bsearch_obj(&(t_shell_op) {.instruction = ctx->argv[0]}, ops);
+		if (op != NULL)
+			ret_val = op->fun(ctx);
+		else
+			ret_val = ft_sh_launch(ctx, NULL);
+	}
 	return (ret_val);
 }

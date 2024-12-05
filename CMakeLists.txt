@@ -72,12 +72,13 @@ file(GLOB_RECURSE FT_LIB_HEADERS "${FT_LIB_DIR}/*.h")
 file(GLOB_RECURSE FT_LIB_SOURCES "${FT_LIB_DIR}/ft_*.c")
 
 add_custom_target(${FT_LIB_NAME}_target ALL
-        COMMAND make -C ${FT_LIB_DIR}
+        COMMAND make -C ${FT_LIB_DIR} BUILD_WITH_ASAN=1
         BYPRODUCTS "${FT_LIB_DIR}/${FT_LIB_FILENAME}"
         SOURCES "${FT_LIB_HEADERS};${FT_LIB_SOURCES}"
         COMMENT "Building FT_LIB")
 
 add_library(${FT_LIB_NAME} STATIC IMPORTED)
+
 add_dependencies(${FT_LIB_NAME} "${FT_LIB_NAME}_target")
 set_target_properties(${FT_LIB_NAME} PROPERTIES
         IMPORTED_LOCATION ${FT_LIB_DIR}/${FT_LIB_FILENAME}
@@ -110,9 +111,11 @@ set(TARGET_LIBRARIES
         Threads::Threads
         PkgConfig::readline)
 
+
 add_executable(${TARGET_NAME}
         ${TARGET_HEADERS}
         ${TARGET_SOURCES})
+
 target_include_directories(${TARGET_NAME} PRIVATE "${PROJECT_SOURCE_DIR}")
 target_link_libraries(${TARGET_NAME} "${TARGET_LIBRARIES}")
 target_link_options(${TARGET_NAME} PRIVATE ${COMMON_LDFLAGS})

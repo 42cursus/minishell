@@ -20,6 +20,39 @@ int		ft_sh_execute(t_obj_arr *ops, t_ctx *ctx);
 int		ft_sh_tokenize(t_obj_arr *ops, t_ctx *ctx);
 
 
+//int main(void)
+//{
+//
+//
+//	char ps[1024];
+//
+//	char *line = NULL;
+//
+//	sprintf(ps, "> ");
+//	line = readline(ps);
+//	while (line)
+//	{
+//		t_lexer lexer = scan_the_Line(line);
+//
+//		int	token_pos = 0;
+//		t_ast_node *ast = parse_pipeline(lexer.tokens, &token_pos);
+//
+//		if (!ast)
+//			ft_printf("Error: Failed to parse the command.\n");
+//		else
+//		{
+//			ft_printf("\n\nAbstract Syntax Tree:\n");
+//			print_ast(ast, 0);
+//		}
+//		free_ast(ast);
+//		free_tokens(&lexer);
+//		free(line);
+//		line = readline(ps);
+//	}
+//	free(line);
+//	return (0);
+//}
+
 int	ft_sh_loop(t_ctx *ctx)
 {
 	char	*line;
@@ -42,11 +75,17 @@ int	ft_sh_loop(t_ctx *ctx)
 				root = NULL;
 				/* We might have not read the entire line... */
 				if (!parse_line(line, &root))
+				{
 					/* There was an error parsing the command. */
 					fprintf(stderr, "Error while parsing command!\n");
-				root->ctx = ctx;
-				status = parse_command(root, 0, NULL);
-				free_parse_memory();
+					status = -1;
+				}
+				else
+				{
+					root->ctx = ctx;
+					status = parse_command(root, 0, NULL);
+					free_parse_memory();
+				}
 			}
 			free(line);
 		}

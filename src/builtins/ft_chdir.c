@@ -58,7 +58,7 @@ int	ft_chdir(t_ctx *ctx)
 		else
 		{
 			//TODO: fix error handling
-			dprintf(STDERR_FILENO, "minsh: cd: HOME not set");
+			dprintf(STDERR_FILENO, "minish: cd: HOME not set\n");
 			return (free(oldpwd), -1);
 		}
 	}
