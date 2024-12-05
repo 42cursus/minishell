@@ -76,6 +76,9 @@ static void shell_redirect_stdout(simple_cmd_t *s)
 
 	snprintf(path, PATH_MAX, "%s", s->out->string);
 
+	if (s->out->next_word)
+		
+
 	if (s->out->next_part)
 		ft_strcat(path, get_word(s->out->next_part, s->ctx));
 
@@ -86,6 +89,7 @@ static void shell_redirect_stdout(simple_cmd_t *s)
 	else
 		flags = flags | O_TRUNC;
 
+	fprintf(stderr, "opening file : \"%s\" with permissions %d", path, 0644);
 	int fd = open(path, flags, 0644);
 
 	dup2(fd, STDOUT_FILENO);
@@ -125,18 +129,16 @@ int ft_sh_launch(t_ctx *ctx, simple_cmd_t *s)
 		pid = fork();
 		if (pid == 0)
 		{
+
+			if (s->in)
+				shell_redirect_stdin(s);
+			if (s->out)
+				shell_redirect_stdout(s);
+			if (s->err)
+				shell_redirect_stderr(s);
 			if (execve(ctx->pathname, ctx->argv,
 					   ft_sh_render_envp(ctx)))    // Child process
 			{
-				if (s->in)
-					shell_redirect_stdin(s);
-
-				if (s->out)
-					shell_redirect_stdout(s);
-
-				if (s->err)
-					shell_redirect_stderr(s);
-
 				perror("ft_sh: error in execve");
 				return (SHELL_EXIT);
 			}

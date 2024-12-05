@@ -15,7 +15,7 @@ CC				:= cc
 INC_DIR			=  ./include
 INCLUDE_FLAGS	:= -I. -I$(INC_DIR) -I/usr/include
 OPTIMIZE_FLAGS	:= -O0
-DEBUG_FLAGS		:= -g3 -gdwarf-3
+DEBUG_FLAGS		:= -g3 -gdwarf-3 -fsanitize=address -fsanitize=undefined
 MANDATORY_FLAGS	:= -Wall -Wextra -Werror -Wimplicit
 CFLAGS			= $(MANDATORY_FLAGS) $(DEBUG_FLAGS) $(OPTIMIZE_FLAGS) $(INCLUDE_FLAGS)
 
@@ -32,7 +32,7 @@ OBJS			= $(SRCS:%.c=$(BUILD_DIR)/%.o)
 all: $(NAME)
 
 $(NAME): $(LIBFT_LIB) $(OBJS)
-		$(CC) -L$(LIBFT_DIR) $(OBJS) -g -o $@ -lft
+		$(CC) -L$(LIBFT_DIR) $(OBJS) $(DEBUG_FLAGS) -o $@ -lft
 
 $(LIBFT_LIB):
 		@$(MAKE) -C $(LIBFT_DIR) -j8

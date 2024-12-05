@@ -82,12 +82,12 @@ static bool run_in_parallel(cmd_t *cmd1, cmd_t *cmd2, int level, cmd_t *father)
 	pid_t pid_cmd1 = fork();
 
 	if (pid_cmd1 == 0)
-		exit(parse_command(cmd1, level + 1, father));
+		exit(traverse_and_exec_the_ast(cmd1, level + 1, father));
 
 	pid_t pid_cmd2 = fork();
 
 	if (pid_cmd2 == 0)
-		exit(parse_command(cmd2, level + 1, father));
+		exit(traverse_and_exec_the_ast(cmd2, level + 1, father));
 
 	int status_cmd1;
 	int status_cmd2;
@@ -115,7 +115,7 @@ static bool run_on_pipe(cmd_t *left, cmd_t *right, int level, cmd_t *father)
 		close(fd[0]);
 		close(fd[1]);
 
-		exit(parse_command(left, level + 1, father));
+		exit(traverse_and_exec_the_ast(left, level + 1, father));
 	}
 
 	pid_t pid_cmd2 = fork();
@@ -127,7 +127,7 @@ static bool run_on_pipe(cmd_t *left, cmd_t *right, int level, cmd_t *father)
 		close(fd[0]);
 		close(fd[1]);
 
-		exit(parse_command(right, level + 1, father));
+		exit(traverse_and_exec_the_ast(right, level + 1, father));
 	}
 
 	close(fd[0]);
@@ -139,7 +139,7 @@ static bool run_on_pipe(cmd_t *left, cmd_t *right, int level, cmd_t *father)
 	return status_cmd2;
 }
 
-int parse_command(cmd_t *c, int level, cmd_t *father)
+int traverse_and_exec_the_ast(cmd_t *c, int level, cmd_t *father)
 {
 	int exit_status;
 
@@ -160,9 +160,9 @@ int parse_command(cmd_t *c, int level, cmd_t *father)
 	switch (c->op)
 	{
 		case OP_SEQUENTIAL:
-			exit_status = parse_command(c->left, level + 1, c);
+			exit_status = traverse_and_exec_the_ast(c->left, level + 1, c);
 			if (exit_status >= 0)
-				exit_status = parse_command(c->right, level + 1, c);
+				exit_status = traverse_and_exec_the_ast(c->right, level + 1, c);
 			break;
 
 		case OP_PARALLEL:
@@ -170,13 +170,13 @@ int parse_command(cmd_t *c, int level, cmd_t *father)
 			break;
 
 		case OP_CONDITIONAL_NZERO:
-			exit_status = parse_command(c->left, level + 1, c);
-			exit_status = exit_status == 0 ? parse_command(c->right, level + 1, c) : exit_status;
+			exit_status = traverse_and_exec_the_ast(c->left, level + 1, c);
+			exit_status = exit_status == 0 ? traverse_and_exec_the_ast(c->right, level + 1, c) : exit_status;
 			break;
 
 		case OP_CONDITIONAL_ZERO:
-			exit_status = parse_command(c->left, level + 1, c);
-			exit_status = exit_status != 0 ? parse_command(c->right, level + 1, c) : exit_status;
+			exit_status = traverse_and_exec_the_ast(c->left, level + 1, c);
+			exit_status = exit_status != 0 ? traverse_and_exec_the_ast(c->right, level + 1, c) : exit_status;
 			break;
 
 		case OP_PIPE:

@@ -182,6 +182,14 @@ typedef enum {
  * can only have OP_PIPE or OP_NONE
  */
 
+typedef struct s_ast_node {
+	int type;
+	char *value;
+	struct s_ast_node *left;
+	struct s_ast_node *right;
+	struct s_ast_node *next;
+} t_ast_node;
+
 typedef struct command_s cmd_t;
 struct command_s {
 	cmd_t			*up;
@@ -190,6 +198,7 @@ struct command_s {
 	operator_t		op;
 	simple_cmd_t	*scmd;
 	t_ctx			*ctx;
+	t_ast_node		*ast;
 };
 
 #ifdef __cplusplus

@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minishellast.h"
+#include "minishell.h"
 
 typedef struct
 {
@@ -324,6 +324,7 @@ void	expand_variables(t_token **tokens, int token_count)
 		}
 	}
 }
+
 
 t_lexer scan_the_Line(const char *line)
 {

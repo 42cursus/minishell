@@ -5,6 +5,6 @@
 
 #define SHELL_EXIT -100
 
-int parse_command(cmd_t *cmd, int level, cmd_t *father);
+int traverse_and_exec_the_ast(cmd_t *c, int level, cmd_t *father);
 
 #endif

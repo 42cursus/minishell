@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minishellast.h"
+#include "minishell.h"
 
 t_ast_node	*parse_redirection(t_token **tokens, int *token_pos)
 {
@@ -23,6 +23,8 @@ t_ast_node	*parse_redirection(t_token **tokens, int *token_pos)
 		redir_node->type = NODE_REDIRECT_IN;
 	else if (tokens[*token_pos]->type == TOKEN_REDIRECT_OUT)
 		redir_node->type = NODE_REDIRECT_OUT;
+	else if (tokens[*token_pos]->type == TOKEN_REDIRECT_ERR)
+		redir_node->type = NODE_REDIRECT_ERR;
 	else if (tokens[*token_pos]->type == TOKEN_APPEND)
 		redir_node->type = NODE_APPEND;
 	else if (tokens[*token_pos]->type == TOKEN_HERE_DOC)

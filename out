@@ -1,0 +1,10 @@
+build
+CMakeLists.txt
+include
+lib
+Makefile
+minishell
+out
+README.md
+scratch
+src
