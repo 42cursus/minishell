@@ -246,86 +246,6 @@ const char *get_idstring(int token)
 	return str;
 }
 
-void preprocess_tokens(t_token **tokens, int *token_count)
-{
-	int i = 0;
-	int j = 0;
-	int k;
-	int start;
-	int total_length;
-	char *concatenated_value;
-
-	while (i < *token_count)
-	{
-		if (tokens[i]->type == TOKEN_WORD)
-		{
-			start = i;
-			total_length = 0;
-			while (i < *token_count && tokens[i]->type == TOKEN_WORD)
-				total_length += ft_strlen(tokens[i++]->value);
-			concatenated_value = malloc(total_length + 1);
-			if (!concatenated_value)
-			{
-				ft_printf("Error: Memory allocation failed.\n");
-				exit(EXIT_FAILURE);
-			}
-			concatenated_value[0] = '\0';
-			k = start;
-			while (k < i)
-			{
-				ft_strlcat(concatenated_value, tokens[k]->value, total_length + 1);
-				free(tokens[k]->value);
-				free(tokens[k++]);
-			}
-			tokens[j] = malloc(sizeof(t_token));
-			if (!tokens[j])
-			{
-				ft_printf("Error: Memory allocation failed.\n");
-				free(concatenated_value);
-				exit(EXIT_FAILURE);
-			}
-			tokens[j]->type = TOKEN_WORD;
-			tokens[j++]->value = concatenated_value;
-		}
-		else if (tokens[i]->type != TOKEN_BLANK)
-		{
-			if (i != j)
-				tokens[j] = tokens[i];
-			j++;
-			i++;
-		}
-		else
-		{
-			free(tokens[i]->value);
-			free(tokens[i++]);
-		}
-	}
-	*token_count = j;
-	tokens[j] = NULL;
-}
-
-void	expand_variables(t_token **tokens, int token_count)
-{
-	int	i;
-
-	i = -1;
-	while (++i < token_count)
-	{
-		if (tokens[i]->type == TOKEN_VAR)
-		{
-			const char *var_name = tokens[i]->value + 1;
-			char *expanded_value = getenv(var_name);
-			free(tokens[i]->value);
-			if (expanded_value)
-				tokens[i]->value = strdup(expanded_value);
-			else
-				tokens[i]->value = strdup("'Error: not a real var'");
-			tokens[i]->type = TOKEN_WORD;
-		}
-	}
-}
-
-
 t_lexer scan_the_Line(const char *line)
 {
 	int i;
@@ -357,17 +277,10 @@ t_lexer scan_the_Line(const char *line)
 	else if (lexer.buf_index != 0)
 		flush_buffer(&lexer, TOKEN_WORD);
 	flush_buffer(&lexer, TOKEN_WORD);
-	ft_printf("Tokens before preprocess:\n");
+	ft_printf("\nTokens:\n");
 	i = -1;
 	while (lexer.tokens[++i] != NULL)
 		printf("Token Type: \"%s\", Value: %s\n",
 	get_idstring(lexer.tokens[i]->type), lexer.tokens[i]->value);
-//	expand_variables(lexer.tokens, lexer.token_count);
-	preprocess_tokens(lexer.tokens, &lexer.token_count);
-	printf("\n\nTokens after preprocess:\n");
-	i = -1;
-	while (lexer.tokens[++i] != NULL)
-		printf("Token Type: \"%s\", Value: %s\n",
-			   get_idstring(lexer.tokens[i]->type), lexer.tokens[i]->value);
 	return lexer;
 }
