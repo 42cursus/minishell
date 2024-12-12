@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: yublee <yublee@student.42london.com>       +#+  +:+       +#+         #
+#    By: abelov <abelov@student.42london.com>       +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2024/02/19 14:55:22 by yublee            #+#    #+#              #
-#    Updated: 2024/07/28 22:08:42 by abelov           ###   ########.fr        #
+#    Created: 2024/12/12 00:27:48 by abelov            #+#    #+#              #
+#    Updated: 2024/12/12 00:27:49 by abelov           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -32,7 +32,7 @@ OBJS			= $(SRCS:%.c=$(BUILD_DIR)/%.o)
 all: $(NAME)
 
 $(NAME): $(LIBFT_LIB) $(OBJS)
-		$(CC) -L$(LIBFT_DIR) $(OBJS) $(DEBUG_FLAGS) -o $@ -lft
+		$(CC) -L$(LIBFT_DIR) $(OBJS) $(DEBUG_FLAGS) -fsanitize=address -fsanitize=undefined -o $@ -lft
 
 $(LIBFT_LIB):
 		@$(MAKE) -C $(LIBFT_DIR) -j8
