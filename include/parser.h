@@ -182,13 +182,32 @@ typedef enum {
  * can only have OP_PIPE or OP_NONE
  */
 
-typedef struct s_ast_node {
-	int type;
-	char *value;
-	struct s_ast_node *left;
-	struct s_ast_node *right;
-	struct s_ast_node *next;
-} t_ast_node;
+typedef enum e_node_type {
+	NODE_COMMAND,
+	NODE_ARGUMENT,
+	NODE_PIPE,
+	NODE_REDIRECT_OUT,
+	NODE_REDIRECT_IN,
+	NODE_HERE_DOC,
+	NODE_FILENAME,
+	NODE_CONTINUE,
+	NODE_APPEND
+} t_node_type;
+
+typedef struct s_ast_node	t_ast_node;
+struct s_ast_node
+{
+	char		*value;
+	t_node_type	type;
+	t_ast_node	*parent;
+	t_ast_node	*arguments;
+	t_ast_node	*redirects_in;
+	t_ast_node	*redirects_out;
+	t_ast_node	*left;
+	t_ast_node	*right;
+	t_ast_node	*word_continue;
+	bool		expand;
+};
 
 typedef struct command_s cmd_t;
 struct command_s {

@@ -73,30 +73,6 @@ typedef struct s_lexer {
 	int token_count;
 } t_lexer;
 
-typedef enum e_node_type {
-	NODE_COMMAND,
-	NODE_ARGUMENT,
-	NODE_PIPE,
-	NODE_REDIRECT_OUT,
-	NODE_REDIRECT_IN,
-	NODE_HERE_DOC,
-	NODE_FILENAME,
-	NODE_CONTINUE,
-	NODE_APPEND
-} t_node_type;
-
-typedef struct s_ast_node {
-	t_node_type			type;
-	char				*value;
-	struct s_ast_node	*parent;
-	struct s_ast_node	*arguments;
-	struct s_ast_node	*redirects_in;
-	struct s_ast_node	*redirects_out;
-	struct s_ast_node	*left;
-	struct s_ast_node	*right;
-	struct s_ast_node	*word_continue;
-	bool				expand;
-} t_ast_node;
 
 t_lexer		scan_the_Line(const char *line);
 t_token     *create_token(t_token_type type, const char *value, t_lexer *lexer);
@@ -114,7 +90,7 @@ const char  *get_idstring(int token);
 t_ast_node  *parse_redirection(t_token **tokens, int *token_pos, t_ast_node *parent);
 t_ast_node  *parse_command(t_token **tokens, int *token_pos);
 t_ast_node  *parse_pipeline(t_token **tokens, int *token_pos);
-t_ast_node	*create_node(t_node_type type, char *value, t_ast_node *parent, t_token_type token);
+t_ast_node	*create_node(t_node_type type, const char *value, t_ast_node *parent, t_token_type token);
 t_ast_node	*create_redirection_node(t_token_type type, char *value, t_ast_node *parent, t_token_type token);
 void        print_ast(t_ast_node *node, int depth);
 void        free_ast(t_ast_node *node);

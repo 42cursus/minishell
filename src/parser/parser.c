@@ -12,13 +12,14 @@
 
 #include "minishell.h"
 
-t_ast_node	*create_node(t_node_type type, char *value, t_ast_node *parent, t_token_type token)
+t_ast_node	*create_node(t_node_type type, const char *value, t_ast_node *parent, t_token_type token)
 {
 	t_ast_node	*node;
 
 	node = malloc(sizeof(t_ast_node));
 	if (!node)
 		return (NULL);
+	ft_memset(node, 0, sizeof(t_ast_node));
 	node->type = type;
 	if (value)
 		node->value = strdup(value);
@@ -215,21 +216,38 @@ t_ast_node	*parse_pipeline(t_token **tokens, int *token_pos)
 	return (command_node);
 }
 
+#define BUFF_SIZE 1024
+
 void print_arguments(t_ast_node *arg_node, int depth)
 {
+	char buf[BUFF_SIZE];
+	t_ast_node *node;
+
 	while (arg_node)
 	{
+		*buf = '\0';
 		for (int i = 0; i < depth; i++)
-			printf("  ");
-		printf("ARGUMENT: %s", arg_node->value ? arg_node->value : "NULL");
-		if (arg_node->expand == true)
-			printf(" - TO EXPAND");
+			ft_printf("  ");
+		if (!arg_node->value)
+			snprintf(buf, BUFF_SIZE, "NULL");
+		else if (arg_node->value && arg_node->expand)
+			snprintf(buf, BUFF_SIZE, "expand(%s)", arg_node->value);
+		else
+			snprintf(buf, BUFF_SIZE, "%s", arg_node->value);
+		ft_printf("ARGUMENT: %s", buf);
+
 		t_ast_node	*cont_node = arg_node; 
 		while (cont_node->word_continue)
 		{
-			printf("; %s", cont_node->word_continue->value ? cont_node->word_continue->value : "NULL");
-			if (cont_node->word_continue->expand == true)
-				printf(" - TO EXPAND");
+			*buf = '\0';
+			node = cont_node->word_continue;
+			if (!node->value)
+				snprintf(buf, BUFF_SIZE, "NULL");
+			else if (node->value && node->expand)
+				snprintf(buf, BUFF_SIZE, "expand(%s)", node->value);
+			else
+				snprintf(buf, 1024, "%s", node->value);
+			ft_printf("; %s", buf);
 			cont_node = cont_node->word_continue;
 		}
 		printf("\n");
