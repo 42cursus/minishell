@@ -42,10 +42,12 @@ int	ft_sh_loop(t_ctx *ctx)
 
 				t_ast_node *ast = parse_pipeline(line);
 
+
 				if (!ast)
 					ft_printf("Error: Failed to parse the command.\n");
 				else
 				{
+//					collect_heredocs(ast);
 					ft_printf("\n\nAbstract Syntax Tree:\n");
 					print_ast(ast, 0);
 					status = exec_ast(ast, 0, NULL);
