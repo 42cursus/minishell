@@ -12,6 +12,7 @@
 
 #include <history.h>
 #include <readline.h>
+#include <errno.h>
 #include "minishell.h"
 #include "cmd.h"
 
@@ -39,11 +40,7 @@ int	ft_sh_loop(t_ctx *ctx)
 			{
 				add_history(line);
 
-				t_lexer lexer = scan_the_Line(line);
-
-				int	token_pos = 0;
-				t_ast_node *ast = parse_pipeline(lexer.tokens, &token_pos);
-				free_tokens(&lexer);
+				t_ast_node *ast = parse_pipeline(line);
 
 				if (!ast)
 					ft_printf("Error: Failed to parse the command.\n");
@@ -51,9 +48,8 @@ int	ft_sh_loop(t_ctx *ctx)
 				{
 					ft_printf("\n\nAbstract Syntax Tree:\n");
 					print_ast(ast, 0);
+					status = exec_ast(ast, 0, NULL);
 				}
-
-
 
 				root = NULL;
 				/* We might have not read the entire line... */

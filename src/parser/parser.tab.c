@@ -192,9 +192,9 @@ static cmd_t	*new_command(simple_cmd_t *scmd)
 
 	memset(c, 0, sizeof(*c));
 	c->up = c->left = c->right = NULL;
-	c->op = OP_NONE;
+	c->op = OP_SIMPLE;
 	assert(scmd != NULL);
-	c->scmd = scmd;
+	c->simple_cmd = scmd;
 	scmd->up = c;
 	c->ctx = NULL;
 	return c;
@@ -217,9 +217,9 @@ static cmd_t *bind_commands(cmd_t *cmd1, cmd_t *cmd2, operator_t op)
 	assert(cmd1 != cmd2);
 	c->right = cmd2;
 	cmd2->up = c;
-	assert((op > OP_NONE) && (op < OP_DUMMY));
+	assert((op > OP_SIMPLE) && (op < OP_DUMMY));
 	c->op = op;
-	c->scmd = NULL;
+	c->simple_cmd = NULL;
 	c->ctx = NULL;
 
 	return c;

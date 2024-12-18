@@ -145,7 +145,7 @@ struct simple_cmd_s
  */
 
 typedef enum {
-	OP_NONE,
+	OP_SIMPLE,
 	OP_SEQUENTIAL,
 	OP_PARALLEL,
 	OP_CONDITIONAL_ZERO,
@@ -186,12 +186,16 @@ typedef enum e_node_type {
 	NODE_COMMAND,
 	NODE_ARGUMENT,
 	NODE_PIPE,
-	NODE_REDIRECT_OUT,
-	NODE_REDIRECT_IN,
+	NODE_REDIRECT_STDOUT,
+	NODE_REDIRECT_STDIN,
 	NODE_HERE_DOC,
 	NODE_FILENAME,
 	NODE_CONTINUE,
-	NODE_APPEND
+	NODE_APPEND,
+	NODE_REDIRECT_IN_2,
+	NODE_REDIRECT_STDERR,
+	NODE_HERE_DOC_2,
+	NODE_APPEND_2
 } t_node_type;
 
 typedef struct s_ast_node	t_ast_node;
@@ -214,16 +218,16 @@ struct command_s {
 	cmd_t			*up;
 	cmd_t			*left;
 	cmd_t			*right;
+
 	operator_t		op;
-	simple_cmd_t	*scmd;
+
+	simple_cmd_t	*simple_cmd;
+
+
 	t_ctx			*ctx;
 	t_ast_node		*ast;
 };
 
-#ifdef __cplusplus
-extern "C"
-{
-#endif
 
 
 /*
@@ -260,11 +264,6 @@ bool parse_line(const char *line, cmd_t **root);
  */
 
 void free_parse_memory(void);
-
-#ifdef __cplusplus
-}
-#endif
-
 
 #ifdef __PARSER_H_INTERNAL_INCLUDE
 

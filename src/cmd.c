@@ -146,12 +146,12 @@ int traverse_and_exec_the_ast(cmd_t *c, int level, cmd_t *father)
 	if (c == NULL)
 		return (SHELL_EXIT);
 
-	if (c->op == OP_NONE)
+	if (c->op == OP_SIMPLE)
 	{
-		if (!c->scmd)
+		if (!c->simple_cmd)
 			return (SHELL_EXIT);
-		c->scmd->ctx = c->ctx;
-		return parse_simple(c->scmd, level, father);
+		c->simple_cmd->ctx = c->ctx;
+		return parse_simple(c->simple_cmd, level, father);
 	}
 
 	c->left->ctx = c->ctx;

@@ -37,15 +37,19 @@ typedef enum e_token_type {
 	TOKEN_COMMAND,
 	TOKEN_WORD,
 	TOKEN_PIPE,
-	TOKEN_REDIRECT_OUT,
-	TOKEN_REDIRECT_ERR,
-	TOKEN_REDIRECT_IN,
+	TOKEN_REDIRECT_STDOUT,
+	TOKEN_REDIRECT_STDIN,
 	TOKEN_HERE_DOC,
 	TOKEN_APPEND,
 	TOKEN_STRING,
 	TOKEN_BLANK,
 	TOKEN_END,
-	TOKEN_VAR
+	TOKEN_VAR,
+	TOKEN_REDIRECT_STDERR,
+	TOKEN_REDIRECT_IN_2,
+	TOKEN_HERE_DOC_2,
+	TOKEN_APPEND_2,
+	TOKEN_MAX
 } t_token_type;
 
 typedef struct s_token {
@@ -68,28 +72,35 @@ typedef enum e_state {
 typedef struct s_lexer {
 	char buffer[1024];
 	int buf_index;
-	char	curent_string;
+	char curent_string;
+	char	*line;
+	int		line_iter;
+
 	t_token *tokens[MAX_TOKENS];
-	int token_count;
+	int		tokens_size;
+	int		token_iter;
+
 } t_lexer;
 
 
-t_lexer		scan_the_Line(const char *line);
+int			exec_ast(t_ast_node *command, int level, t_ast_node *parent);
+
+int			scan_the_Line(const char *line, t_lexer *lexer);
 t_token     *create_token(t_token_type type, const char *value, t_lexer *lexer);
 void        flush_buffer(t_lexer *lexer, t_token_type type);
 void        free_tokens(t_lexer *lexer);
-t_state     handle_initial(char c, t_lexer *lexer);
-t_state     handle_reading_word(char c, t_lexer *lexer);
-t_state     handle_in_single_quote(char c, t_lexer *lexer);
-t_state     handle_variable(char c, t_lexer *lexer);
-t_state     handle_in_double_quote(char c, t_lexer *lexer);
-t_state     handle_check_append(char c, t_lexer *lexer);
-t_state     handle_check_here_doc(char c, t_lexer *lexer);
-t_state     handle_reading_whitespace(char c, t_lexer *lexer);
+t_state     handle_initial(t_lexer *lexer);
+t_state     handle_reading_word(t_lexer *lexer);
+t_state		handle_in_single_quote(t_lexer *lexer);
+t_state     handle_variable(t_lexer *lexer);
+t_state     handle_in_double_quote(t_lexer *lexer);
+t_state     handle_check_append(t_lexer *lexer);
+t_state     handle_check_here_doc(t_lexer *lexer);
+t_state     handle_reading_whitespace(t_lexer *lexer);
 const char  *get_idstring(int token);
 t_ast_node  *parse_redirection(t_token **tokens, int *token_pos, t_ast_node *parent);
 t_ast_node  *parse_command(t_token **tokens, int *token_pos);
-t_ast_node  *parse_pipeline(t_token **tokens, int *token_pos);
+t_ast_node	*parse_pipeline(char *line);
 t_ast_node	*create_node(t_node_type type, const char *value, t_ast_node *parent, t_token_type token);
 t_ast_node	*create_redirection_node(t_token_type type, char *value, t_ast_node *parent, t_token_type token);
 void        print_ast(t_ast_node *node, int depth);
