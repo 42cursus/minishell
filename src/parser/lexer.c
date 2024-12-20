@@ -38,11 +38,12 @@ lt_entry lt[] = {
 
 t_token *create_token(t_token_type type, const char *value, t_lexer *lexer)
 {
-	t_token *token = malloc(sizeof(t_token));
+	t_token *token = (t_token *)malloc(sizeof(t_token));
 	if (!token) return NULL;
 	token->type = type;
 	token->value = strdup(value);
-	lexer->token_iter++;
+
+	lexer->tokens[lexer->token_iter++] = token;
 	return (token);
 }
 
@@ -51,7 +52,7 @@ void flush_buffer(t_lexer *lexer, t_token_type type)
 	if (lexer->buf_index > 0)
 	{
 		lexer->buffer[lexer->buf_index] = '\0';
-		lexer->tokens[lexer->token_iter] = create_token(type, lexer->buffer, lexer);
+		create_token(type, lexer->buffer, lexer);
 		lexer->buf_index = 0;
 	}
 }

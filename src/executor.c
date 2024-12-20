@@ -20,8 +20,7 @@ int exec_ast(t_ast_node *command, int level, t_ast_node *parent)
 
 	if (command->type == NODE_COMMAND)
 	{
-		if (!command->value)
-			return (SHELL_EXIT);
+
 	}
 
 	return 0;

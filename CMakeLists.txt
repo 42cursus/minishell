@@ -11,6 +11,8 @@
 # **************************************************************************** #
 
 cmake_minimum_required(VERSION 3.8)
+set(CMAKE_C_COMPILER clang)
+
 
 project(minishell C)
 set(CMAKE_VERBOSE_MAKEFILE ON)
@@ -23,9 +25,6 @@ set(FT_CFLAGS
         -Wno-error=unused-function
         -O0 -g3 -gdwarf-3
         -masm=att -MMD
-        -fcf-protection=none -mmanual-endbr
-        -fno-exceptions
-        -ffunction-sections
         -fdata-sections
         -fno-dwarf2-cfi-asm
         -fno-asynchronous-unwind-tables)
@@ -37,17 +36,10 @@ set(FT_CFLAGS
         -Wno-error=unused-parameter
         -O0
         -masm=att
-        -fno-exceptions
-        -ffunction-sections
-        -fdata-sections
-        -fno-omit-frame-pointer
-        -fdwarf2-cfi-asm
-        -fcf-protection=none
-        -mmanual-endbr
         -g3 -gdwarf-3
         -fasynchronous-unwind-tables
         -fsanitize=address
-        -fsanitize=undefined
+        #-fsanitize=undefined
         -fno-sanitize-recover
         -fsanitize=float-divide-by-zero
         -fsanitize=float-cast-overflow
@@ -55,7 +47,7 @@ set(FT_CFLAGS
 
 set(COMMON_LDFLAGS
         -fsanitize=address
-        -fsanitize=undefined
+        #-fsanitize=undefined
         -fno-sanitize-recover
         -fsanitize=float-divide-by-zero
         -fsanitize=float-cast-overflow)
@@ -104,19 +96,22 @@ set(TARGET_NAME "${PROJECT_NAME}_exe")
 
 find_package(Threads REQUIRED)
 find_package(PkgConfig REQUIRED)
-pkg_check_modules(readline REQUIRED IMPORTED_TARGET readline)
+pkg_check_modules(RL REQUIRED IMPORTED_TARGET readline)
 
 set(TARGET_LIBRARIES
         ${FT_LIB_NAME}
         Threads::Threads
-        PkgConfig::readline)
+        PkgConfig::RL)
 
+MESSAGE(STATUS "${RL_INCLUDE_DIRS}")
 
 add_executable(${TARGET_NAME}
         ${TARGET_HEADERS}
         ${TARGET_SOURCES})
 
-target_include_directories(${TARGET_NAME} PRIVATE "${PROJECT_SOURCE_DIR}")
+target_include_directories(${TARGET_NAME} PRIVATE
+        ${PROJECT_SOURCE_DIR}    
+        )
 target_link_libraries(${TARGET_NAME} "${TARGET_LIBRARIES}")
 target_link_options(${TARGET_NAME} PRIVATE ${COMMON_LDFLAGS})
 target_compile_options(${TARGET_NAME} PRIVATE

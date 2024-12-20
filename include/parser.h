@@ -199,51 +199,51 @@ typedef enum e_node_type {
 } t_node_type;
 
 
-typedef struct s_wrd t_wrd;
-struct s_wrd
-{
-	const char *value;
-	bool expand;
-	t_wrd *next_part;
-	t_wrd *next_word;
-};
+// typedef struct s_wrd t_wrd;
+// struct s_wrd
+// {
+// 	const char *value;
+// 	bool expand;
+// 	t_wrd *next_part;
+// 	t_wrd *next_word;
+// };
 
-typedef struct s_cmd_node	t_cmd_node;
-struct s_cmd_node
-{
-	t_wrd	*args;
+// typedef struct s_cmd_node	t_cmd_node;
+// struct s_cmd_node
+// {
+// 	t_wrd	*args;
 
-	t_wrd	*redirects_in;
-	t_wrd	*redirects_err;
-	t_wrd	*redirects_err_append;
-	t_wrd	*redirects_out;
-	t_wrd	*redirects_out_append;
-};
+// 	t_wrd	*redirects_in;
+// 	t_wrd	*redirects_err;
+// 	t_wrd	*redirects_err_append;
+// 	t_wrd	*redirects_out;
+// 	t_wrd	*redirects_out_append;
+// };
+
+// typedef struct s_ast_node	t_ast_node;
+// struct s_ast_node
+// {
+// 	t_ast_node	*parent;
+// 	t_ast_node	*left;
+// 	t_ast_node	*right;
+// 	t_node_type	type;
+// 	t_cmd_node	*cmd;
+// };
 
 typedef struct s_ast_node	t_ast_node;
 struct s_ast_node
 {
+	char		*value;
+	t_node_type	type;
 	t_ast_node	*parent;
+	t_ast_node	*arguments;
+	t_ast_node	*redirects_in;
+	t_ast_node	*redirects_out;
 	t_ast_node	*left;
 	t_ast_node	*right;
-	t_node_type	type;
-	t_cmd_node	*cmd;
+	t_ast_node	*word_continue;
+	bool		expand;
 };
-
-//typedef struct s_ast_node	t_ast_node;
-//struct s_ast_node
-//{
-//	char		*value;
-//	t_node_type	type;
-//	t_ast_node	*parent;
-//	t_ast_node	*arguments;
-//	t_ast_node	*redirects_in;
-//	t_ast_node	*redirects_out;
-//	t_ast_node	*left;
-//	t_ast_node	*right;
-//	t_ast_node	*word_continue;
-//	bool		expand;
-//};
 
 typedef struct command_s cmd_t;
 struct command_s {

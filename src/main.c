@@ -10,8 +10,9 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <history.h>
-#include <readline.h>
+#include <stdio.h>
+#include <readline/history.h>
+#include <readline/readline.h>
 #include <errno.h>
 #include "minishell.h"
 #include "cmd.h"
