@@ -11,6 +11,17 @@
 /* ************************************************************************** */
 
 #include "minishell.h"
+void	redir_to_null(t_ast_node *node)
+{
+	node->cmd->redirects_in = NULL;
+	node->cmd->redirects_out = NULL;
+	node->cmd->redirects_err = NULL;
+	node->cmd->redirects_err_append = NULL;
+	node->cmd->redirects_err_here_doc = NULL;
+	node->cmd->redirects_here_doc = NULL;
+	node->cmd->redirects_out_append = NULL;
+	node->cmd->redirects_err_in = NULL;
+}
 
 t_ast_node	*create_node(t_node_type type, const char *value, t_ast_node *parent, t_token_type token)
 {
@@ -21,152 +32,110 @@ t_ast_node	*create_node(t_node_type type, const char *value, t_ast_node *parent,
 		return (NULL);
 	ft_memset(node, 0, sizeof(t_ast_node));
 	node->type = type;
+	node->cmd = malloc(sizeof(t_cmd_node));
 	if (value)
-		node->value = strdup(value);
+	{
+		node->cmd->args = malloc(sizeof(t_wrd)); 
+		node->cmd->args->value = strdup(value);
+		if (token == TOKEN_VAR)
+			node->cmd->args->expand = true;
+		else
+			node->cmd->args->expand = false;
+	}
 	else
-		node->value = NULL;
+		node->cmd->args = NULL;
 	node->parent = parent;
-	node->arguments = NULL;
-	node->redirects_in = NULL;
-	node->redirects_out = NULL;
+	redir_to_null(node);
 	node->left = NULL;
 	node->right = NULL;
-	if (token == TOKEN_VAR)
-		node->expand = true;
-	else
-		node->expand = false;
 	return (node);
 }
 
-t_ast_node	*create_redirection_node(t_token_type type, char *value, t_ast_node *parent, t_token_type token)
+void	create_redirection_node(t_wrd *redir, t_token_type type, t_cmd_node *cmd)
 {
+	t_wrd	*dest;
+
+	dest = NULL;
 	if (type == TOKEN_REDIRECT_STDOUT)
-		return (create_node(NODE_REDIRECT_STDOUT, value, parent, token));
+		dest = cmd->redirects_out;
 	else if (type == TOKEN_REDIRECT_STDIN)
-		return (create_node(NODE_REDIRECT_STDIN, value, parent, token));
+		dest = cmd->redirects_in;
 	else if (type == TOKEN_APPEND)
-		return (create_node(NODE_APPEND, value, parent, token));
+		dest = cmd->redirects_out_append;
 	else if (type == TOKEN_HERE_DOC)
-		return (create_node(NODE_HERE_DOC, value, parent, token));
+		dest = cmd->redirects_here_doc;
 	else if (type == TOKEN_REDIRECT_STDERR)
-		return (create_node(NODE_REDIRECT_STDERR, value, parent, token));
+		dest = cmd->redirects_err; 
 	else if (type == TOKEN_REDIRECT_IN_2)
-		return (create_node(NODE_REDIRECT_IN_2, value, parent, token));
+		dest = cmd->redirects_err_in; 
 	else if (type == TOKEN_HERE_DOC_2)
-		return (create_node(NODE_HERE_DOC_2, value, parent, token));
+		dest = cmd->redirects_err_here_doc;
 	else if (type == TOKEN_APPEND_2)
-		return (create_node(NODE_APPEND_2, value, parent, token));
-	else
-		return (NULL);
+		dest = cmd->redirects_err_append;
+	while (dest != NULL)
+		dest = dest->next_word;
+	dest = redir;
 }
 
-t_ast_node	*parse_redirection(t_token **tokens, int *token_pos, t_ast_node *parent)
+void	parse_redirection(t_token **tokens, int *token_pos, t_ast_node *parent, t_wrd *redir)
 {
-	t_ast_node	*redir_node;
-	t_ast_node	*filename_node;
-
-	redir_node = create_redirection_node(tokens[*token_pos]->type, tokens[*token_pos]->value, parent, tokens[*token_pos]->type);
-	if (!redir_node)
-		return (NULL);
+	redir = malloc(sizeof(t_wrd));
+	create_redirection_node(redir, tokens[*token_pos]->type, parent->cmd);
 	skip_blanks(tokens, token_pos, NULL);
 	if (tokens[*token_pos] && (tokens[*token_pos]->type == TOKEN_WORD || tokens[*token_pos]->type == TOKEN_VAR))
 	{
-		filename_node = create_node(NODE_FILENAME, tokens[*token_pos]->value, redir_node, tokens[*token_pos]->type);
-		if (!filename_node)
-		{
-			free_ast(redir_node);
-			return (NULL);
-		}
-		redir_node->right = filename_node;
-		skip_blanks(tokens, token_pos, filename_node);
+		create_wrd(redir, tokens[*token_pos]);
+		skip_blanks(tokens, token_pos, redir);
 	}
 	else
-	{
 		ft_printf("Syntax error: Expected target after redirection\n");
-		free_ast(redir_node);
-		return (NULL);
-	}
-	if (redir_node->type == NODE_REDIRECT_STDIN || redir_node->type == NODE_HERE_DOC || redir_node->type == NODE_REDIRECT_IN_2 || redir_node->type == NODE_HERE_DOC_2)
-	{
-		if (!parent->redirects_in)
-			parent->redirects_in = redir_node;
-		else
-		{
-			t_ast_node *current = parent->redirects_in;
-			while (current->redirects_in)
-				current = current->redirects_in;
-			current->redirects_in = redir_node;
-		}
-	}
-	else
-	{
-		if (!parent->redirects_out)
-			parent->redirects_out = redir_node;
-		else
-		{
-			t_ast_node *current = parent->redirects_out;
-			while (current->redirects_out)
-				current = current->redirects_out;
-			current->redirects_out = redir_node;
-		}
-	}
-	return (redir_node);
 }
 
 t_ast_node	*parse_command(t_token **tokens, int *token_pos)
 {
 	t_ast_node	*command_node;
-	t_ast_node	*last_arg = NULL;
-	t_ast_node	*redir_node = NULL;
-	t_ast_node	*arg_node;
+	t_wrd		*last_arg;
+	t_wrd		*redir;
+	t_wrd		*arg;
 
+	redir = NULL;
 	if (!tokens[*token_pos] || (tokens[*token_pos]->type != TOKEN_WORD && tokens[*token_pos]->type != TOKEN_VAR))
 		return (NULL);
-
 	command_node = create_node(NODE_COMMAND, tokens[*token_pos]->value, NULL, tokens[*token_pos]->type);
 	if (!command_node)
 		return (NULL);
-	skip_blanks(tokens, token_pos, command_node);
+	skip_blanks(tokens, token_pos, command_node->cmd->args);
+	last_arg = command_node->cmd->args;
 	while ((*token_pos) && tokens[*token_pos] != NULL)
 	{
 		if (tokens[*token_pos]->type == TOKEN_WORD || tokens[*token_pos]->type == TOKEN_VAR)
 		{
-			arg_node = create_node(NODE_ARGUMENT, tokens[*token_pos]->value, command_node, tokens[*token_pos]->type);
-			if (!arg_node)
-			{
-				free_ast(command_node);
-				return (NULL);
-			}
-			if (command_node->arguments == NULL)
-				command_node->arguments = arg_node;
-			else
-				last_arg->arguments = arg_node;
-			last_arg = arg_node;
-			skip_blanks(tokens, token_pos, arg_node);
+			arg = malloc(sizeof(t_wrd));
+			create_wrd(arg, tokens[*token_pos]);
+			last_arg->next_word = arg;
+			last_arg = arg;
+			skip_blanks(tokens, token_pos, arg);
 		}
-		else if (tokens[*token_pos]->type >= TOKEN_REDIRECT_STDIN ||
-				 tokens[*token_pos]->type == TOKEN_REDIRECT_STDOUT ||
-				 tokens[*token_pos]->type == TOKEN_APPEND ||
-				 tokens[*token_pos]->type == TOKEN_HERE_DOC ||
-				 tokens[*token_pos]->type == TOKEN_REDIRECT_IN_2 ||
-				 tokens[*token_pos]->type == TOKEN_REDIRECT_STDERR ||
-				 tokens[*token_pos]->type == TOKEN_APPEND_2 ||
-				 tokens[*token_pos]->type == TOKEN_HERE_DOC_2)
-		{
-			redir_node = parse_redirection(tokens, token_pos, command_node);
-			if (!redir_node)
-			{
-				free_ast(command_node);
-				return (NULL);
-			}
-		}
+		else if (tokens[*token_pos]->type >= TOKEN_REDIRECT_STDOUT && tokens[*token_pos]->type < TOKEN_MAX)
+			parse_redirection(tokens, token_pos, command_node, redir);
 		else
 			break;
 	}
 	return (command_node);
 }
 
-void	skip_blanks(t_token **tokens, int *token_pos, t_ast_node *last)
+void	create_wrd(t_wrd *word, t_token *token)
+{
+	word->value = token->value;
+	if (token->type == TOKEN_VAR)
+		word->expand = true;
+	else
+		word->expand = false;
+	word->next_part = NULL;
+	word->next_word = NULL;
+}
+
+void	skip_blanks(t_token **tokens, int *token_pos, t_wrd *last)
 {
 	(*token_pos)++;
 	if (tokens[*token_pos])
@@ -175,8 +144,9 @@ void	skip_blanks(t_token **tokens, int *token_pos, t_ast_node *last)
 		{
 			while (tokens[*token_pos]->type == TOKEN_WORD || tokens[*token_pos]->type == TOKEN_VAR)
 			{
-				last->word_continue = create_node(NODE_CONTINUE, tokens[*token_pos]->value, NULL, tokens[*token_pos]->type);
-				last = last->word_continue;
+				last->next_part = malloc(sizeof(t_wrd));
+				create_wrd(last->next_part, tokens[*token_pos]);
+				last = last->next_part;
 				(*token_pos)++;
 				if (!tokens[*token_pos])
 					break;
@@ -190,53 +160,77 @@ void	skip_blanks(t_token **tokens, int *token_pos, t_ast_node *last)
 	}
 }
 
-
-t_ast_node *parse_pipeline(char *line)
+int has_right(t_lexer *lexer, t_ast_node **right)
 {
-	t_ast_node	*current_node;
-	t_ast_node	*next_command;
+	if (lexer->tokens[lexer->token_iter] && lexer->tokens[lexer->token_iter]->type == TOKEN_PIPE)
+	{
+		skip_blanks(lexer->tokens, &lexer->token_iter, NULL);
+		*right = parse_command(lexer->tokens, &lexer->token_iter);
+		return (true);
+	}
+	*right = NULL;
+	return (false);
+}
+
+#define HALF_BAKED_TREE 2135646
+
+int	parse_pipeline(char *line, t_ast_node **root)
+{
+	t_ast_node	*cn;
+	t_ast_node	*nn;
 	t_ast_node	*pipe_node;
 	t_lexer		lexer;
+	int			errcode;
 
-	scan_the_Line(line, &lexer);
+	errcode = scan_the_Line(line, &lexer);
 
+	//TODO: replace me with a while loop inside scan_the_Line
 	if (lexer.tokens[lexer.token_iter]->type == TOKEN_BLANK)
 		(lexer.token_iter)++;
-	current_node = parse_command(lexer.tokens, &lexer.token_iter);
-	if (current_node != NULL)
+
+	if (!errcode)
 	{
-		while (lexer.tokens[lexer.token_iter] && lexer.tokens[lexer.token_iter]->type == TOKEN_PIPE)
+		cn = parse_command(lexer.tokens, &lexer.token_iter);
+
+		if (cn != NULL)
 		{
-			skip_blanks(lexer.tokens, &lexer.token_iter, NULL);
-			next_command = parse_command(lexer.tokens, &lexer.token_iter);
-			if (!next_command)
+			while (has_right(&lexer, &nn))
 			{
-				ft_printf("Syntax error: Expected command after '|'\n");
-				current_node = (free_ast(current_node), NULL);
-				break;
+				if (nn)
+				{
+					pipe_node = create_node(NODE_PIPE, NULL, NULL, TOKEN_PIPE);
+					pipe_node->cmd = (free(pipe_node->cmd), NULL);
+					if (!pipe_node)
+					{
+						ft_printf("Error: Memory allocation failed.\n");
+						//echo current_node = (free_ast(current_node), NULL);
+						//free_ast(next_command);
+						break;
+					}
+					pipe_node->left = cn;
+					pipe_node->right = nn;
+					cn->parent = pipe_node;
+					nn->parent = pipe_node;
+					cn = pipe_node;
+				}
+				else
+				{
+					ft_printf("Syntax error: Expected command after '|'\n");
+					//current_node = (free_ast(current_node), NULL);
+					errcode = HALF_BAKED_TREE;
+					break;
+				}
 			}
-			pipe_node = create_node(NODE_PIPE, "|", NULL, TOKEN_PIPE);
-			if (!pipe_node)
-			{
-				ft_printf("Error: Memory allocation failed.\n");
-				current_node = (free_ast(current_node), NULL);
-				free_ast(next_command);
-				break;
-			}
-			pipe_node->left = current_node;
-			pipe_node->right = next_command;
-			current_node->parent = pipe_node;
-			next_command->parent = pipe_node;
-			current_node = pipe_node;
 		}
+		*root = cn;
+		free_tokens(&lexer);
 	}
-	free_tokens(&lexer);
-	return (current_node);
+	return (errcode);
 }
 
 #define BUFF_SIZE 1024
 
-void print_arguments(t_ast_node *arg_node, int depth)
+/*void print_arguments(t_ast_node *arg_node, int depth)
 {
 	char buf[BUFF_SIZE];
 	t_ast_node *node;
@@ -430,4 +424,4 @@ void	free_ast(t_ast_node *node)
 	if (node->right)
 		free_ast(node->right);
 	free(node);
-}
+}*/

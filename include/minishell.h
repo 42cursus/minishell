@@ -37,14 +37,14 @@ typedef enum e_token_type {
 	TOKEN_COMMAND,
 	TOKEN_WORD,
 	TOKEN_PIPE,
-	TOKEN_REDIRECT_STDOUT,
-	TOKEN_REDIRECT_STDIN,
-	TOKEN_HERE_DOC,
-	TOKEN_APPEND,
 	TOKEN_STRING,
 	TOKEN_BLANK,
 	TOKEN_END,
 	TOKEN_VAR,
+	TOKEN_REDIRECT_STDOUT,
+	TOKEN_REDIRECT_STDIN,
+	TOKEN_HERE_DOC,
+	TOKEN_APPEND,
 	TOKEN_REDIRECT_STDERR,
 	TOKEN_REDIRECT_IN_2,
 	TOKEN_HERE_DOC_2,
@@ -98,17 +98,19 @@ t_state     handle_check_append(t_lexer *lexer);
 t_state     handle_check_here_doc(t_lexer *lexer);
 t_state     handle_reading_whitespace(t_lexer *lexer);
 const char  *get_idstring(int token);
-t_ast_node  *parse_redirection(t_token **tokens, int *token_pos, t_ast_node *parent);
+void		parse_redirection(t_token **tokens, int *token_pos, t_ast_node *parent, t_wrd *redir);
 t_ast_node  *parse_command(t_token **tokens, int *token_pos);
-t_ast_node	*parse_pipeline(char *line);
+int 		parse_pipeline(char *line, t_ast_node **root);
 t_ast_node	*create_node(t_node_type type, const char *value, t_ast_node *parent, t_token_type token);
-t_ast_node	*create_redirection_node(t_token_type type, char *value, t_ast_node *parent, t_token_type token);
+void		create_redirection_node(t_wrd *redir, t_token_type type, t_cmd_node *cmd);
 void        print_ast(t_ast_node *node, int depth);
 void        free_ast(t_ast_node *node);
 void        parse_command_details(t_token **tokens, int *token_pos, t_ast_node *command_node);
 void        print_arguments(t_ast_node *arg_node, int depth);
 void        print_redirections(t_ast_node *redir_node, int depth);
-void		skip_blanks(t_token **tokens, int *token_pos, t_ast_node *last);
+void		skip_blanks(t_token **tokens, int *token_pos, t_wrd *last);
+void		redir_to_null(t_ast_node *node);
+void		create_wrd(t_wrd *word, t_token *token);
 
 enum	{ VAR_MAX = 256 };
 enum	{ MAXC = 128 };
