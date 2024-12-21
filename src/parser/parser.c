@@ -41,6 +41,8 @@ t_ast_node	*create_node(t_node_type type, const char *value, t_ast_node *parent,
 			node->cmd->args->expand = true;
 		else
 			node->cmd->args->expand = false;
+		node->cmd->args->next_part = NULL;
+		node->cmd->args->next_word = NULL;
 	}
 	else
 		node->cmd->args = NULL;
@@ -51,41 +53,94 @@ t_ast_node	*create_node(t_node_type type, const char *value, t_ast_node *parent,
 	return (node);
 }
 
-void	create_redirection_node(t_wrd *redir, t_token_type type, t_cmd_node *cmd)
+int	end_of_redir_list(t_wrd *redir, t_wrd *list, t_token_type type, t_cmd_node *cmd)
 {
-	t_wrd	*dest;
-
-	dest = NULL;
-	if (type == TOKEN_REDIRECT_STDOUT)
-		dest = cmd->redirects_out;
-	else if (type == TOKEN_REDIRECT_STDIN)
-		dest = cmd->redirects_in;
-	else if (type == TOKEN_APPEND)
-		dest = cmd->redirects_out_append;
-	else if (type == TOKEN_HERE_DOC)
-		dest = cmd->redirects_here_doc;
-	else if (type == TOKEN_REDIRECT_STDERR)
-		dest = cmd->redirects_err; 
-	else if (type == TOKEN_REDIRECT_IN_2)
-		dest = cmd->redirects_err_in; 
-	else if (type == TOKEN_HERE_DOC_2)
-		dest = cmd->redirects_err_here_doc;
-	else if (type == TOKEN_APPEND_2)
-		dest = cmd->redirects_err_append;
-	while (dest != NULL)
-		dest = dest->next_word;
-	dest = redir;
+	if (list == NULL)
+	{
+		if (type == TOKEN_REDIRECT_STDOUT)
+			cmd->redirects_out = redir;
+		else if (type == TOKEN_REDIRECT_STDIN)
+			cmd->redirects_in  = redir;
+		else if (type == TOKEN_APPEND)
+			cmd->redirects_out_append  = redir;
+		else if (type == TOKEN_HERE_DOC)
+			cmd->redirects_here_doc  = redir;
+		else if (type == TOKEN_REDIRECT_STDERR)
+			cmd->redirects_err  = redir;
+		else if (type == TOKEN_REDIRECT_IN_2)
+			cmd->redirects_err_in  = redir;
+		else if (type == TOKEN_HERE_DOC_2)
+			cmd->redirects_err_here_doc = redir;
+		else if (type == TOKEN_APPEND_2)
+			cmd->redirects_err_append = redir;
+		return (0);
+	}
+	while (list->next_word != NULL)
+		list = list->next_word;
+	list->next_word = redir;
+	return (0);
 }
 
-void	parse_redirection(t_token **tokens, int *token_pos, t_ast_node *parent, t_wrd *redir)
+void list_append(t_wrd **list, t_wrd *redir)
 {
-	redir = malloc(sizeof(t_wrd));
-	create_redirection_node(redir, tokens[*token_pos]->type, parent->cmd);
+	t_wrd *curr;
+
+	if (list == NULL)
+		return;
+	if (*list == NULL)
+		*list = redir;
+	else
+	{
+		curr = *list;
+		while (curr->next_word != NULL)
+			curr = curr->next_word;
+		curr->next_word = redir;
+	}
+	return (0);
+}
+
+void	find_redir_list(t_wrd *redir, t_token_type type, t_cmd_node *cmd)
+{
+	if (type == TOKEN_REDIRECT_STDOUT)
+		list_append(&cmd->redirects_out, redir);
+	else if (type == TOKEN_REDIRECT_STDIN || TOKEN_HERE_DOC)
+		end_of_redir_list(redir, cmd->redirects_in, type, cmd);
+	else if (type == TOKEN_APPEND)
+		end_of_redir_list(redir, cmd->redirects_out_append, type, cmd);
+	else if (type == TOKEN_HERE_DOC)
+	{
+
+		list_append(&cmd->redirects_here_doc, redir);
+
+	}
+		
+	else if (type == TOKEN_REDIRECT_STDERR)
+		end_of_redir_list(redir, cmd->redirects_err, type, cmd); 
+	else if (type == TOKEN_REDIRECT_IN_2)
+		end_of_redir_list(redir, cmd->redirects_err_in, type, cmd); 
+	else if (type == TOKEN_HERE_DOC_2)
+		end_of_redir_list(redir, cmd->redirects_err_here_doc, type, cmd);
+	else if (type == TOKEN_APPEND_2)
+		end_of_redir_list(redir, cmd->redirects_err_append, type, cmd);
+}
+
+void	parse_redirection(t_token **tokens, int *token_pos, t_ast_node *parent)
+{
+	t_wrd			*redir;
+	t_token_type	rt;
+
+	redir = NULL;
+	rt = tokens[*token_pos]->type;
 	skip_blanks(tokens, token_pos, NULL);
 	if (tokens[*token_pos] && (tokens[*token_pos]->type == TOKEN_WORD || tokens[*token_pos]->type == TOKEN_VAR))
 	{
+		redir = malloc(sizeof(t_wrd));
 		create_wrd(redir, tokens[*token_pos]);
 		skip_blanks(tokens, token_pos, redir);
+
+		
+
+		find_redir_list(redir, rt, parent->cmd);
 	}
 	else
 		ft_printf("Syntax error: Expected target after redirection\n");
@@ -95,29 +150,33 @@ t_ast_node	*parse_command(t_token **tokens, int *token_pos)
 {
 	t_ast_node	*command_node;
 	t_wrd		*last_arg;
-	t_wrd		*redir;
 	t_wrd		*arg;
 
-	redir = NULL;
-	if (!tokens[*token_pos] || (tokens[*token_pos]->type != TOKEN_WORD && tokens[*token_pos]->type != TOKEN_VAR))
-		return (NULL);
-	command_node = create_node(NODE_COMMAND, tokens[*token_pos]->value, NULL, tokens[*token_pos]->type);
+	if (tokens[*token_pos]->type == TOKEN_WORD || tokens[*token_pos]->type == TOKEN_VAR)
+	{
+		command_node = create_node(NODE_COMMAND, tokens[*token_pos]->value, NULL, tokens[*token_pos]->type);
+		skip_blanks(tokens, token_pos, command_node->cmd->args);
+	}
+	else
+		command_node = create_node(NODE_COMMAND, NULL, NULL, TOKEN_COMMAND);
 	if (!command_node)
 		return (NULL);
-	skip_blanks(tokens, token_pos, command_node->cmd->args);
 	last_arg = command_node->cmd->args;
-	while ((*token_pos) && tokens[*token_pos] != NULL)
+	while (tokens[*token_pos] != NULL)
 	{
 		if (tokens[*token_pos]->type == TOKEN_WORD || tokens[*token_pos]->type == TOKEN_VAR)
 		{
 			arg = malloc(sizeof(t_wrd));
 			create_wrd(arg, tokens[*token_pos]);
-			last_arg->next_word = arg;
+			if (command_node->cmd->args == NULL)
+				command_node->cmd->args = arg;
+			else if (last_arg != NULL)
+				last_arg->next_word = arg;
 			last_arg = arg;
 			skip_blanks(tokens, token_pos, arg);
 		}
 		else if (tokens[*token_pos]->type >= TOKEN_REDIRECT_STDOUT && tokens[*token_pos]->type < TOKEN_MAX)
-			parse_redirection(tokens, token_pos, command_node, redir);
+			parse_redirection(tokens, token_pos, command_node);
 		else
 			break;
 	}
@@ -126,11 +185,19 @@ t_ast_node	*parse_command(t_token **tokens, int *token_pos)
 
 void	create_wrd(t_wrd *word, t_token *token)
 {
-	word->value = token->value;
-	if (token->type == TOKEN_VAR)
-		word->expand = true;
+	if (token)
+	{
+		word->value = token->value;
+		if (token->type == TOKEN_VAR)
+			word->expand = true;
+		else
+			word->expand = false;
+	}
 	else
+	{
+		word->value = NULL;
 		word->expand = false;
+	}
 	word->next_part = NULL;
 	word->next_word = NULL;
 }
@@ -183,15 +250,12 @@ int	parse_pipeline(char *line, t_ast_node **root)
 	int			errcode;
 
 	errcode = scan_the_Line(line, &lexer);
-
 	//TODO: replace me with a while loop inside scan_the_Line
 	if (lexer.tokens[lexer.token_iter]->type == TOKEN_BLANK)
 		(lexer.token_iter)++;
-
 	if (!errcode)
 	{
 		cn = parse_command(lexer.tokens, &lexer.token_iter);
-
 		if (cn != NULL)
 		{
 			while (has_right(&lexer, &nn))
