@@ -191,8 +191,9 @@ typedef enum e_node_type {
 typedef struct s_wrd t_wrd;
 struct s_wrd
 {
-	const char *value;
+	char *value;
 	bool expand;
+	bool append;
 	t_wrd *next_part;
 	t_wrd *next_word;
 };
@@ -202,20 +203,10 @@ struct s_cmd_node
 {
 	t_wrd	*args;
 
-	/* input */
 	t_wrd	*redirects_in;
-	t_wrd	*redirects_here_doc;
-
 	t_wrd	*redirects_err_in;
-	t_wrd	*redirects_err_here_doc;
-
-	/* outputs */
-
 	t_wrd	*redirects_err;
-	t_wrd	*redirects_err_append;
-
 	t_wrd	*redirects_out;
-	t_wrd	*redirects_out_append;
 };
 
 typedef struct s_ast_node	t_ast_node;

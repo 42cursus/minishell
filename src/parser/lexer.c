@@ -62,7 +62,7 @@ void	free_tokens(t_lexer *lexer)
 	int	i;
 
 	i = -1;
-	while (++i < lexer->token_iter)
+	while (lexer->tokens[++i] != NULL)
 	{
 		free(lexer->tokens[i]->value);
 		free(lexer->tokens[i]);

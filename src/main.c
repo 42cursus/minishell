@@ -57,7 +57,7 @@ int	ft_sh_loop(t_ctx *ctx)
 				{
 //					collect_heredocs(ast);
 					ft_printf("\n\nAbstract Syntax Tree:\n");
-					//print_ast(ast, 0);
+					print_ast(ast, 0);
 					status = exec_ast(ast, 0, NULL);
 				}
 
@@ -76,7 +76,7 @@ int	ft_sh_loop(t_ctx *ctx)
 					status = traverse_and_exec_the_ast(root, 0, NULL);
 					free_parse_memory();
 				}
-				//free_ast(ast);
+				free_ast(ast);
 			}
 			free(line);
 		}

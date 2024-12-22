@@ -33,7 +33,8 @@ t_ast_node	*create_node(t_node_type type, const char *value, t_ast_node *parent,
 	ft_memset(node, 0, sizeof(t_ast_node));
 	node->type = type;
 	node->cmd = malloc(sizeof(t_cmd_node));
-	if (value)
+	ft_memset(node->cmd, 0, sizeof(t_cmd_node));
+	if (type == NODE_COMMAND && value != NULL)
 	{
 		node->cmd->args = malloc(sizeof(t_wrd)); 
 		node->cmd->args->value = strdup(value);
@@ -53,34 +54,6 @@ t_ast_node	*create_node(t_node_type type, const char *value, t_ast_node *parent,
 	return (node);
 }
 
-int	end_of_redir_list(t_wrd *redir, t_wrd *list, t_token_type type, t_cmd_node *cmd)
-{
-	if (list == NULL)
-	{
-		if (type == TOKEN_REDIRECT_STDOUT)
-			cmd->redirects_out = redir;
-		else if (type == TOKEN_REDIRECT_STDIN)
-			cmd->redirects_in  = redir;
-		else if (type == TOKEN_APPEND)
-			cmd->redirects_out_append  = redir;
-		else if (type == TOKEN_HERE_DOC)
-			cmd->redirects_here_doc  = redir;
-		else if (type == TOKEN_REDIRECT_STDERR)
-			cmd->redirects_err  = redir;
-		else if (type == TOKEN_REDIRECT_IN_2)
-			cmd->redirects_err_in  = redir;
-		else if (type == TOKEN_HERE_DOC_2)
-			cmd->redirects_err_here_doc = redir;
-		else if (type == TOKEN_APPEND_2)
-			cmd->redirects_err_append = redir;
-		return (0);
-	}
-	while (list->next_word != NULL)
-		list = list->next_word;
-	list->next_word = redir;
-	return (0);
-}
-
 void list_append(t_wrd **list, t_wrd *redir)
 {
 	t_wrd *curr;
@@ -96,32 +69,18 @@ void list_append(t_wrd **list, t_wrd *redir)
 			curr = curr->next_word;
 		curr->next_word = redir;
 	}
-	return (0);
 }
 
 void	find_redir_list(t_wrd *redir, t_token_type type, t_cmd_node *cmd)
 {
-	if (type == TOKEN_REDIRECT_STDOUT)
+	if (type == TOKEN_REDIRECT_STDOUT || type == TOKEN_APPEND)
 		list_append(&cmd->redirects_out, redir);
-	else if (type == TOKEN_REDIRECT_STDIN || TOKEN_HERE_DOC)
-		end_of_redir_list(redir, cmd->redirects_in, type, cmd);
-	else if (type == TOKEN_APPEND)
-		end_of_redir_list(redir, cmd->redirects_out_append, type, cmd);
-	else if (type == TOKEN_HERE_DOC)
-	{
-
-		list_append(&cmd->redirects_here_doc, redir);
-
-	}
-		
-	else if (type == TOKEN_REDIRECT_STDERR)
-		end_of_redir_list(redir, cmd->redirects_err, type, cmd); 
-	else if (type == TOKEN_REDIRECT_IN_2)
-		end_of_redir_list(redir, cmd->redirects_err_in, type, cmd); 
-	else if (type == TOKEN_HERE_DOC_2)
-		end_of_redir_list(redir, cmd->redirects_err_here_doc, type, cmd);
-	else if (type == TOKEN_APPEND_2)
-		end_of_redir_list(redir, cmd->redirects_err_append, type, cmd);
+	else if (type == TOKEN_REDIRECT_STDIN || type == TOKEN_HERE_DOC)
+		list_append(&cmd->redirects_in, redir);
+	else if (type == TOKEN_REDIRECT_STDERR || type == TOKEN_APPEND_2)
+		list_append(&cmd->redirects_err, redir); 
+	else if (type == TOKEN_REDIRECT_IN_2 || type == TOKEN_HERE_DOC_2)
+		list_append(&cmd->redirects_err_in, redir); 
 }
 
 void	parse_redirection(t_token **tokens, int *token_pos, t_ast_node *parent)
@@ -136,10 +95,9 @@ void	parse_redirection(t_token **tokens, int *token_pos, t_ast_node *parent)
 	{
 		redir = malloc(sizeof(t_wrd));
 		create_wrd(redir, tokens[*token_pos]);
+		if (rt == TOKEN_APPEND || rt == TOKEN_APPEND_2)
+			redir->append = true;
 		skip_blanks(tokens, token_pos, redir);
-
-		
-
 		find_redir_list(redir, rt, parent->cmd);
 	}
 	else
@@ -187,7 +145,7 @@ void	create_wrd(t_wrd *word, t_token *token)
 {
 	if (token)
 	{
-		word->value = token->value;
+		word->value = ft_strdup(token->value);
 		if (token->type == TOKEN_VAR)
 			word->expand = true;
 		else
@@ -250,7 +208,6 @@ int	parse_pipeline(char *line, t_ast_node **root)
 	int			errcode;
 
 	errcode = scan_the_Line(line, &lexer);
-	//TODO: replace me with a while loop inside scan_the_Line
 	if (lexer.tokens[lexer.token_iter]->type == TOKEN_BLANK)
 		(lexer.token_iter)++;
 	if (!errcode)
@@ -294,29 +251,28 @@ int	parse_pipeline(char *line, t_ast_node **root)
 
 #define BUFF_SIZE 1024
 
-/*void print_arguments(t_ast_node *arg_node, int depth)
+void print_arguments(t_wrd *arguments, int depth)
 {
 	char buf[BUFF_SIZE];
-	t_ast_node *node;
+	t_wrd *node;
 
-	while (arg_node)
+	while (arguments)
 	{
 		*buf = '\0';
 		for (int i = 0; i < depth; i++)
 			ft_printf("  ");
-		if (!arg_node->value)
+		if (!arguments->value)
 			snprintf(buf, BUFF_SIZE, "NULL");
-		else if (arg_node->value && arg_node->expand)
-			snprintf(buf, BUFF_SIZE, "expand(%s)", arg_node->value);
+		else if (arguments->value && arguments->expand)
+			snprintf(buf, BUFF_SIZE, "expand(%s)", arguments->value);
 		else
-			snprintf(buf, BUFF_SIZE, "%s", arg_node->value);
+			snprintf(buf, BUFF_SIZE, "%s", arguments->value);
 		ft_printf("ARGUMENT: %s", buf);
-
-		t_ast_node	*cont_node = arg_node;
-		while (cont_node->word_continue)
+		t_wrd	*cont_node = arguments;
+		while (cont_node->next_part)
 		{
 			*buf = '\0';
-			node = cont_node->word_continue;
+			node = cont_node->next_part;
 			if (!node->value)
 				snprintf(buf, BUFF_SIZE, "NULL");
 			else if (node->value && node->expand)
@@ -324,16 +280,30 @@ int	parse_pipeline(char *line, t_ast_node **root)
 			else
 				snprintf(buf, 1024, "%s", node->value);
 			ft_printf("; %s", buf);
-			cont_node = cont_node->word_continue;
+			cont_node = cont_node->next_part;
 		}
 		printf("\n");
-		arg_node = arg_node->arguments;
+		arguments = arguments->next_word;
 	}
 }
 
-void	print_redirections(t_ast_node *redir_node, int depth)
+void	print_redirections(t_wrd *redir, int depth, t_token_type rt)
 {
-	while (redir_node)
+	const char	*type;
+
+	if (rt == TOKEN_REDIRECT_STDOUT && redir->append == true)
+		type = ">>";
+	else if (rt == TOKEN_REDIRECT_STDERR && redir->append == true)
+		type = "2>>";
+	else if (rt == TOKEN_REDIRECT_STDERR && redir->append == false)
+		type = "2>";
+	else if (rt == TOKEN_REDIRECT_STDOUT && redir->append == false)
+		type = ">";
+	else if (rt == TOKEN_REDIRECT_STDIN)
+		type = "<";
+	else if (rt == TOKEN_REDIRECT_IN_2)
+		type = "2<";
+	while (redir)
 	{
 		int	i;
 
@@ -341,24 +311,18 @@ void	print_redirections(t_ast_node *redir_node, int depth)
 		while (++i < depth)
 			ft_printf("  ");
 		printf("Redirection Type: %s, Target: %s",
-			   redir_node->value, redir_node->right->value);
-		if (redir_node->right->expand == true)
+			   type, redir->value);
+		if (redir->expand == true)
 			printf(" - TO EXPAND");
-		t_ast_node	*file = redir_node->right;
-		while (file->word_continue)
+		while (redir->next_part)
 		{
-			printf("; %s", file->word_continue->value ? file->word_continue->value : "NULL");
-			if (file->word_continue->expand == true)
+			printf("; %s", redir->next_part->value ? redir->next_part->value : "NULL");
+			if (redir->next_part->expand == true)
 				printf(" - TO EXPAND");
-			file = file->word_continue;
+			redir = redir->next_part;
 		}
 		printf("\n");
-		if (redir_node->type == NODE_REDIRECT_STDIN || redir_node->type == NODE_HERE_DOC || redir_node->type == NODE_REDIRECT_IN_2 || redir_node->type == NODE_HERE_DOC_2)
-			redir_node = redir_node->redirects_in;
-		else if (redir_node->type == NODE_REDIRECT_STDOUT || redir_node->type == NODE_APPEND || redir_node->type == NODE_REDIRECT_STDERR || redir_node->type == NODE_APPEND_2)
-			redir_node = redir_node->redirects_out;
-		else
-			redir_node = NULL;
+		redir = redir->next_word;
 	}
 }
 
@@ -371,53 +335,66 @@ void	print_ast(t_ast_node *node, int depth)
 		return;
 	while (++i < depth)
 		ft_printf("  ");
-	printf("%s: %s",
-		   node->type == NODE_COMMAND ? "COMMAND" :
-		   node->type == NODE_ARGUMENT ? "ARGUMENT" :
-		   node->type == NODE_PIPE ? "PIPE" :
-		   node->type == NODE_REDIRECT_STDOUT ? "REDIRECT_OUT" :
-		   node->type == NODE_REDIRECT_STDIN ? "REDIRECT_IN" :
-		   node->type == NODE_APPEND ? "APPEND" :
-		   node->type == NODE_HERE_DOC ? "HERE_DOC" :
-		   node->type == NODE_FILENAME ? "FILENAME" :
-		   "UNKNOWN",
-		   node->value ? node->value : "NULL");
-	if (node->expand == true)
-		printf(" - TO EXPAND");
-	t_ast_node	*cont = node;
-	while (cont->word_continue)
+	if (node->type == NODE_COMMAND)
+		printf("COMMAND: ");
+	else if (node->type == NODE_PIPE)
+		printf("PIPE: ");
+	if (node->type == NODE_COMMAND && node->cmd->args)
 	{
-		printf("; %s", cont->word_continue->value ? cont->word_continue->value : "NULL");
-		if (cont->word_continue->expand == true)
+		printf("%s", node->cmd->args->value);
+		if (node->cmd->args->expand == true)
 			printf(" - TO EXPAND");
-		cont = cont->word_continue;
+		t_wrd	*cont = node->cmd->args;
+		while (cont->next_part)
+		{
+			printf("; %s", cont->next_part->value ? cont->next_part->value : "NULL");
+			if (cont->next_part->expand == true)
+				printf(" - TO EXPAND");
+			cont = cont->next_part;
+		}
 	}
 	printf("\n");
 	if (node->type == NODE_COMMAND)
 	{
-		if (node->arguments)
+		if (node->cmd->args->next_word)
 		{
 			i = -1;
 			while (++i < depth + 1)
 				ft_printf("  ");
 			ft_printf("Arguments:\n");
-			print_arguments(node->arguments, depth + 2);
+			print_arguments(node->cmd->args->next_word, depth + 2);
 		}
-		if (node->redirects_in)
+		if (node->cmd->redirects_in)
 		{
 			i = -1;
 			while (++i < depth + 1)
 				ft_printf("  ");
 			ft_printf("Input Redirections:\n");
-			print_redirections(node->redirects_in, depth + 2);
+			print_redirections(node->cmd->redirects_in, depth + 2, TOKEN_REDIRECT_STDIN);
 		}
-		if (node->redirects_out)
+		if (node->cmd->redirects_out)
 		{
 			i = -1;
 			while (++i < depth + 1)
 				ft_printf("  ");
 			ft_printf("Output Redirections:\n");
-			print_redirections(node->redirects_out, depth + 2);
+			print_redirections(node->cmd->redirects_out, depth + 2, TOKEN_REDIRECT_STDOUT);
+		}
+		if (node->cmd->redirects_err_in)
+		{
+			i = -1;
+			while (++i < depth + 1)
+				ft_printf("  ");
+			ft_printf("Error Input Redirections:\n");
+			print_redirections(node->cmd->redirects_err_in, depth + 2, TOKEN_REDIRECT_IN_2);
+		}
+		if (node->cmd->redirects_err)
+		{
+			i = -1;
+			while (++i < depth + 1)
+				ft_printf("  ");
+			ft_printf("Error Output Redirections:\n");
+			print_redirections(node->cmd->redirects_err_in, depth + 2, TOKEN_REDIRECT_STDERR);
 		}
 	}
 	else if (node->type == NODE_PIPE)
@@ -441,51 +418,38 @@ void	print_ast(t_ast_node *node, int depth)
 	}
 }
 
-void	free_arguments(t_ast_node *arg_node)
+void	free_wrd(t_wrd *word)
 {
-	while (arg_node)
-	{
-		t_ast_node *temp = arg_node;
-		free(arg_node->value);
-		arg_node = arg_node->arguments;
-		free(temp);
-	}
-}
-
-void	free_redirections(t_ast_node *redir_node)
-{
-	while (redir_node)
-	{
-		t_ast_node	*temp;
-
-		temp = redir_node;
-		free(redir_node->value);
-		if (redir_node->right)
-			free_ast(redir_node->right);
-		if (redir_node->type == NODE_REDIRECT_STDIN || redir_node->type == NODE_HERE_DOC)
-			redir_node = redir_node->redirects_in;
-		else if (redir_node->type == NODE_REDIRECT_STDOUT || redir_node->type == NODE_APPEND)
-			redir_node = redir_node->redirects_out;
-		else
-			redir_node = NULL;
-		free(temp);
-	}
+	if (word->value)
+		free(word->value);
+	if (word->next_part)
+		free_wrd(word->next_part);
+	if (word->next_word)
+		free_wrd(word->next_word);
+	free(word);
 }
 
 void	free_ast(t_ast_node *node)
 {
 	if (!node)
 		return;
-	free(node->value);
-	if (node->arguments)
-		free_arguments(node->arguments);
-	if (node->redirects_in)
-		free_redirections(node->redirects_in);
-	if (node->redirects_out)
-		free_redirections(node->redirects_out);
+	if (node->type == NODE_COMMAND)
+	{
+		if (node->cmd->args)
+			free_wrd(node->cmd->args);
+		if (node->cmd->redirects_in)
+			free_wrd(node->cmd->redirects_in);
+		if (node->cmd->redirects_out)
+			free_wrd(node->cmd->redirects_out);
+		if (node->cmd->redirects_err_in)
+			free_wrd(node->cmd->redirects_err_in);
+		if (node->cmd->redirects_err)
+			free_wrd(node->cmd->redirects_err);
+	}
 	if (node->left)
 		free_ast(node->left);
 	if (node->right)
 		free_ast(node->right);
+	free(node->cmd);
 	free(node);
-}*/
+}
