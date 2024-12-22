@@ -16,10 +16,6 @@ void	redir_to_null(t_ast_node *node)
 	node->cmd->redirects_in = NULL;
 	node->cmd->redirects_out = NULL;
 	node->cmd->redirects_err = NULL;
-	node->cmd->redirects_err_append = NULL;
-	node->cmd->redirects_err_here_doc = NULL;
-	node->cmd->redirects_here_doc = NULL;
-	node->cmd->redirects_out_append = NULL;
 	node->cmd->redirects_err_in = NULL;
 }
 
@@ -224,8 +220,8 @@ int	parse_pipeline(char *line, t_ast_node **root)
 					if (!pipe_node)
 					{
 						ft_printf("Error: Memory allocation failed.\n");
-						//echo current_node = (free_ast(current_node), NULL);
-						//free_ast(next_command);
+						cn = (free_ast(cn), NULL);
+						free_ast(nn);
 						break;
 					}
 					pipe_node->left = cn;
@@ -236,8 +232,6 @@ int	parse_pipeline(char *line, t_ast_node **root)
 				}
 				else
 				{
-					ft_printf("Syntax error: Expected command after '|'\n");
-					//current_node = (free_ast(current_node), NULL);
 					errcode = HALF_BAKED_TREE;
 					break;
 				}
@@ -291,14 +285,10 @@ void	print_redirections(t_wrd *redir, int depth, t_token_type rt)
 {
 	const char	*type;
 
-	if (rt == TOKEN_REDIRECT_STDOUT && redir->append == true)
-		type = ">>";
-	else if (rt == TOKEN_REDIRECT_STDERR && redir->append == true)
-		type = "2>>";
-	else if (rt == TOKEN_REDIRECT_STDERR && redir->append == false)
-		type = "2>";
-	else if (rt == TOKEN_REDIRECT_STDOUT && redir->append == false)
+	if (rt == TOKEN_REDIRECT_STDOUT)
 		type = ">";
+	else if (rt == TOKEN_REDIRECT_STDERR)
+		type = "2>";
 	else if (rt == TOKEN_REDIRECT_STDIN)
 		type = "<";
 	else if (rt == TOKEN_REDIRECT_IN_2)
@@ -310,8 +300,10 @@ void	print_redirections(t_wrd *redir, int depth, t_token_type rt)
 		i = -1;
 		while (++i < depth)
 			ft_printf("  ");
-		printf("Redirection Type: %s, Target: %s",
-			   type, redir->value);
+		printf("Redirection Type: %s", type);
+		if (redir->append == true)
+			printf(">");
+		printf(", Target: %s", redir->value);
 		if (redir->expand == true)
 			printf(" - TO EXPAND");
 		while (redir->next_part)
@@ -394,7 +386,7 @@ void	print_ast(t_ast_node *node, int depth)
 			while (++i < depth + 1)
 				ft_printf("  ");
 			ft_printf("Error Output Redirections:\n");
-			print_redirections(node->cmd->redirects_err_in, depth + 2, TOKEN_REDIRECT_STDERR);
+			print_redirections(node->cmd->redirects_err, depth + 2, TOKEN_REDIRECT_STDERR);
 		}
 	}
 	else if (node->type == NODE_PIPE)
