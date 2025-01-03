@@ -72,7 +72,7 @@ bison --report=state shell.y
 A concrete syntax tree matches what the grammar rules say is the syntax.
 The purpose of the abstract syntax tree is have a "simple" representation of what's essential in "the syntax tree".
 
-- [AST vs BST](https://stackoverflow.com/questions/1888854/#1916687)
+- [AST vs CST](https://stackoverflow.com/questions/1888854/#1916687)
 
 ### Executing:
 - [Shell Implementation of Pipelines](https://www.cs.uleth.ca/~holzmann/C/system/shell_does_pipeline.pdf)
