@@ -74,6 +74,7 @@ int	ft_sh_loop(t_ctx *ctx)
 					root->ctx = ctx;
 					root->ast = ast;
 					status = traverse_and_exec_the_ast(root, 0, NULL);
+//					status = exec_ast(ast, 0, NULL);
 					free_parse_memory();
 				}
 				free_ast(ast);

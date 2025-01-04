@@ -119,7 +119,12 @@ static void shell_redirect_stderr(simple_cmd_t *s)
 	close(fd);
 }
 
-int ft_sh_launch(t_ctx *ctx, simple_cmd_t *s)
+int ft_sh_launch(t_cmd_node *cmd)
+{
+	return (0);
+}
+
+int ft_sh_launch2(t_ctx *ctx, simple_cmd_t *s)
 {
 	pid_t	pid;
 	int		status = -1;
@@ -172,7 +177,7 @@ int	ft_sh_execute(t_obj_arr *ops, t_ctx *ctx)
 		if (op != NULL)
 			ret_val = op->fun(ctx);
 		else
-			ret_val = ft_sh_launch(ctx, NULL);
+			ret_val = ft_sh_launch2(ctx, NULL);
 	}
 	return (ret_val);
 }

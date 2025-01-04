@@ -83,7 +83,7 @@ typedef struct s_lexer {
 } t_lexer;
 
 
-int			exec_ast(t_ast_node *command, int level, t_ast_node *parent);
+int			exec_ast(t_ast_node *node, int level, t_ast_node *parent);
 
 int			scan_the_Line(const char *line, t_lexer *lexer);
 t_token     *create_token(t_token_type type, const char *value, t_lexer *lexer);
@@ -188,7 +188,8 @@ int			ft_sh_op_cmp(const void *a, const void *b);
 int			ft_sh_var_cmp(const void *a, const void *b);
 int			ft_sh_parse_env_map(t_obj_arr *map, char **env_tab);
 char		**ft_sh_render_envp(t_ctx *ctx);
-int ft_sh_launch(t_ctx *ctx, simple_cmd_t *s);
+int			ft_sh_launch(t_cmd_node *cmd);
+int			ft_sh_launch2(t_ctx *ctx, simple_cmd_t *s);
 int			ft_sh_env_map_del_entry(t_sh_var var, t_ctx *ctx);
 int			ft_sh_env_map_add_entry(t_sh_var var, t_ctx *ctx);
 t_sh_var	*ft_sh_env_map_get_entry(const char *key, t_ctx *ctx);

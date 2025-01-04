@@ -16,5 +16,5 @@
 char *get_word(word_t *s, t_ctx *ctx);
 
 char **get_argv(simple_cmd_t *command, int *size, t_ctx *ctx);
-
+int ft_build_argv(t_cmd_node *command);
 #endif

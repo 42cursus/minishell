@@ -154,34 +154,6 @@ typedef enum {
 	OP_DUMMY
 } operator_t;
 
-
-/*
- * Describes a command tree (a node of the parse tree)
-
- *  if (op == OP_NONE)
-      scmd != NULL
-      cmd1 == cmd2 == NULL
-      scmd points to a command to be executed
- *  else
-      scmd == NULL
-      cmd1 != NULL
-      cmd2 != NULL
-      cmd1 op cmd2 must be executed, according to the rules for op
-
- * You can use aux the same way as for simple_command_t
-
- * up points to the command_t that points to this structure
- * (the father of the current node in the parse tree)
- * The root of the tree has up == NULL
-
- * The parsed expressions do not contain parantheses, this means that
- * the following holds:
- * for any op_lower that has a lower priority than op, there is no
- * parent in the tree with op == op_lower
- * In particular, if op == OP_PIPE descendants
- * can only have OP_PIPE or OP_NONE
- */
-
 typedef enum e_node_type {
 	NODE_COMMAND,
 	NODE_PIPE,
@@ -191,7 +163,7 @@ typedef enum e_node_type {
 typedef struct s_wrd t_wrd;
 struct s_wrd
 {
-	char *value;
+	const char *value;
 	bool expand;
 	bool append;
 	t_wrd *next_part;
@@ -207,6 +179,7 @@ struct s_cmd_node
 	t_wrd	*redirects_err_in;
 	t_wrd	*redirects_err;
 	t_wrd	*redirects_out;
+	t_ctx	*ctx;
 };
 
 typedef struct s_ast_node	t_ast_node;
@@ -217,22 +190,8 @@ struct s_ast_node
 	t_ast_node	*right;
 	t_node_type	type;
 	t_cmd_node	*cmd;
+	t_ctx		*ctx;
 };
-
-/*typedef struct s_ast_node	t_ast_node;
-struct s_ast_node
-{
-	char		*value;
-	t_node_type	type;
-	t_ast_node	*parent;
-	t_ast_node	*arguments;
-	t_ast_node	*redirects_in;
-	t_ast_node	*redirects_out;
-	t_ast_node	*left;
-	t_ast_node	*right;
-	t_ast_node	*word_continue;
-	bool		expand;
-};*/
 
 typedef struct command_s cmd_t;
 struct command_s {

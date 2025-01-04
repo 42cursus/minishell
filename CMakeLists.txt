@@ -11,7 +11,8 @@
 # **************************************************************************** #
 
 cmake_minimum_required(VERSION 3.8)
-set(CMAKE_C_COMPILER clang)
+#set(CMAKE_C_COMPILER clang)
+set(CMAKE_C_COMPILER gcc)
 
 
 project(minishell C)
@@ -23,6 +24,7 @@ set(FT_CFLAGS
         -Wwrite-strings -Wimplicit
         -Wno-error=unused-parameter
         -Wno-error=unused-function
+        -Wno-error=unused-variable
         -O0 -g3 -gdwarf-3
         -masm=att -MMD
         -fdata-sections
@@ -34,21 +36,22 @@ set(FT_CFLAGS
         -Wwrite-strings
         -Wimplicit
         -Wno-error=unused-parameter
+        -Wno-error=unused-variable
         -O0
         -masm=att
         -g3 -gdwarf-3
         -fasynchronous-unwind-tables
         -fsanitize=address
-        #-fsanitize=undefined
-        -fno-sanitize-recover
+        -fsanitize=undefined
+        -fno-sanitize-recover=all
         -fsanitize=float-divide-by-zero
         -fsanitize=float-cast-overflow
 )
 
 set(COMMON_LDFLAGS
         -fsanitize=address
-        #-fsanitize=undefined
-        -fno-sanitize-recover
+        -fsanitize=undefined
+        -fno-sanitize-recover=all
         -fsanitize=float-divide-by-zero
         -fsanitize=float-cast-overflow)
 

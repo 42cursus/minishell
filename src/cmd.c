@@ -69,7 +69,7 @@ static int parse_simple(simple_cmd_t *s, int level, cmd_t *father)
 	if (op != NULL)
 		status = op->fun(ctx);
 	else
-		status = ft_sh_launch(ctx, s);
+		status = ft_sh_launch2(ctx, s);
 	while (ctx->argc-- > 0)
 		free(ctx->argv[ctx->argc]);
 	free(ctx->argv);

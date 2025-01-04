@@ -413,7 +413,7 @@ void	print_ast(t_ast_node *node, int depth)
 void	free_wrd(t_wrd *word)
 {
 	if (word->value)
-		free(word->value);
+		free((void *)word->value);
 	if (word->next_part)
 		free_wrd(word->next_part);
 	if (word->next_word)
