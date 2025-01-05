@@ -26,6 +26,9 @@
 # include "libft.h"
 # include "parser.h"
 
+#include <sys/stat.h>
+#include <fcntl.h>
+
 # include <signal.h>
 # include <readline/readline.h>
 
@@ -185,7 +188,7 @@ int			ft_unset(t_ctx *ctx);
 /* ---------- UTILS -------------------- */
 void		sigsegv(int signal);
 int			ft_sh_split_line(char *input, t_ctx *ctx);
-char		*ft_sh_read_line(t_ctx *ctx);
+char		*ft_sh_read_line(t_ctx *ctx, const char *fmt);
 int			ft_sh_do_init(t_ctx	**ctx, char **envp, t_obj_arr **ops);
 int			ft_sh_op_cmp(const void *a, const void *b);
 int			ft_sh_var_cmp(const void *a, const void *b);

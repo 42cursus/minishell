@@ -114,7 +114,7 @@ int	add_random_numbers_to_str(char *str_buf, int rand_count)
 	int		ret_val;
 
 	ret_val = 0;
-	ft_strncpy(str_buf, "/tmp/minishell/heredock_", FILENAME_BUF_SIZE);
+	ft_strncpy(str_buf, "/tmp/heredock_", FILENAME_BUF_SIZE);
 	fd = open("/dev/urandom", O_RDONLY);
 	if (fd >= 0)
 	{
@@ -174,27 +174,13 @@ void	parse_redirection(t_token **tokens, int *token_pos, t_ast_node *parent, t_c
 		{
 			here_doc_cat(redir);
 			redir->next_part = NULL;
-			entry = ft_calloc(1, sizeof(HeredocEntry));
+			entry = &ctx->hd.entries[ctx->hd.ss++];
 			create_here_file(redir, entry);
-			ctx->hd->entries[ctx->hd->ss++] = entry;
 		}
 		find_redir_list(redir, rt, parent->cmd);
 	}
 	else
 		ft_printf("Syntax error: Expected target after redirection\n");
-}
-
-void	free_here_array(t_ctx *ctx)
-{
-	int	i;
-
-	i = -1;
-	if (ctx->hd != NULL)
-	{
-		while (ctx->hd->entries[++i] != NULL)
-			free(ctx->hd->entries[i]);
-		free(ctx->hd);
-	}
 }
 
 t_ast_node	*parse_command(t_token **tokens, int *token_pos, t_ctx *ctx)
@@ -338,8 +324,8 @@ int	parse_pipeline(char *line, t_ast_node **root, t_ctx *ctx)
 		*root = cn;
 		free_tokens(&lexer);
 	}
-	ctx->hd->size = ctx->hd->ss;
-	ctx->hd->ss = 0;
+	ctx->hd.size = ctx->hd.ss;
+	ctx->hd.ss = 0;
 	return (errcode);
 }
 

@@ -10,15 +10,44 @@
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "minishell.h"
 #include <stdio.h>
 #include <readline/history.h>
 #include <readline/readline.h>
-#include <errno.h>
 #include "cmd.h"
+
 
 void	ft_sh_init_welcome(void);
 int		ft_sh_execute(t_obj_arr *ops, t_ctx *ctx);
 int		ft_sh_tokenize(t_obj_arr *ops, t_ctx *ctx);
+
+void	collect_heredocs(t_ctx *ctx)
+{
+	int				fd;
+	int				i;
+	char			*line;
+	const int		flags = O_WRONLY | O_CREAT;
+	const mode_t	mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
+	HeredocEntry	*en;
+
+	if (ctx == NULL)
+		return;
+	i = -1;
+	while(++i < ctx->hd.size)
+	{
+		en = &ctx->hd.entries[i];
+		fd = open(en->filename, flags, mode);
+		if (fd < 0) break;
+		line = ft_sh_read_line(ctx, "> ");
+		
+		while(ft_strcmp(line, en->delimiter))
+		{
+			dprintf(fd, "%s\n", line);
+			line = ft_sh_read_line(ctx, "> ");
+		}
+		close(fd);
+	}
+}
 
 int	ft_sh_loop(t_ctx *ctx)
 {
@@ -34,14 +63,15 @@ int	ft_sh_loop(t_ctx *ctx)
 	using_history();
 	while (status != SHELL_EXIT)
 	{
-		line = ft_sh_read_line(ctx);
+		line = ft_sh_read_line(ctx, NULL);
 		if (line)
 		{
 			if (*line != 0)
 			{
 				add_history(line);
-				ctx->hd = ft_calloc(1, sizeof(HereArray));
-				ctx->hd->size = 1024;
+				ctx->hd.ss = 0;
+				ctx->hd.size = 1024;
+				ft_memset(ctx->hd.entries, 0, sizeof(HeredocEntry) * HEREDOC_ARRAY_SIZE);
 				int errcode = parse_pipeline(line, &ast, ctx);
 				if (errcode)
 				{
@@ -53,8 +83,7 @@ int	ft_sh_loop(t_ctx *ctx)
 					ft_printf("Error: Failed to parse the command.\n");
 				else
 				{
-//					collect_heredocs(ast, ctx);
-					free_here_array(ctx);
+					collect_heredocs(ctx);
 					ft_printf("\n\nAbstract Syntax Tree:\n");
 					print_ast(ast, 0);
 					status = exec_ast(ast, 0, NULL);

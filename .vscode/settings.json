@@ -1,4 +1,5 @@
 {
+
     "VsCodeTaskButtons.showCounter": true,
     "VsCodeTaskButtons.tasks": [
         {
@@ -8,7 +9,6 @@
         }
     ],
     "files.associations": {
-        "minishell.h": "c",
-        "cmd.h": "c"
+        "minishell.h": "c"
     }
 }

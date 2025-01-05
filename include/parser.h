@@ -128,7 +128,7 @@ typedef struct HeredocEntry
 
 typedef struct HereArray
 {
-	HeredocEntry *entries[HEREDOC_ARRAY_SIZE];
+	HeredocEntry entries[HEREDOC_ARRAY_SIZE];
 	int size;
 	int ss;
 }	HereArray;
@@ -140,7 +140,7 @@ typedef struct s_exec_ctx
 	t_obj_arr	env_map;
 	char 		pathname[PATH_MAX];
 	t_obj_arr	*ops;
-	HereArray	*hd;
+	HereArray	hd;
 }	t_ctx;
 
 typedef struct simple_cmd_s simple_cmd_t;
