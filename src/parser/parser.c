@@ -41,12 +41,8 @@ t_ast_node	*create_node(t_node_type type, const char *value, t_ast_node *parent,
 		node->cmd->args->next_part = NULL;
 		node->cmd->args->next_word = NULL;
 	}
-	else
-		node->cmd->args = NULL;
 	node->parent = parent;
 	redir_to_null(node);
-	node->left = NULL;
-	node->right = NULL;
 	return (node);
 }
 
@@ -79,10 +75,90 @@ void	find_redir_list(t_wrd *redir, t_token_type type, t_cmd_node *cmd)
 		list_append(&cmd->redirects_err_in, redir); 
 }
 
-void	parse_redirection(t_token **tokens, int *token_pos, t_ast_node *parent)
+void	here_doc_cat(t_wrd	*here)
+{
+	t_wrd		*origin;
+	char		*str;
+	size_t		len;
+
+	origin = here;
+	len = 0;
+	if (here->next_part)
+	{
+		while (here)
+		{
+			len += ft_strlen(here->value);
+			here = here->next_part;
+		}
+		str = (char *)malloc(sizeof(char) * len + 1);
+		ft_memset(str, 0, sizeof(char));
+		here = origin;
+		while (here)
+		{
+			ft_strcat(str, here->value);
+			here = here->next_part;
+		}
+		free((void *)origin->value);
+		free_wrd(origin->next_part);
+		origin->value = ft_strdup(str);
+		free(str);
+	}
+}
+
+int	add_random_numbers_to_str(char *str_buf, int rand_count)
+{
+	char	random_code[6];
+	char	buf[1];
+	int		fd;
+	int		i;
+	int		ret_val;
+
+	ret_val = 0;
+	ft_strncpy(str_buf, "/tmp/minishell/heredock_", FILENAME_BUF_SIZE);
+	fd = open("/dev/urandom", O_RDONLY);
+	if (fd >= 0)
+	{
+		i = 0;
+		while (read(fd, buf, 1) && i < rand_count)
+			if (isalnum(buf[0]))
+				random_code[i++] = buf[0];
+		close(fd);
+		random_code[i] = '\0';
+		ft_strcat(str_buf, random_code);
+	}
+	else
+	{
+		ret_val = -1;
+		errno = COULDNT_OPEN_URANDOM;
+	}	
+	return (ret_val);
+}
+
+int create_here_file(t_wrd *here, HeredocEntry *entry)
+{
+	int error_code;
+
+	error_code = 0;
+	error_code = add_random_numbers_to_str(entry->filename, 5);
+
+	if (!error_code)
+	{
+		ft_strcpy(entry->delimiter, here->value);
+		free((void *)here->value);
+		here->value = NULL;
+		here->value = ft_strdup(entry->filename);
+	}
+	else
+		perror("Couldn't add_random_numbers_to_str");
+
+	return (error_code);
+}
+
+void	parse_redirection(t_token **tokens, int *token_pos, t_ast_node *parent, t_ctx *ctx)
 {
 	t_wrd			*redir;
 	t_token_type	rt;
+	HeredocEntry	*entry;
 
 	redir = NULL;
 	rt = tokens[*token_pos]->type;
@@ -91,16 +167,37 @@ void	parse_redirection(t_token **tokens, int *token_pos, t_ast_node *parent)
 	{
 		redir = malloc(sizeof(t_wrd));
 		create_wrd(redir, tokens[*token_pos]);
+		skip_blanks(tokens, token_pos, redir);
 		if (rt == TOKEN_APPEND || rt == TOKEN_APPEND_2)
 			redir->append = true;
-		skip_blanks(tokens, token_pos, redir);
+		if (rt == TOKEN_HERE_DOC || rt == TOKEN_HERE_DOC_2)
+		{
+			here_doc_cat(redir);
+			redir->next_part = NULL;
+			entry = ft_calloc(1, sizeof(HeredocEntry));
+			create_here_file(redir, entry);
+			ctx->hd->entries[ctx->hd->ss++] = entry;
+		}
 		find_redir_list(redir, rt, parent->cmd);
 	}
 	else
 		ft_printf("Syntax error: Expected target after redirection\n");
 }
 
-t_ast_node	*parse_command(t_token **tokens, int *token_pos)
+void	free_here_array(t_ctx *ctx)
+{
+	int	i;
+
+	i = -1;
+	if (ctx->hd != NULL)
+	{
+		while (ctx->hd->entries[++i] != NULL)
+			free(ctx->hd->entries[i]);
+		free(ctx->hd);
+	}
+}
+
+t_ast_node	*parse_command(t_token **tokens, int *token_pos, t_ctx *ctx)
 {
 	t_ast_node	*command_node;
 	t_wrd		*last_arg;
@@ -130,7 +227,7 @@ t_ast_node	*parse_command(t_token **tokens, int *token_pos)
 			skip_blanks(tokens, token_pos, arg);
 		}
 		else if (tokens[*token_pos]->type >= TOKEN_REDIRECT_STDOUT && tokens[*token_pos]->type < TOKEN_MAX)
-			parse_redirection(tokens, token_pos, command_node);
+			parse_redirection(tokens, token_pos, command_node, ctx);
 		else
 			break;
 	}
@@ -152,6 +249,7 @@ void	create_wrd(t_wrd *word, t_token *token)
 		word->value = NULL;
 		word->expand = false;
 	}
+	word->append = false;
 	word->next_part = NULL;
 	word->next_word = NULL;
 }
@@ -176,17 +274,17 @@ void	skip_blanks(t_token **tokens, int *token_pos, t_wrd *last)
 	}
 	if (tokens[*token_pos])
 	{
-		if (tokens[*token_pos]->type == TOKEN_BLANK)
+		while (tokens[*token_pos]->type == TOKEN_BLANK)
 			(*token_pos)++;
 	}
 }
 
-int has_right(t_lexer *lexer, t_ast_node **right)
+int has_right(t_lexer *lexer, t_ast_node **right, t_ctx *ctx)
 {
 	if (lexer->tokens[lexer->token_iter] && lexer->tokens[lexer->token_iter]->type == TOKEN_PIPE)
 	{
 		skip_blanks(lexer->tokens, &lexer->token_iter, NULL);
-		*right = parse_command(lexer->tokens, &lexer->token_iter);
+		*right = parse_command(lexer->tokens, &lexer->token_iter, ctx);
 		return (true);
 	}
 	*right = NULL;
@@ -195,7 +293,7 @@ int has_right(t_lexer *lexer, t_ast_node **right)
 
 #define HALF_BAKED_TREE 2135646
 
-int	parse_pipeline(char *line, t_ast_node **root)
+int	parse_pipeline(char *line, t_ast_node **root, t_ctx *ctx)
 {
 	t_ast_node	*cn;
 	t_ast_node	*nn;
@@ -208,10 +306,10 @@ int	parse_pipeline(char *line, t_ast_node **root)
 		(lexer.token_iter)++;
 	if (!errcode)
 	{
-		cn = parse_command(lexer.tokens, &lexer.token_iter);
+		cn = parse_command(lexer.tokens, &lexer.token_iter, ctx);
 		if (cn != NULL)
 		{
-			while (has_right(&lexer, &nn))
+			while (has_right(&lexer, &nn, ctx))
 			{
 				if (nn)
 				{
@@ -240,6 +338,8 @@ int	parse_pipeline(char *line, t_ast_node **root)
 		*root = cn;
 		free_tokens(&lexer);
 	}
+	ctx->hd->size = ctx->hd->ss;
+	ctx->hd->ss = 0;
 	return (errcode);
 }
 

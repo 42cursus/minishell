@@ -1,0 +1,14 @@
+{
+    "VsCodeTaskButtons.showCounter": true,
+    "VsCodeTaskButtons.tasks": [
+        {
+            "label": "$(search-refresh) Re-Build and Run",
+            "task": "BuildAndRun",
+            "tooltip": "🧹🛠️ Start the \"re-build\" task"
+        }
+    ],
+    "files.associations": {
+        "minishell.h": "c",
+        "cmd.h": "c"
+    }
+}

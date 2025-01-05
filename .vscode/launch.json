@@ -12,7 +12,7 @@
             "program": "${workspaceFolder}/minishell",
             "args": [],
             "stopAtEntry": false,
-            "cwd": "${fileDirname}",
+            "cwd": "${workspaceFolder}",
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",
@@ -23,8 +23,8 @@
                     "ignoreFailures": true
                 },
                 {
-                    "description": "Set Disassembly Flavor to Intel",
-                    "text": "-gdb-set disassembly-flavor intel",
+                    "description": "Set Disassembly Flavor to AT&T",
+                    "text": "-gdb-set disassembly-flavor att",
                     "ignoreFailures": true
                 }
             ],

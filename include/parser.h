@@ -110,6 +110,29 @@ struct word_t {
 #define IO_OUT_APPEND	0x01
 #define IO_ERR_APPEND	0x02
 
+#define HEREDOC_ARRAY_SIZE 1024
+#define FILENAME_BUF_SIZE 256
+
+
+typedef enum e_errcodes
+{
+	OK = 0,
+	COULDNT_OPEN_URANDOM
+} t_errcodes;
+
+typedef struct HeredocEntry
+{
+	char delimiter[FILENAME_BUF_SIZE];
+	char filename[FILENAME_BUF_SIZE];
+}	HeredocEntry;
+
+typedef struct HereArray
+{
+	HeredocEntry *entries[HEREDOC_ARRAY_SIZE];
+	int size;
+	int ss;
+}	HereArray;
+
 typedef struct s_exec_ctx
 {
 	char		**argv;
@@ -117,6 +140,7 @@ typedef struct s_exec_ctx
 	t_obj_arr	env_map;
 	char 		pathname[PATH_MAX];
 	t_obj_arr	*ops;
+	HereArray	*hd;
 }	t_ctx;
 
 typedef struct simple_cmd_s simple_cmd_t;

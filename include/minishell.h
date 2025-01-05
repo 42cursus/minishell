@@ -16,9 +16,11 @@
 
 # include <stdbool.h>
 # include <error.h>
+# include <errno.h>
 # include <stdio.h>
 # include <signal.h>
 # include <sysexits.h>
+# include <fcntl.h>
 # include <asm-generic/errno.h>
 # include <linux/limits.h>
 # include "libft.h"
@@ -98,9 +100,9 @@ t_state     handle_check_here_doc(t_lexer *lexer);
 t_state     handle_reading_whitespace(t_lexer *lexer);
 const char  *get_idstring(int token);
 void		free_tokens(t_lexer *lexer);
-void		parse_redirection(t_token **tokens, int *token_pos, t_ast_node *parent);
-t_ast_node  *parse_command(t_token **tokens, int *token_pos);
-int 		parse_pipeline(char *line, t_ast_node **root);
+void		parse_redirection(t_token **tokens, int *token_pos, t_ast_node *parent, t_ctx *ctx);
+t_ast_node  *parse_command(t_token **tokens, int *token_pos, t_ctx *ctx);
+int 		parse_pipeline(char *line, t_ast_node **root, t_ctx *ctx);
 t_ast_node	*create_node(t_node_type type, const char *value, t_ast_node *parent, t_token_type token);
 void		find_redir_list(t_wrd *redir, t_token_type type, t_cmd_node *cmd);
 void		print_ast(t_ast_node *node, int depth);
@@ -112,6 +114,7 @@ void		print_redirections(t_wrd *redir, int depth, t_token_type rt);
 void		skip_blanks(t_token **tokens, int *token_pos, t_wrd *last);
 void		redir_to_null(t_ast_node *node);
 void		create_wrd(t_wrd *word, t_token *token);
+void		free_here_array(t_ctx *ctx);
 
 enum	{ VAR_MAX = 256 };
 enum	{ MAXC = 128 };

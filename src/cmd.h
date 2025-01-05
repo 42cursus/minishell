@@ -2,6 +2,7 @@
 #define _CMD_H
 
 #include "parser.h"
+#include "minishell.h"
 
 #define SHELL_EXIT -100
 

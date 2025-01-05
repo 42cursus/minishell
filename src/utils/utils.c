@@ -69,13 +69,13 @@ char *get_word(word_t *s, t_ctx *ctx)
 	return (string);
 }
 
-int ft_build_argv(t_cmd_node *command)
+/*int ft_build_argv(t_cmd_node *command)
 {
 	char **argv;
 	int argc;
 
 	return (0);
-}
+}*/
 
 char **get_argv(simple_cmd_t *command, int *size, t_ctx *ctx)
 {

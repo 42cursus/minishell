@@ -14,7 +14,6 @@
 #include <readline/history.h>
 #include <readline/readline.h>
 #include <errno.h>
-#include "minishell.h"
 #include "cmd.h"
 
 void	ft_sh_init_welcome(void);
@@ -41,21 +40,21 @@ int	ft_sh_loop(t_ctx *ctx)
 			if (*line != 0)
 			{
 				add_history(line);
-
-				int errcode = parse_pipeline(line, &ast);
+				ctx->hd = ft_calloc(1, sizeof(HereArray));
+				ctx->hd->size = 1024;
+				int errcode = parse_pipeline(line, &ast, ctx);
 				if (errcode)
 				{
 					// clean and break
 					status = SHELL_EXIT;
 					break;
 				}
-
-
 				if (!ast)
 					ft_printf("Error: Failed to parse the command.\n");
 				else
 				{
-//					collect_heredocs(ast);
+//					collect_heredocs(ast, ctx);
+					free_here_array(ctx);
 					ft_printf("\n\nAbstract Syntax Tree:\n");
 					print_ast(ast, 0);
 					status = exec_ast(ast, 0, NULL);
