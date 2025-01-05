@@ -146,7 +146,6 @@ t_state	handle_reading_word(t_lexer *lexer)
 	if (lexer->line[lexer->line_iter] == '$')
 	{
 		flush_buffer(lexer, TOKEN_WORD);
-		lexer->buffer[lexer->buf_index++] = lexer->line[lexer->line_iter];
 		return (VARIABLE);
 	}
 	if (lexer->line[lexer->line_iter] == '1'|| lexer->line[lexer->line_iter] == '2')
@@ -207,7 +206,6 @@ t_state	handle_in_double_quote(t_lexer *lexer)
 	{
 		lexer->curent_string = '"';
 		flush_buffer(lexer, TOKEN_WORD);
-		lexer->buffer[lexer->buf_index++] = lexer->line[lexer->line_iter];
 		return (VARIABLE);
 	}
 	if (lexer->line[lexer->line_iter] == '"')

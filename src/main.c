@@ -48,11 +48,10 @@ void	collect_heredocs(t_ctx *ctx)
 	}
 }
 
-int	ft_sh_loop(t_ctx *ctx)
+int	ft_sh_loop2(t_ctx *ctx)
 {
 	const char	*line;
 	int			status;
-	cmd_t 		*root = NULL;
 	t_ast_node	*ast = NULL;
 
 	ft_sh_init_welcome();
@@ -60,8 +59,11 @@ int	ft_sh_loop(t_ctx *ctx)
 	ctx->argv = NULL;
 	ctx->argc = 0;
 
-	line = "echo MYPATH | grep PATH";
+	line = "<<HERE cat | grep $?hdbf";
 
+	ctx->hd.ss = 0;
+	ctx->hd.size = 1024;
+	ft_memset(ctx->hd.entries, 0, sizeof(HeredocEntry) * HEREDOC_ARRAY_SIZE);
 	int errcode = parse_pipeline(line, &ast, ctx);
 	if (!errcode)
 	{
@@ -69,26 +71,13 @@ int	ft_sh_loop(t_ctx *ctx)
 			ft_printf("Error: Failed to parse the command.\n");
 		else
 		{
-			ft_printf("\n\nAbstract Syntax Tree:\n");
-			print_ast(ast, 0);
-			status = exec_ast(ast, 0, NULL);
-		}
-
-		root = NULL;
-
-		if (parse_line(line, &root))
-		{
+			collect_heredocs(ctx);
+			// ft_pritintf("\n\nAbstract Syntax Tree:\n");
+			// print_ast(ast, 0);
 			ast->ctx = ctx;
 			status = traverse_and_exec_the_ast(ast, 0, NULL);
-			free_parse_memory();
+			free_ast(ast);
 		}
-		else /* We might have not read the entire line... */
-		{
-			/* There was an error parsing the command. */
-			fprintf(stderr, "Error while parsing command!\n");
-			status = -1;
-		}
-		free_ast(ast);
 	}
 	else
 		status = SHELL_EXIT;
@@ -96,7 +85,7 @@ int	ft_sh_loop(t_ctx *ctx)
 	return (status);
 }
 
-int	ft_sh_loop2(t_ctx *ctx)
+int	ft_sh_loop(t_ctx *ctx)
 {
 	char	*line;
 	int		status;
