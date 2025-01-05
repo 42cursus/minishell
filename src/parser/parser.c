@@ -41,8 +41,12 @@ t_ast_node	*create_node(t_node_type type, const char *value, t_ast_node *parent,
 		node->cmd->args->next_part = NULL;
 		node->cmd->args->next_word = NULL;
 	}
+	else
+		node->cmd->args = NULL;
 	node->parent = parent;
 	redir_to_null(node);
+	node->left = NULL;
+	node->right = NULL;
 	return (node);
 }
 
@@ -130,7 +134,7 @@ int	add_random_numbers_to_str(char *str_buf, int rand_count)
 	{
 		ret_val = -1;
 		errno = COULDNT_OPEN_URANDOM;
-	}	
+	}
 	return (ret_val);
 }
 
@@ -279,7 +283,7 @@ int has_right(t_lexer *lexer, t_ast_node **right, t_ctx *ctx)
 
 #define HALF_BAKED_TREE 2135646
 
-int	parse_pipeline(char *line, t_ast_node **root, t_ctx *ctx)
+int	parse_pipeline(const char *line, t_ast_node **root, t_ctx *ctx)
 {
 	t_ast_node	*cn;
 	t_ast_node	*nn;

@@ -13,7 +13,6 @@
 #include <sys/wait.h>
 #include <fcntl.h>
 #include "minishell.h"
-#include "cmd.h"
 #include "utils.h"
 
 int	ft_sh_lookup_pathname(t_ctx *ctx)
@@ -119,9 +118,46 @@ static void shell_redirect_stderr(simple_cmd_t *s)
 	close(fd);
 }
 
-int ft_sh_launch(t_cmd_node *cmd)
+int ft_sh_launch(t_cmd_node *cmd, t_ctx *ctx)
 {
-	return (0);
+	pid_t	pid;
+	int		status = -1;
+
+	if (!ft_sh_lookup_pathname(ctx) && cmd)
+	{
+		pid = fork();
+		if (pid == 0)
+		{
+			if (cmd->redirects_in)
+				ft_shell_redirect_stdin(cmd);
+			if (cmd->redirects_out)
+				ft_shell_redirect_stdout(cmd);
+			if (cmd->redirects_err_in)
+				ft_shell_redirect_stderr_in(cmd);
+			if (cmd->redirects_err)
+				ft_shell_redirect_stderr(cmd);
+			if (execve(ctx->pathname, ctx->argv,
+					   ft_sh_render_envp(ctx)))    // Child process
+			{
+				perror("ft_sh: error in execve");
+				return (SHELL_EXIT);
+			}
+		}
+		else if (pid < 0)
+		{
+			perror("ft_sh: error forking");            // Error forking
+			return (SHELL_EXIT);
+		}
+		else
+		{
+			waitpid(pid, &status, WUNTRACED);        // Parent process
+			while (!WIFEXITED(status) && !WIFSIGNALED(status))
+				waitpid(pid, &status, WUNTRACED);
+		}
+	}
+	else
+		printf("%s: command not found\n", ctx->argv[0]);
+	return (status);
 }
 
 int ft_sh_launch2(t_ctx *ctx, simple_cmd_t *s)
@@ -134,7 +170,6 @@ int ft_sh_launch2(t_ctx *ctx, simple_cmd_t *s)
 		pid = fork();
 		if (pid == 0)
 		{
-
 			if (s->in)
 				shell_redirect_stdin(s);
 			if (s->out)

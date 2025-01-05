@@ -1,4 +1,14 @@
-#include "cmd.h"
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   cmd.c                                              :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: abelov <abelov@student.42london.com>       +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/01/05 02:30:50 by abelov            #+#    #+#             */
+/*   Updated: 2025/01/05 02:30:51 by abelov           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 #include <fcntl.h>
 #include <stdio.h>
@@ -82,12 +92,12 @@ static bool run_in_parallel(cmd_t *cmd1, cmd_t *cmd2, int level, cmd_t *father)
 	pid_t pid_cmd1 = fork();
 
 	if (pid_cmd1 == 0)
-		exit(traverse_and_exec_the_ast(cmd1, level + 1, father));
+		exit(traverse_and_exec_the_ast2(cmd1, level + 1, father));
 
 	pid_t pid_cmd2 = fork();
 
 	if (pid_cmd2 == 0)
-		exit(traverse_and_exec_the_ast(cmd2, level + 1, father));
+		exit(traverse_and_exec_the_ast2(cmd2, level + 1, father));
 
 	int status_cmd1;
 	int status_cmd2;
@@ -104,7 +114,12 @@ static bool run_on_pipe(cmd_t *left, cmd_t *right, int level, cmd_t *father)
 	int status_cmd1;
 	int status_cmd2;
 
-	DIE(pipe(fd) < 0, "pipe failed");
+	if (pipe(fd) < 0)
+	{
+		fprintf(stderr, "(%s:%d, %s): ", __FILE__, __LINE__, __func__);
+		perror("pipe failed");
+		exit(1);
+	}
 
 	pid_t pid_cmd1 = fork();
 
@@ -115,7 +130,8 @@ static bool run_on_pipe(cmd_t *left, cmd_t *right, int level, cmd_t *father)
 		close(fd[0]);
 		close(fd[1]);
 
-		exit(traverse_and_exec_the_ast(left, level + 1, father));
+		int status_code = traverse_and_exec_the_ast2(left, level + 1, father);
+		exit(status_code);
 	}
 
 	pid_t pid_cmd2 = fork();
@@ -127,7 +143,9 @@ static bool run_on_pipe(cmd_t *left, cmd_t *right, int level, cmd_t *father)
 		close(fd[0]);
 		close(fd[1]);
 
-		exit(traverse_and_exec_the_ast(right, level + 1, father));
+
+		int status_code = traverse_and_exec_the_ast2(right, level + 1, father);
+		exit(status_code);
 	}
 
 	close(fd[0]);
@@ -139,7 +157,7 @@ static bool run_on_pipe(cmd_t *left, cmd_t *right, int level, cmd_t *father)
 	return status_cmd2;
 }
 
-int traverse_and_exec_the_ast(cmd_t *c, int level, cmd_t *father)
+int traverse_and_exec_the_ast2(cmd_t *c, int level, cmd_t *father)
 {
 	int exit_status;
 
@@ -160,9 +178,9 @@ int traverse_and_exec_the_ast(cmd_t *c, int level, cmd_t *father)
 	switch (c->op)
 	{
 		case OP_SEQUENTIAL:
-			exit_status = traverse_and_exec_the_ast(c->left, level + 1, c);
+			exit_status = traverse_and_exec_the_ast2(c->left, level + 1, c);
 			if (exit_status >= 0)
-				exit_status = traverse_and_exec_the_ast(c->right, level + 1, c);
+				exit_status = traverse_and_exec_the_ast2(c->right, level + 1, c);
 			break;
 
 		case OP_PARALLEL:
@@ -170,13 +188,13 @@ int traverse_and_exec_the_ast(cmd_t *c, int level, cmd_t *father)
 			break;
 
 		case OP_CONDITIONAL_NZERO:
-			exit_status = traverse_and_exec_the_ast(c->left, level + 1, c);
-			exit_status = exit_status == 0 ? traverse_and_exec_the_ast(c->right, level + 1, c) : exit_status;
+			exit_status = traverse_and_exec_the_ast2(c->left, level + 1, c);
+			exit_status = exit_status == 0 ? traverse_and_exec_the_ast2(c->right, level + 1, c) : exit_status;
 			break;
 
 		case OP_CONDITIONAL_ZERO:
-			exit_status = traverse_and_exec_the_ast(c->left, level + 1, c);
-			exit_status = exit_status != 0 ? traverse_and_exec_the_ast(c->right, level + 1, c) : exit_status;
+			exit_status = traverse_and_exec_the_ast2(c->left, level + 1, c);
+			exit_status = exit_status != 0 ? traverse_and_exec_the_ast2(c->right, level + 1, c) : exit_status;
 			break;
 
 		case OP_PIPE:

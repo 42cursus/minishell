@@ -8,67 +8,25 @@
 #include <linux/limits.h>
 #include "ft/ft_stdlib.h"
 
-/*
- * Include this header to use the parser.
+#define SHELL_EXIT -100
+#define IO_REGULAR	0x00
+#define IO_OUT_APPEND	0x01
+#define IO_ERR_APPEND	0x02
 
- * For an example of the usage see
- * CUseParser.c
- * UseParser.cpp
+typedef struct s_wrd t_wrd;
+struct s_wrd
+{
+	const char		*value;
+	unsigned char	expand;
+	unsigned char	append;
+	t_wrd			*next_part;
+	t_wrd			*next_word;
+};
 
- * For an example of the build run make and see the commands it executes
- * (see README for details)
-
- * If you want to see the structure of the generated parse tree, run
- * ./DisplayStructure
- */
-
-
-
-#ifdef __cplusplus
-#else
-/*
- * Use this to simulate the bool type in C++; e.g.:
-
- * bool flag = false;
- * if (flag) ...
- * else      ...
- *
- */
-/*
-typedef enum {
-	false,
-	true
-} bool;
-
-*/
-#endif
-/*
- * String literal list
-
- * String literals can be made up of multiple strings
- * (next_part points to the next part of a string or
- * is NULL if there are no more parts)
-
- * Some parts might need environment variable expansion (expand == true);
- * if that is the case, "string" points to the environment variable name
-
- * The next string literal is pointed to by next_word
- * (NULL if there are no more list elements)
-
- * The parser guarantees that '=' will be a single part of a string
- * (e.g. "name=value" will contain three parts: "name" "=" "value"
- * (except for quoted strings in the original command line))
- * this can ease implementing an internal command similar to export,
- * although the parser does not provide full functionality for this.
- * You are not required to implement export.
-
- * To tell if a string literal represents an internal command, first
- * concatenate all its parts (expanding them if necessary) and then
- * compare the result using string comparison.
- */
 
 typedef struct word_t word_t;
-struct word_t {
+struct word_t
+{
 	const char *string;
 	bool expand;
 	struct word_t *next_part;
@@ -159,16 +117,13 @@ struct simple_cmd_s
 
 /*
  * Operators
-
  * OP_NONE means no operator
  * (the scmd field points to a simple command and cmd1 == cmd2 == NULL)
-
  * The rest of the operators mean scmd == NULL
-
  * OP_DUMMY is a dummy value that can be used to count the number of operators
  */
-
-typedef enum {
+typedef enum e_op
+{
 	OP_SIMPLE,
 	OP_SEQUENTIAL,
 	OP_PARALLEL,
@@ -176,23 +131,13 @@ typedef enum {
 	OP_CONDITIONAL_NZERO,
 	OP_PIPE,
 	OP_DUMMY
-} operator_t;
+}	operator_t;
 
 typedef enum e_node_type {
 	NODE_COMMAND,
 	NODE_PIPE,
 } t_node_type;
 
-
-typedef struct s_wrd t_wrd;
-struct s_wrd
-{
-	const char *value;
-	bool expand;
-	bool append;
-	t_wrd *next_part;
-	t_wrd *next_word;
-};
 
 typedef struct s_cmd_node	t_cmd_node;
 struct s_cmd_node
@@ -222,17 +167,11 @@ struct command_s {
 	cmd_t			*up;
 	cmd_t			*left;
 	cmd_t			*right;
-
 	operator_t		op;
-
 	simple_cmd_t	*simple_cmd;
-
-
 	t_ctx			*ctx;
 	t_ast_node		*ast;
 };
-
-
 
 /*
  * You must define this function; it will be called by the parser
@@ -284,20 +223,10 @@ typedef struct {
 	int red_flags;
 } redirect_t;
 
-
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-
 void pointerToMallocMemory(const void *ptr);
 int yylex(void);
 void globalParseAnotherString(const char *str);
 void globalEndParsing(void);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif
 

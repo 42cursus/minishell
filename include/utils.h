@@ -13,8 +13,9 @@
     }            \
   } while (0)
 
+char *ft_get_word(t_wrd *wrd, t_ctx *ctx);
 char *get_word(word_t *s, t_ctx *ctx);
 
 char **get_argv(simple_cmd_t *command, int *size, t_ctx *ctx);
-int ft_build_argv(t_cmd_node *command);
+char **ft_get_argv(t_cmd_node *cmd, int *size, t_ctx *ctx);
 #endif

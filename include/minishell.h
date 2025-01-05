@@ -20,7 +20,6 @@
 # include <stdio.h>
 # include <signal.h>
 # include <sysexits.h>
-# include <fcntl.h>
 # include <asm-generic/errno.h>
 # include <linux/limits.h>
 # include "libft.h"
@@ -105,7 +104,7 @@ const char  *get_idstring(int token);
 void		free_tokens(t_lexer *lexer);
 void		parse_redirection(t_token **tokens, int *token_pos, t_ast_node *parent, t_ctx *ctx);
 t_ast_node  *parse_command(t_token **tokens, int *token_pos, t_ctx *ctx);
-int 		parse_pipeline(char *line, t_ast_node **root, t_ctx *ctx);
+int 		parse_pipeline(const char *line, t_ast_node **root, t_ctx *ctx);
 t_ast_node	*create_node(t_node_type type, const char *value, t_ast_node *parent, t_token_type token);
 void		find_redir_list(t_wrd *redir, t_token_type type, t_cmd_node *cmd);
 void		print_ast(t_ast_node *node, int depth);
@@ -117,7 +116,13 @@ void		print_redirections(t_wrd *redir, int depth, t_token_type rt);
 void		skip_blanks(t_token **tokens, int *token_pos, t_wrd *last);
 void		redir_to_null(t_ast_node *node);
 void		create_wrd(t_wrd *word, t_token *token);
-void		free_here_array(t_ctx *ctx);
+
+int traverse_and_exec_the_ast2(cmd_t *c, int level, cmd_t *father);
+int traverse_and_exec_the_ast(t_ast_node *cmd, int level, t_ast_node *father);
+void ft_shell_redirect_stdin(t_cmd_node *cmd);
+void ft_shell_redirect_stdout(t_cmd_node *cmd);
+void ft_shell_redirect_stderr(t_cmd_node *cmd);
+void ft_shell_redirect_stderr_in(t_cmd_node *cmd);
 
 enum	{ VAR_MAX = 256 };
 enum	{ MAXC = 128 };
@@ -194,7 +199,7 @@ int			ft_sh_op_cmp(const void *a, const void *b);
 int			ft_sh_var_cmp(const void *a, const void *b);
 int			ft_sh_parse_env_map(t_obj_arr *map, char **env_tab);
 char		**ft_sh_render_envp(t_ctx *ctx);
-int			ft_sh_launch(t_cmd_node *cmd);
+int			ft_sh_launch(t_cmd_node *cmd, t_ctx *ctx);
 int			ft_sh_launch2(t_ctx *ctx, simple_cmd_t *s);
 int			ft_sh_env_map_del_entry(t_sh_var var, t_ctx *ctx);
 int			ft_sh_env_map_add_entry(t_sh_var var, t_ctx *ctx);

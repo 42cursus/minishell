@@ -10,12 +10,11 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minishell.h"
 #include <stdio.h>
 #include <readline/history.h>
 #include <readline/readline.h>
-#include "cmd.h"
-
+#include <errno.h>
+#include "minishell.h"
 
 void	ft_sh_init_welcome(void);
 int		ft_sh_execute(t_obj_arr *ops, t_ctx *ctx);
@@ -39,7 +38,7 @@ void	collect_heredocs(t_ctx *ctx)
 		fd = open(en->filename, flags, mode);
 		if (fd < 0) break;
 		line = ft_sh_read_line(ctx, "> ");
-		
+
 		while(ft_strcmp(line, en->delimiter))
 		{
 			dprintf(fd, "%s\n", line);
@@ -50,6 +49,54 @@ void	collect_heredocs(t_ctx *ctx)
 }
 
 int	ft_sh_loop(t_ctx *ctx)
+{
+	const char	*line;
+	int			status;
+	cmd_t 		*root = NULL;
+	t_ast_node	*ast = NULL;
+
+	ft_sh_init_welcome();
+	status = 0;
+	ctx->argv = NULL;
+	ctx->argc = 0;
+
+	line = "echo MYPATH | grep PATH";
+
+	int errcode = parse_pipeline(line, &ast, ctx);
+	if (!errcode)
+	{
+		if (!ast)
+			ft_printf("Error: Failed to parse the command.\n");
+		else
+		{
+			ft_printf("\n\nAbstract Syntax Tree:\n");
+			print_ast(ast, 0);
+			status = exec_ast(ast, 0, NULL);
+		}
+
+		root = NULL;
+
+		if (parse_line(line, &root))
+		{
+			ast->ctx = ctx;
+			status = traverse_and_exec_the_ast(ast, 0, NULL);
+			free_parse_memory();
+		}
+		else /* We might have not read the entire line... */
+		{
+			/* There was an error parsing the command. */
+			fprintf(stderr, "Error while parsing command!\n");
+			status = -1;
+		}
+		free_ast(ast);
+	}
+	else
+		status = SHELL_EXIT;
+
+	return (status);
+}
+
+int	ft_sh_loop2(t_ctx *ctx)
 {
 	char	*line;
 	int		status;
@@ -101,7 +148,7 @@ int	ft_sh_loop(t_ctx *ctx)
 				{
 					root->ctx = ctx;
 					root->ast = ast;
-					status = traverse_and_exec_the_ast(root, 0, NULL);
+					status = traverse_and_exec_the_ast2(root, 0, NULL);
 //					status = exec_ast(ast, 0, NULL);
 					free_parse_memory();
 				}

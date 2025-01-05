@@ -33,6 +33,46 @@ void check(bool succes)
 
 #include "utils.h"
 
+char *ft_get_word(t_wrd *wrd, t_ctx *ctx)
+{
+	t_sh_var *var = NULL;
+	char *string = NULL;
+	int string_length = 0;
+
+	const char *substring = "";
+
+	while (wrd != NULL)
+	{
+		if (wrd->expand == true)
+		{
+			var = ft_sh_env_map_get_entry(wrd->value, ctx);
+			if (var && var->v)
+				substring = var->v;
+		}
+		else
+			substring = wrd->value;
+
+		int substring_length = ft_strlen(substring);
+
+		string = realloc(string, string_length + substring_length + 1);
+		if (string == NULL)
+		{
+			fprintf(stderr, "(%s:%d, %s): ", __FILE__, __LINE__, __func__);
+			perror("Error allocating word string.");
+			exit(1);
+		}
+
+		string[string_length] = '\0';
+		strcat(string, substring);
+
+		string_length += substring_length;
+
+		wrd = wrd->next_part;
+	}
+
+	return (string);
+}
+
 char *get_word(word_t *s, t_ctx *ctx)
 {
 	t_sh_var *var = NULL;
@@ -69,13 +109,49 @@ char *get_word(word_t *s, t_ctx *ctx)
 	return (string);
 }
 
-/*int ft_build_argv(t_cmd_node *command)
+char **ft_get_argv(t_cmd_node *cmd, int *size, t_ctx *ctx)
 {
 	char **argv;
 	int argc;
 
-	return (0);
-}*/
+	t_wrd *param;
+	argc = 1;
+
+	param = cmd->args->next_word;
+	while (param != NULL)
+	{
+		argc++;
+		param = param->next_word;
+	}
+
+	argv = calloc(argc + 1, sizeof(char *));
+	if (argv == NULL)
+	{
+		fprintf(stderr, "(%s:%d, %s): ", __FILE__, __LINE__, __func__);
+		perror("Error allocating argv.");
+		exit(1);
+	}
+
+	param = cmd->args;
+	argc = 0;
+	while (param != NULL)
+	{
+		char *word = ft_get_word(param, ctx);
+
+		if (word == NULL)
+		{
+			fprintf(stderr, "(%s:%d, %s): ", __FILE__, __LINE__, __func__);
+			perror("Error retrieving word.");
+			exit(1);
+		}
+		argv[argc++] = word;
+		param = param->next_word;
+	}
+
+	*size = argc;
+
+	return (argv);
+}
 
 char **get_argv(simple_cmd_t *command, int *size, t_ctx *ctx)
 {
