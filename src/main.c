@@ -41,6 +41,7 @@ void	collect_heredocs(t_ctx *ctx)
 
 		while(ft_strcmp(line, en->delimiter))
 		{
+			
 			dprintf(fd, "%s\n", line);
 			line = ft_sh_read_line(ctx, "> ");
 		}
@@ -122,25 +123,26 @@ int	ft_sh_loop(t_ctx *ctx)
 					collect_heredocs(ctx);
 					ft_printf("\n\nAbstract Syntax Tree:\n");
 					print_ast(ast, 0);
-					status = exec_ast(ast, 0, NULL);
+					ast->ctx = ctx;
+					status = traverse_and_exec_the_ast(ast, 0, NULL);
 				}
 
-				root = NULL;
-				/* We might have not read the entire line... */
-				if (!parse_line(line, &root))
-				{
-					/* There was an error parsing the command. */
-					fprintf(stderr, "Error while parsing command!\n");
-					status = -1;
-				}
-				else
-				{
-					root->ctx = ctx;
-					root->ast = ast;
-					status = traverse_and_exec_the_ast2(root, 0, NULL);
-//					status = exec_ast(ast, 0, NULL);
-					free_parse_memory();
-				}
+// 				root = NULL;
+// 				/* We might have not read the entire line... */
+// 				if (!parse_line(line, &root))
+// 				{
+// 					/* There was an error parsing the command. */
+// 					fprintf(stderr, "Error while parsing command!\n");
+// 					status = -1;
+// 				}
+// 				else
+// 				{
+// 					root->ctx = ctx;
+// 					root->ast = ast;
+// 					status = traverse_and_exec_the_ast2(root, 0, NULL);
+// //					status = exec_ast(ast, 0, NULL);
+// 					free_parse_memory();
+// 				}
 				free_ast(ast);
 			}
 			free(line);

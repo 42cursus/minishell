@@ -150,6 +150,8 @@ int ft_sh_launch(t_cmd_node *cmd, t_ctx *ctx)
 		}
 		else
 		{
+
+			write(STDOUT_FILENO, "hello", 5);
 			waitpid(pid, &status, WUNTRACED);        // Parent process
 			while (!WIFEXITED(status) && !WIFSIGNALED(status))
 				waitpid(pid, &status, WUNTRACED);

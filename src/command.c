@@ -70,13 +70,15 @@ static int ft_parse_simple(t_cmd_node *cmd, int level, t_ast_node *father)
 	t_shell_op *op;
 	t_ctx *ctx = cmd->ctx;
 
-	if (cmd == NULL || cmd->args == NULL || cmd->args->value == NULL)
-		return (SHELL_EXIT);
+	// if (cmd == NULL || cmd->args == NULL || cmd->args->value == NULL)
+	// 	return (SHELL_EXIT);
 
 	char cwd[1024];
-
+	status = 0;
 	if (getcwd(cwd, sizeof(cwd)) == NULL)
 		return (SHELL_EXIT);
+
+	if (!cmd->args) return (status);
 
 	if (strcmp(cmd->args->value, "exit") == 0 || strcmp(cmd->args->value, "quit") == 0)
 		return (SHELL_EXIT);

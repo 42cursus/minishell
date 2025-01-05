@@ -264,8 +264,9 @@ void	skip_blanks(t_token **tokens, int *token_pos, t_wrd *last)
 	}
 	if (tokens[*token_pos])
 	{
-		while (tokens[*token_pos]->type == TOKEN_BLANK)
-			(*token_pos)++;
+		t_token *t = tokens[*token_pos];
+		while ((*token_pos < 1024) && t && t->type == TOKEN_BLANK)
+			t = tokens[(*token_pos)++];
 	}
 }
 
@@ -438,13 +439,16 @@ void	print_ast(t_ast_node *node, int depth)
 	printf("\n");
 	if (node->type == NODE_COMMAND)
 	{
-		if (node->cmd->args->next_word)
+
+		
+		t_wrd *arg = node->cmd->args;
+		if (arg && arg->next_word)
 		{
 			i = -1;
 			while (++i < depth + 1)
 				ft_printf("  ");
 			ft_printf("Arguments:\n");
-			print_arguments(node->cmd->args->next_word, depth + 2);
+			print_arguments(arg->next_word, depth + 2);
 		}
 		if (node->cmd->redirects_in)
 		{

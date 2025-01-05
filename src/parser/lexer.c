@@ -78,10 +78,7 @@ t_state	handle_initial(t_lexer *lexer)
 		return (READING_WHITESPACE);
 	}
 	else if (lexer->line[lexer->line_iter] == '$')
-	{
-		lexer->buffer[lexer->buf_index++] = lexer->line[lexer->line_iter];
 		return (VARIABLE);
-	}
 	else if (lexer->line[lexer->line_iter] == '1')
 	{
 		lexer->line_iter++;
@@ -250,7 +247,7 @@ t_state	handle_reading_whitespace(t_lexer *lexer)
 
 t_state	handle_variable(t_lexer *lexer)
 {
-	if (lexer->buf_index == 1 && lexer->line[lexer->line_iter] == '?')
+	if (lexer->buf_index == 0 && lexer->line[lexer->line_iter] == '?')
 	{
 		lexer->buffer[lexer->buf_index++] = lexer->line[lexer->line_iter];
 		flush_buffer(lexer, TOKEN_VAR);
@@ -258,17 +255,17 @@ t_state	handle_variable(t_lexer *lexer)
 			return (IN_DOUBLE_QUOTE);
 		return (INITIAL);
 	}
-	if (lexer->buf_index == 1 && (ft_isalpha(lexer->line[lexer->line_iter]) || lexer->line[lexer->line_iter] == '_'))
+	if (lexer->buf_index == 0 && (ft_isalpha(lexer->line[lexer->line_iter]) || lexer->line[lexer->line_iter] == '_'))
 	{
 		lexer->buffer[lexer->buf_index++] = lexer->line[lexer->line_iter];
 		return (VARIABLE);
 	}
-	else if (lexer->buf_index == 1 && !ft_isalpha(lexer->line[lexer->line_iter]) && lexer->line[lexer->line_iter] != '_')
+	else if (lexer->buf_index == 0 && !ft_isalpha(lexer->line[lexer->line_iter]) && lexer->line[lexer->line_iter] != '_')
 	{
 		flush_buffer(lexer, TOKEN_WORD);
 		return (handle_initial(lexer));
 	}
-	else if ((lexer->buf_index > 1) && (ft_isalnum(lexer->line[lexer->line_iter]) || lexer->line[lexer->line_iter] == '_'))
+	else if ((lexer->buf_index > 0) && (ft_isalnum(lexer->line[lexer->line_iter]) || lexer->line[lexer->line_iter] == '_'))
 	{
 		lexer->buffer[lexer->buf_index++] = lexer->line[lexer->line_iter];
 		return (VARIABLE);
