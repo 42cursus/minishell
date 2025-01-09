@@ -78,7 +78,10 @@ t_state	handle_initial(t_lexer *lexer)
 		return (READING_WHITESPACE);
 	}
 	else if (lexer->line[lexer->line_iter] == '$')
-		return (VARIABLE);
+	{
+		(lexer->line_iter)++;
+		return (handle_variable(lexer));
+	}
 	else if (lexer->line[lexer->line_iter] == '1')
 	{
 		lexer->line_iter++;
@@ -143,7 +146,8 @@ t_state	handle_reading_word(t_lexer *lexer)
 	if (lexer->line[lexer->line_iter] == '$')
 	{
 		flush_buffer(lexer, TOKEN_WORD);
-		return (VARIABLE);
+		(lexer->line_iter)++;
+		return (handle_variable(lexer));
 	}
 	if (lexer->line[lexer->line_iter] == '1'|| lexer->line[lexer->line_iter] == '2')
 	{
@@ -203,7 +207,8 @@ t_state	handle_in_double_quote(t_lexer *lexer)
 	{
 		lexer->curent_string = '"';
 		flush_buffer(lexer, TOKEN_WORD);
-		return (VARIABLE);
+		(lexer->line_iter)++;
+		return (handle_variable(lexer));
 	}
 	if (lexer->line[lexer->line_iter] == '"')
 	{
@@ -244,44 +249,44 @@ t_state	handle_reading_whitespace(t_lexer *lexer)
 	else
 		return READING_WHITESPACE;
 }
+t_state exit_variable(t_lexer *lexer)
+{
+	if (lexer->curent_string == '"')
+	{
+		lexer->curent_string = '0';
+		if (lexer->line[lexer->line_iter] == '"')
+			return (INITIAL);
+		return (handle_in_double_quote(lexer));
+	}
+	if (lexer->line[lexer->line_iter] != '\0')
+		return (handle_initial(lexer));
+	return (INITIAL);
+}
 
 t_state	handle_variable(t_lexer *lexer)
 {
-	if (lexer->buf_index == 0 && lexer->line[lexer->line_iter] == '?')
+	while (lexer->line[(lexer->line_iter)] != '\0')
 	{
-		lexer->buffer[lexer->buf_index++] = lexer->line[lexer->line_iter];
-		flush_buffer(lexer, TOKEN_VAR);
-		if (lexer->curent_string == '"')
-			return (IN_DOUBLE_QUOTE);
-		return (INITIAL);
-	}
-	if (lexer->buf_index == 0 && (ft_isalpha(lexer->line[lexer->line_iter]) || lexer->line[lexer->line_iter] == '_'))
-	{
-		lexer->buffer[lexer->buf_index++] = lexer->line[lexer->line_iter];
-		return (VARIABLE);
-	}
-	else if (lexer->buf_index == 0 && !ft_isalpha(lexer->line[lexer->line_iter]) && lexer->line[lexer->line_iter] != '_')
-	{
-		flush_buffer(lexer, TOKEN_WORD);
-		return (handle_initial(lexer));
-	}
-	else if ((lexer->buf_index > 0) && (ft_isalnum(lexer->line[lexer->line_iter]) || lexer->line[lexer->line_iter] == '_'))
-	{
-		lexer->buffer[lexer->buf_index++] = lexer->line[lexer->line_iter];
-		return (VARIABLE);
-	}
-	else
-	{
-		flush_buffer(lexer, TOKEN_VAR);
-		if (lexer->curent_string == '"')
+		if (lexer->buf_index == 0 && lexer->line[lexer->line_iter] == '?')
 		{
-			lexer->curent_string = '0';
-			if (lexer->line[lexer->line_iter] == '"')
-				return (INITIAL);
-			return (handle_in_double_quote(lexer));
+			lexer->buffer[lexer->buf_index++] = lexer->line[lexer->line_iter];
+			flush_buffer(lexer, TOKEN_VAR);
+			if (lexer->curent_string == '"')
+				return (IN_DOUBLE_QUOTE);
+			return (INITIAL);
 		}
-		return (handle_initial(lexer));
+		if (lexer->buf_index == 0 && (ft_isalpha(lexer->line[lexer->line_iter]) || lexer->line[lexer->line_iter] == '_'))
+			lexer->buffer[lexer->buf_index++] = lexer->line[lexer->line_iter];
+		else if (lexer->buf_index == 0 && !ft_isalpha(lexer->line[lexer->line_iter]) && lexer->line[lexer->line_iter] != '_')
+			return(exit_variable(lexer));
+		else if ((lexer->buf_index > 0) && (ft_isalnum(lexer->line[lexer->line_iter]) || lexer->line[lexer->line_iter] == '_'))
+			lexer->buffer[lexer->buf_index++] = lexer->line[lexer->line_iter];
+		else
+			break;
+		(lexer->line_iter)++;
 	}
+	flush_buffer(lexer, TOKEN_VAR);
+	return(exit_variable(lexer));
 }
 
 const char *get_idstring(int token)
@@ -307,11 +312,11 @@ int scan_the_Line(const char *line, t_lexer *lexer)
 	*lexer = (t_lexer){
 		.curent_string = '0',
 		.line = (char *)line,
-		.line_iter = -1
+		.line_iter = 0
 	};
 
 	current_state = INITIAL;
-	while (lexer->line[++(lexer->line_iter)] != '\0')
+	while (lexer->line[(lexer->line_iter)] != '\0')
 	{
 		if (current_state == INITIAL)
 			current_state = handle_initial(lexer);
@@ -327,12 +332,10 @@ int scan_the_Line(const char *line, t_lexer *lexer)
 			current_state = handle_check_here_doc(lexer);
 		else if (current_state == READING_WHITESPACE)
 			current_state = handle_reading_whitespace(lexer);
-		else if (current_state == VARIABLE)
-			current_state = handle_variable(lexer);
+		if (lexer->line[(lexer->line_iter)] != '\0')
+			(lexer->line_iter)++;
 	}
-	if (current_state == VARIABLE)
-		flush_buffer(lexer, TOKEN_VAR);
-	else if (lexer->buf_index != 0)
+	if (lexer->buf_index != 0)
 		flush_buffer(lexer, TOKEN_WORD);
 	lexer->tokens[lexer->token_iter] = NULL;
 	printf("\n\nTokens:\n");

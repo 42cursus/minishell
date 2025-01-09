@@ -246,6 +246,8 @@ void	create_wrd(t_wrd *word, t_token *token)
 
 void	skip_blanks(t_token **tokens, int *token_pos, t_wrd *last)
 {
+	t_token	*t;
+
 	(*token_pos)++;
 	if (tokens[*token_pos])
 	{
@@ -266,7 +268,10 @@ void	skip_blanks(t_token **tokens, int *token_pos, t_wrd *last)
 	{
 		t_token *t = tokens[*token_pos];
 		while ((*token_pos < 1024) && t && t->type == TOKEN_BLANK)
+		{
 			t = tokens[(*token_pos)++];
+			t = tokens[*token_pos];
+		}
 	}
 }
 

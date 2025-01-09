@@ -69,8 +69,7 @@ typedef enum e_state {
 	CHECK_APPEND,
 	CHECK_HERE_DOC,
 	READING_WHITESPACE,
-	END,
-	VARIABLE
+	END
 } t_state;
 
 typedef struct s_lexer {
