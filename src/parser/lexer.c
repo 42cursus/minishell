@@ -72,18 +72,21 @@ void	free_tokens(t_lexer *lexer)
 
 t_state	handle_initial(t_lexer *lexer)
 {
-	if (isspace(lexer->line[lexer->line_iter]))
+	if (lexer->line[lexer->line_iter] == ' ' || lexer->line[lexer->line_iter] == '\t')
 	{
+		flush_buffer(lexer, TOKEN_WORD);
 		lexer->tokens[lexer->token_iter] = create_token(TOKEN_BLANK, " ", lexer);
-		return (READING_WHITESPACE);
+		return (handle_reading_whitespace(lexer));
 	}
 	else if (lexer->line[lexer->line_iter] == '$')
 	{
+		flush_buffer(lexer, TOKEN_WORD);
 		(lexer->line_iter)++;
 		return (handle_variable(lexer));
 	}
 	else if (lexer->line[lexer->line_iter] == '1')
 	{
+		flush_buffer(lexer, TOKEN_WORD);
 		lexer->line_iter++;
 		if (lexer->line[lexer->line_iter] == '<')
 			return (CHECK_HERE_DOC);
@@ -92,10 +95,11 @@ t_state	handle_initial(t_lexer *lexer)
 		else
 			lexer->line_iter--;
 		lexer->buffer[lexer->buf_index++] = lexer->line[lexer->line_iter];
-		return (READING_WORD);
+		return (INITIAL);
 	}
 	else if (lexer->line[lexer->line_iter] == '2')
 	{
+		flush_buffer(lexer, TOKEN_WORD);
 		lexer->line_iter++;
 		if (lexer->line[lexer->line_iter] == '<')
 		{
@@ -122,43 +126,7 @@ t_state	handle_initial(t_lexer *lexer)
 		else
 			lexer->line_iter--;
 		lexer->buffer[lexer->buf_index++] = lexer->line[lexer->line_iter];
-		return (READING_WORD);
-	}
-	else if (lexer->line[lexer->line_iter] == '\'')
-		return (IN_SINGLE_QUOTE);
-	else if (lexer->line[lexer->line_iter] == '"')
-		return (IN_DOUBLE_QUOTE);
-	else if (lexer->line[lexer->line_iter] == '>')
-		return (CHECK_APPEND);
-	else if (lexer->line[lexer->line_iter] == '<')
-		return (CHECK_HERE_DOC);
-	else if (lexer->line[lexer->line_iter] == '|')
-	{
-		lexer->tokens[lexer->token_iter] = create_token(TOKEN_PIPE, "|", lexer);
 		return (INITIAL);
-	}
-	lexer->buffer[lexer->buf_index++] = lexer->line[lexer->line_iter];
-	return (READING_WORD);
-}
-
-t_state	handle_reading_word(t_lexer *lexer)
-{
-	if (lexer->line[lexer->line_iter] == '$')
-	{
-		flush_buffer(lexer, TOKEN_WORD);
-		(lexer->line_iter)++;
-		return (handle_variable(lexer));
-	}
-	if (lexer->line[lexer->line_iter] == '1'|| lexer->line[lexer->line_iter] == '2')
-	{
-		flush_buffer(lexer, TOKEN_WORD);
-		return (handle_initial(lexer));
-	}
-	else if (isspace(lexer->line[lexer->line_iter]))
-	{
-		flush_buffer(lexer, TOKEN_WORD);
-		lexer->tokens[lexer->token_iter] = create_token(TOKEN_BLANK, " ", lexer);
-		return (READING_WHITESPACE);
 	}
 	else if (lexer->line[lexer->line_iter] == '\'')
 	{
@@ -187,7 +155,7 @@ t_state	handle_reading_word(t_lexer *lexer)
 		return (INITIAL);
 	}
 	lexer->buffer[lexer->buf_index++] = lexer->line[lexer->line_iter];
-	return (READING_WORD);
+	return (INITIAL);
 }
 
 t_state	handle_in_single_quote(t_lexer *lexer)
@@ -244,10 +212,12 @@ t_state	handle_check_here_doc(t_lexer *lexer)
 
 t_state	handle_reading_whitespace(t_lexer *lexer)
 {
-	if (!(lexer->line[lexer->line_iter] == ' ') && !(lexer->line[lexer->line_iter] == '\t'))
+	while ((lexer->line[lexer->line_iter] == ' ') || (lexer->line[lexer->line_iter] == '\t'))
+		(lexer->line_iter)++;
+	if (lexer->line[lexer->line_iter] != '\0')
 		return (handle_initial(lexer));
 	else
-		return READING_WHITESPACE;
+		return (INITIAL);
 }
 t_state exit_variable(t_lexer *lexer)
 {
@@ -320,8 +290,6 @@ int scan_the_Line(const char *line, t_lexer *lexer)
 	{
 		if (current_state == INITIAL)
 			current_state = handle_initial(lexer);
-		else if (current_state == READING_WORD)
-			current_state = handle_reading_word(lexer);
 		else if (current_state == IN_SINGLE_QUOTE)
 			current_state = handle_in_single_quote(lexer);
 		else if (current_state == IN_DOUBLE_QUOTE)
@@ -330,8 +298,6 @@ int scan_the_Line(const char *line, t_lexer *lexer)
 			current_state = handle_check_append(lexer);
 		else if (current_state == CHECK_HERE_DOC)
 			current_state = handle_check_here_doc(lexer);
-		else if (current_state == READING_WHITESPACE)
-			current_state = handle_reading_whitespace(lexer);
 		if (lexer->line[(lexer->line_iter)] != '\0')
 			(lexer->line_iter)++;
 	}
@@ -343,7 +309,6 @@ int scan_the_Line(const char *line, t_lexer *lexer)
 	while (lexer->tokens[++(lexer->line_iter)] != NULL)
 		printf("Token Type: \"%s\", Value: %s\n",
 			   get_idstring(lexer->tokens[lexer->line_iter]->type), lexer->tokens[lexer->line_iter]->value);
-
 	lexer->tokens_size = lexer->token_iter;
 	lexer->token_iter = 0;
 	return (0);

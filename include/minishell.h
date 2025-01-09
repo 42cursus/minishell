@@ -63,12 +63,10 @@ typedef struct s_token {
 
 typedef enum e_state {
 	INITIAL,
-	READING_WORD,
 	IN_SINGLE_QUOTE,
 	IN_DOUBLE_QUOTE,
 	CHECK_APPEND,
 	CHECK_HERE_DOC,
-	READING_WHITESPACE,
 	END
 } t_state;
 
@@ -92,8 +90,8 @@ int			scan_the_Line(const char *line, t_lexer *lexer);
 t_token     *create_token(t_token_type type, const char *value, t_lexer *lexer);
 void        flush_buffer(t_lexer *lexer, t_token_type type);
 t_state     handle_initial(t_lexer *lexer);
-t_state     handle_reading_word(t_lexer *lexer);
 t_state		handle_in_single_quote(t_lexer *lexer);
+t_state		exit_variable(t_lexer *lexer);
 t_state     handle_variable(t_lexer *lexer);
 t_state     handle_in_double_quote(t_lexer *lexer);
 t_state     handle_check_append(t_lexer *lexer);
@@ -113,7 +111,6 @@ void        parse_command_details(t_token **tokens, int *token_pos, t_ast_node *
 void		print_arguments(t_wrd *arguments, int depth);
 void		print_redirections(t_wrd *redir, int depth, t_token_type rt);
 void		skip_blanks(t_token **tokens, int *token_pos, t_wrd *last);
-void		redir_to_null(t_ast_node *node);
 void		create_wrd(t_wrd *word, t_token *token);
 
 int traverse_and_exec_the_ast2(cmd_t *c, int level, cmd_t *father);

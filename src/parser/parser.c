@@ -11,13 +11,6 @@
 /* ************************************************************************** */
 
 #include "minishell.h"
-void	redir_to_null(t_ast_node *node)
-{
-	node->cmd->redirects_in = NULL;
-	node->cmd->redirects_out = NULL;
-	node->cmd->redirects_err = NULL;
-	node->cmd->redirects_err_in = NULL;
-}
 
 t_ast_node	*create_node(t_node_type type, const char *value, t_ast_node *parent, t_token_type token)
 {
@@ -32,19 +25,15 @@ t_ast_node	*create_node(t_node_type type, const char *value, t_ast_node *parent,
 	ft_memset(node->cmd, 0, sizeof(t_cmd_node));
 	if (type == NODE_COMMAND && value != NULL)
 	{
-		node->cmd->args = malloc(sizeof(t_wrd)); 
+		node->cmd->args = malloc(sizeof(t_wrd));
+		ft_memset(node->cmd->args, 0, sizeof(t_wrd));
 		node->cmd->args->value = strdup(value);
 		if (token == TOKEN_VAR)
 			node->cmd->args->expand = true;
-		else
-			node->cmd->args->expand = false;
-		node->cmd->args->next_part = NULL;
-		node->cmd->args->next_word = NULL;
 	}
 	else
 		node->cmd->args = NULL;
 	node->parent = parent;
-	redir_to_null(node);
 	node->left = NULL;
 	node->right = NULL;
 	return (node);
@@ -249,10 +238,8 @@ void	skip_blanks(t_token **tokens, int *token_pos, t_wrd *last)
 	t_token	*t;
 
 	(*token_pos)++;
-	if (tokens[*token_pos])
+	if (tokens[*token_pos] && last != NULL)
 	{
-		if (last != NULL)
-		{
 			while (tokens[*token_pos]->type == TOKEN_WORD || tokens[*token_pos]->type == TOKEN_VAR)
 			{
 				last->next_part = malloc(sizeof(t_wrd));
@@ -262,11 +249,10 @@ void	skip_blanks(t_token **tokens, int *token_pos, t_wrd *last)
 				if (!tokens[*token_pos])
 					break;
 			}
-		}
 	}
 	if (tokens[*token_pos])
 	{
-		t_token *t = tokens[*token_pos];
+		t = tokens[*token_pos];
 		while ((*token_pos < 1024) && t && t->type == TOKEN_BLANK)
 		{
 			t = tokens[(*token_pos)++];
