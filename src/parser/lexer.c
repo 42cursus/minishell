@@ -36,13 +36,38 @@ lt_entry lt[] = {
 	{ .token_id = TOKEN_APPEND_2,				.str = "TOKEN_APPEND_2" }
 };
 
+const char *get_idstring(int token)
+{
+	int i;
+	const char *str = NULL;
+
+	i = -1;
+	while (++i < TOKEN_MAX)
+	{
+		if (lt[i].token_id == token)
+		{
+			str = lt[i].str;
+			break ;
+		}
+	}
+	return str;
+}
+
+void	print_tokens(t_lexer *lexer)
+{
+	printf("\n\nTokens:\n");
+	lexer->line_iter = -1;
+	while (lexer->tokens[++(lexer->line_iter)] != NULL)
+		printf("Token Type: \"%s\", Value: %s\n",
+			   get_idstring(lexer->tokens[lexer->line_iter]->type), lexer->tokens[lexer->line_iter]->value);
+}
+
 t_token *create_token(t_token_type type, const char *value, t_lexer *lexer)
 {
 	t_token *token = (t_token *)malloc(sizeof(t_token));
 	if (!token) return NULL;
 	token->type = type;
 	token->value = strdup(value);
-
 	lexer->tokens[lexer->token_iter++] = token;
 	return (token);
 }
@@ -220,51 +245,32 @@ t_state exit_variable(t_lexer *lexer)
 
 t_state	handle_variable(t_lexer *lexer)
 {
+	char	c;
+
 	flush_buffer(lexer, TOKEN_WORD);
 	while (lexer->line[++(lexer->line_iter)] != '\0')
 	{
-		if (lexer->buf_index == 0 && lexer->line[lexer->line_iter] == '?')
+		c = lexer->line[(lexer->line_iter)];
+		if (lexer->buf_index == 0 && c == '?')
 		{
-			lexer->buffer[lexer->buf_index++] = lexer->line[lexer->line_iter];
+			lexer->buffer[lexer->buf_index++] = c;
 			return(exit_variable(lexer));
 		}
-		if (lexer->buf_index == 0 && (ft_isalpha(lexer->line[lexer->line_iter]) || lexer->line[lexer->line_iter] == '_'))
-			lexer->buffer[lexer->buf_index++] = lexer->line[lexer->line_iter];
-		else if (lexer->buf_index == 0 && !ft_isalpha(lexer->line[lexer->line_iter]) && lexer->line[lexer->line_iter] != '_')
+		if (lexer->buf_index == 0 && (ft_isalpha(c) || c == '_'))
+			lexer->buffer[lexer->buf_index++] = c;
+		else if (lexer->buf_index == 0 && !ft_isalpha(c) && c != '_')
 			return(exit_variable(lexer));
-		else if ((lexer->buf_index > 0) && (ft_isalnum(lexer->line[lexer->line_iter]) || lexer->line[lexer->line_iter] == '_'))
-			lexer->buffer[lexer->buf_index++] = lexer->line[lexer->line_iter];
+		else if ((lexer->buf_index > 0) && (ft_isalnum(c) || c == '_'))
+			lexer->buffer[lexer->buf_index++] = c;
 		else
 			break;
 	}
 	return(exit_variable(lexer));
 }
 
-const char *get_idstring(int token)
+t_state	scan_loop(t_lexer *lexer)
 {
-	int i;
-	const char *str = NULL;
-
-	i = -1;
-	while (++i < TOKEN_MAX)
-	{
-		if (lt[i].token_id == token)
-		{
-			str = lt[i].str;
-			break ;
-		}
-	}
-	return str;
-}
-
-int scan_the_Line(const char *line, t_lexer *lexer)
-{
-	t_state current_state = INITIAL;
-	*lexer = (t_lexer){
-		.curent_string = '0',
-		.line = (char *)line,
-		.line_iter = 0
-	};
+	t_state	current_state;
 
 	current_state = INITIAL;
 	while (lexer->line[(lexer->line_iter)] != '\0')
@@ -282,14 +288,22 @@ int scan_the_Line(const char *line, t_lexer *lexer)
 		if (lexer->line[(lexer->line_iter)] != '\0')
 			(lexer->line_iter)++;
 	}
-	if (lexer->buf_index != 0)
+	return (current_state);
+}
+
+int scan_the_Line(const char *line, t_lexer *lexer)
+{
+	t_state	current_state;
+
+	*lexer = (t_lexer){
+		.curent_string = '0',
+		.line = (char *)line,
+	};
+	current_state = scan_loop(lexer);
+	if (lexer->buf_index != 0 && current_state == INITIAL)
 		flush_buffer(lexer, TOKEN_WORD);
 	lexer->tokens[lexer->token_iter] = NULL;
-	printf("\n\nTokens:\n");
-	lexer->line_iter = -1;
-	while (lexer->tokens[++(lexer->line_iter)] != NULL)
-		printf("Token Type: \"%s\", Value: %s\n",
-			   get_idstring(lexer->tokens[lexer->line_iter]->type), lexer->tokens[lexer->line_iter]->value);
+	print_tokens(lexer);
 	lexer->tokens_size = lexer->token_iter;
 	lexer->token_iter = 0;
 	return (0);

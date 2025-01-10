@@ -113,6 +113,7 @@ void		print_arguments(t_wrd *arguments, int depth);
 void		print_redirections(t_wrd *redir, int depth, t_token_type rt);
 void		skip_blanks(t_token **tokens, int *token_pos, t_wrd *last);
 void		create_wrd(t_wrd *word, t_token *token);
+void		print_tokens(t_lexer *lexer);
 
 int traverse_and_exec_the_ast2(cmd_t *c, int level, cmd_t *father);
 int traverse_and_exec_the_ast(t_ast_node *cmd, int level, t_ast_node *father);
