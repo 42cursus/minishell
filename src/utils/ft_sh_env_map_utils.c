@@ -51,7 +51,7 @@ char	**ft_sh_render_envp(t_ctx *ctx)
 	while (++i < (int)map.total_elems)
 	{
 		var = map.base + (i * map.elem_size);
-		new[i] = ft_strjoin2((const char *[2]){var->k, var->v}, 2, "=");
+		new[i] = ft_tab_str_join((const char *[2]){var->k, var->v}, 2, "=");
 	}
 	new[i] = NULL;
 	return (new);
