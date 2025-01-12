@@ -16,26 +16,19 @@ t_ast_node	*create_node(t_node_type type, const char *value, t_ast_node *parent,
 {
 	t_ast_node	*node;
 
-	node = malloc(sizeof(t_ast_node));
+	node = ft_calloc(sizeof(t_ast_node), 1);
 	if (!node)
 		return (NULL);
-	ft_memset(node, 0, sizeof(t_ast_node));
 	node->type = type;
-	node->cmd = malloc(sizeof(t_cmd_node));
-	ft_memset(node->cmd, 0, sizeof(t_cmd_node));
+	node->cmd = ft_calloc(sizeof(t_cmd_node), 1);
 	if (type == NODE_COMMAND && value != NULL)
 	{
-		node->cmd->args = malloc(sizeof(t_wrd));
-		ft_memset(node->cmd->args, 0, sizeof(t_wrd));
+		node->cmd->args = ft_calloc(sizeof(t_wrd), 1);
 		node->cmd->args->value = strdup(value);
 		if (token == TOKEN_VAR)
 			node->cmd->args->expand = true;
 	}
-	else
-		node->cmd->args = NULL;
 	node->parent = parent;
-	node->left = NULL;
-	node->right = NULL;
 	return (node);
 }
 
@@ -68,7 +61,20 @@ void	find_redir_list(t_wrd *redir, t_token_type type, t_cmd_node *cmd)
 		list_append(&cmd->redirects_err_in, redir); 
 }
 
-void	here_doc_cat(t_wrd	*here)
+char	*hd_cat_loop(t_wrd *here, size_t len)
+{
+	char *str;
+
+	str = ft_calloc(sizeof(char), len + 1);
+	while (here)
+	{
+		ft_strcat(str, here->value);
+		here = here->next_part;
+	}
+	return (str);
+}
+
+void	here_doc_cat(t_wrd *here)
 {
 	t_wrd		*origin;
 	char		*str;
@@ -83,18 +89,13 @@ void	here_doc_cat(t_wrd	*here)
 			len += ft_strlen(here->value);
 			here = here->next_part;
 		}
-		str = (char *)malloc(sizeof(char) * len + 1);
-		ft_memset(str, 0, sizeof(char));
 		here = origin;
-		while (here)
-		{
-			ft_strcat(str, here->value);
-			here = here->next_part;
-		}
+		str = hd_cat_loop(here, len);
 		free((void *)origin->value);
 		free_wrd(origin->next_part);
 		origin->value = ft_strdup(str);
 		free(str);
+		origin->next_part = NULL;
 	}
 }
 
@@ -113,7 +114,7 @@ int	add_random_numbers_to_str(char *str_buf, int rand_count)
 	{
 		i = 0;
 		while (read(fd, buf, 1) && i < rand_count)
-			if (isalnum(buf[0]))
+			if (ft_isalnum(buf[0]))
 				random_code[i++] = buf[0];
 		close(fd);
 		random_code[i] = '\0';
@@ -153,20 +154,16 @@ void	parse_redirection(t_token **tokens, int *token_pos, t_ast_node *parent, t_c
 	t_token_type	rt;
 	HeredocEntry	*entry;
 
-	redir = NULL;
 	rt = tokens[*token_pos]->type;
 	skip_blanks(tokens, token_pos, NULL);
 	if (tokens[*token_pos] && (tokens[*token_pos]->type == TOKEN_WORD || tokens[*token_pos]->type == TOKEN_VAR))
 	{
-		redir = malloc(sizeof(t_wrd));
-		create_wrd(redir, tokens[*token_pos]);
+		redir = ft_calloc(sizeof(t_wrd), 1);
+		create_wrd(redir, tokens[*token_pos], rt);
 		skip_blanks(tokens, token_pos, redir);
-		if (rt == TOKEN_APPEND || rt == TOKEN_APPEND_2)
-			redir->append = true;
 		if (rt == TOKEN_HERE_DOC || rt == TOKEN_HERE_DOC_2)
 		{
 			here_doc_cat(redir);
-			redir->next_part = NULL;
 			entry = &ctx->hd.entries[ctx->hd.ss++];
 			create_here_file(redir, entry);
 		}
@@ -176,11 +173,35 @@ void	parse_redirection(t_token **tokens, int *token_pos, t_ast_node *parent, t_c
 		ft_printf("Syntax error: Expected target after redirection\n");
 }
 
+void	parse_command_loop(t_token **t, int *tp, t_ctx *ctx, t_ast_node *cn)
+{
+	t_wrd	*arg;
+	t_wrd	*la;
+
+	la = cn->cmd->args;
+	while (t[*tp] != NULL)
+	{
+		if (t[*tp]->type == TOKEN_WORD || t[*tp]->type == TOKEN_VAR)
+		{
+			arg = ft_calloc(sizeof(t_wrd), 1);
+			create_wrd(arg, t[*tp], t[*tp]->type);
+			if (cn->cmd->args == NULL)
+				cn->cmd->args = arg;
+			else if (la != NULL)
+				la->next_word = arg;
+			la = arg;
+			skip_blanks(t, tp, arg);
+		}
+		else if (t[*tp]->type >= TOKEN_REDIRECT_STDOUT && t[*tp]->type < TOKEN_MAX)
+			parse_redirection(t, tp, cn, ctx);
+		else
+			break;
+	}
+}
+
 t_ast_node	*parse_command(t_token **tokens, int *token_pos, t_ctx *ctx)
 {
 	t_ast_node	*command_node;
-	t_wrd		*last_arg;
-	t_wrd		*arg;
 
 	if (tokens[*token_pos]->type == TOKEN_WORD || tokens[*token_pos]->type == TOKEN_VAR)
 	{
@@ -191,30 +212,13 @@ t_ast_node	*parse_command(t_token **tokens, int *token_pos, t_ctx *ctx)
 		command_node = create_node(NODE_COMMAND, NULL, NULL, TOKEN_COMMAND);
 	if (!command_node)
 		return (NULL);
-	last_arg = command_node->cmd->args;
-	while (tokens[*token_pos] != NULL)
-	{
-		if (tokens[*token_pos]->type == TOKEN_WORD || tokens[*token_pos]->type == TOKEN_VAR)
-		{
-			arg = malloc(sizeof(t_wrd));
-			create_wrd(arg, tokens[*token_pos]);
-			if (command_node->cmd->args == NULL)
-				command_node->cmd->args = arg;
-			else if (last_arg != NULL)
-				last_arg->next_word = arg;
-			last_arg = arg;
-			skip_blanks(tokens, token_pos, arg);
-		}
-		else if (tokens[*token_pos]->type >= TOKEN_REDIRECT_STDOUT && tokens[*token_pos]->type < TOKEN_MAX)
-			parse_redirection(tokens, token_pos, command_node, ctx);
-		else
-			break;
-	}
+	parse_command_loop(tokens, token_pos, ctx, command_node);
 	return (command_node);
 }
 
-void	create_wrd(t_wrd *word, t_token *token)
+void	create_wrd(t_wrd *word, t_token *token, t_token_type rt)
 {
+	ft_memset(word, 0, sizeof(t_wrd));
 	if (token)
 	{
 		word->value = ft_strdup(token->value);
@@ -223,30 +227,22 @@ void	create_wrd(t_wrd *word, t_token *token)
 		else
 			word->expand = false;
 	}
-	else
-	{
-		word->value = NULL;
-		word->expand = false;
-	}
-	word->append = false;
-	word->next_part = NULL;
-	word->next_word = NULL;
+	if (rt == TOKEN_APPEND || rt == TOKEN_APPEND_2)
+		word->append = true;
 }
 
 void	skip_blanks(t_token **tokens, int *token_pos, t_wrd *last)
 {
 	t_token	*t;
 
-	(*token_pos)++;
-	if (tokens[*token_pos] && last != NULL)
+	if (tokens[++(*token_pos)] && last != NULL)
 	{
 			while (tokens[*token_pos]->type == TOKEN_WORD || tokens[*token_pos]->type == TOKEN_VAR)
 			{
-				last->next_part = malloc(sizeof(t_wrd));
-				create_wrd(last->next_part, tokens[*token_pos]);
+				last->next_part = ft_calloc(sizeof(t_wrd), 1);
+				create_wrd(last->next_part, tokens[*token_pos], tokens[*token_pos]->type);
 				last = last->next_part;
-				(*token_pos)++;
-				if (!tokens[*token_pos])
+				if (!tokens[++(*token_pos)])
 					break;
 			}
 	}
@@ -254,10 +250,7 @@ void	skip_blanks(t_token **tokens, int *token_pos, t_wrd *last)
 	{
 		t = tokens[*token_pos];
 		while ((*token_pos < 1024) && t && t->type == TOKEN_BLANK)
-		{
-			t = tokens[(*token_pos)++];
-			t = tokens[*token_pos];
-		}
+			t = tokens[++(*token_pos)];
 	}
 }
 
@@ -273,8 +266,6 @@ int has_right(t_lexer *lexer, t_ast_node **right, t_ctx *ctx)
 	return (false);
 }
 
-#define HALF_BAKED_TREE 2135646
-
 int	parse_pipeline(const char *line, t_ast_node **root, t_ctx *ctx)
 {
 	t_ast_node	*cn;
@@ -283,7 +274,7 @@ int	parse_pipeline(const char *line, t_ast_node **root, t_ctx *ctx)
 	t_lexer		lexer;
 	int			errcode;
 
-	errcode = scan_the_Line(line, &lexer);
+	errcode = scan_the_line(line, &lexer);
 	if (lexer.tokens[lexer.token_iter]->type == TOKEN_BLANK)
 		(lexer.token_iter)++;
 	if (!errcode)
@@ -311,10 +302,7 @@ int	parse_pipeline(const char *line, t_ast_node **root, t_ctx *ctx)
 					cn = pipe_node;
 				}
 				else
-				{
-					errcode = HALF_BAKED_TREE;
 					break;
-				}
 			}
 		}
 		*root = cn;
@@ -323,6 +311,42 @@ int	parse_pipeline(const char *line, t_ast_node **root, t_ctx *ctx)
 	ctx->hd.size = ctx->hd.ss;
 	ctx->hd.ss = 0;
 	return (errcode);
+}
+
+void	free_wrd(t_wrd *word)
+{
+	if (word->value)
+		free((void *)word->value);
+	if (word->next_part)
+		free_wrd(word->next_part);
+	if (word->next_word)
+		free_wrd(word->next_word);
+	free(word);
+}
+
+void	free_ast(t_ast_node *node)
+{
+	if (!node)
+		return;
+	if (node->type == NODE_COMMAND)
+	{
+		if (node->cmd->args)
+			free_wrd(node->cmd->args);
+		if (node->cmd->redirects_in)
+			free_wrd(node->cmd->redirects_in);
+		if (node->cmd->redirects_out)
+			free_wrd(node->cmd->redirects_out);
+		if (node->cmd->redirects_err_in)
+			free_wrd(node->cmd->redirects_err_in);
+		if (node->cmd->redirects_err)
+			free_wrd(node->cmd->redirects_err);
+	}
+	if (node->left)
+		free_ast(node->left);
+	if (node->right)
+		free_ast(node->right);
+	free(node->cmd);
+	free(node);
 }
 
 #define BUFF_SIZE 1024
@@ -493,40 +517,4 @@ void	print_ast(t_ast_node *node, int depth)
 			print_ast(node->right, depth + 2);
 		}
 	}
-}
-
-void	free_wrd(t_wrd *word)
-{
-	if (word->value)
-		free((void *)word->value);
-	if (word->next_part)
-		free_wrd(word->next_part);
-	if (word->next_word)
-		free_wrd(word->next_word);
-	free(word);
-}
-
-void	free_ast(t_ast_node *node)
-{
-	if (!node)
-		return;
-	if (node->type == NODE_COMMAND)
-	{
-		if (node->cmd->args)
-			free_wrd(node->cmd->args);
-		if (node->cmd->redirects_in)
-			free_wrd(node->cmd->redirects_in);
-		if (node->cmd->redirects_out)
-			free_wrd(node->cmd->redirects_out);
-		if (node->cmd->redirects_err_in)
-			free_wrd(node->cmd->redirects_err_in);
-		if (node->cmd->redirects_err)
-			free_wrd(node->cmd->redirects_err);
-	}
-	if (node->left)
-		free_ast(node->left);
-	if (node->right)
-		free_ast(node->right);
-	free(node->cmd);
-	free(node);
 }

@@ -116,9 +116,15 @@ t_state	handle_2(t_lexer *lexer)
 {
 	flush_buffer(lexer, TOKEN_WORD);
 	if (lexer->line[++lexer->line_iter] == '<')
+	{
+		lexer->line_iter++;
 		return (handle_check_here_doc(lexer, 2));
+	}
 	else if (lexer->line[lexer->line_iter] == '>')
+	{
+		lexer->line_iter++;
 		return (handle_check_append(lexer, 2));
+	}
 	else
 		lexer->buffer[lexer->buf_index++] = lexer->line[--lexer->line_iter];
 	return (INITIAL);
@@ -134,8 +140,8 @@ t_state	handle_symbol(t_lexer *lexer, t_state state)
 
 t_state	handle_initial(t_lexer *lexer)
 {
-	if (lexer->line[lexer->line_iter] == ' ' ||
-	 lexer->line[lexer->line_iter] == '\t')
+	if (lexer->line[lexer->line_iter]
+		== ' ' || lexer->line[lexer->line_iter] == '\t')
 		return (handle_reading_whitespace(lexer));
 	else if (lexer->line[lexer->line_iter] == '$')
 		return (handle_variable(lexer));
@@ -148,7 +154,7 @@ t_state	handle_initial(t_lexer *lexer)
 	else if (lexer->line[lexer->line_iter] == '"')
 		return (handle_symbol(lexer, IN_DOUBLE_QUOTE));
 	else if (lexer->line[lexer->line_iter] == '>')
-			return (handle_symbol(lexer, CHECK_APPEND));
+		return (handle_symbol(lexer, CHECK_APPEND));
 	else if (lexer->line[lexer->line_iter] == '<')
 		return (handle_symbol(lexer, CHECK_HERE_DOC));
 	else if (lexer->line[lexer->line_iter] == '|')
@@ -184,61 +190,54 @@ t_state	handle_in_double_quote(t_lexer *lexer)
 	return (IN_DOUBLE_QUOTE);
 }
 
-t_state	handle_check_append(t_lexer *lexer, int	i)
+t_state	handle_check_append(t_lexer *lexer, int i)
 {
+	if (lexer->line[lexer->line_iter] == '>')
+	{
+		if (i == 1)
+			lexer->tokens[lexer->token_iter]
+				= create_token(TOKEN_APPEND, ">>", lexer);
+		else if (i == 2)
+			lexer->tokens[lexer->token_iter]
+				= create_token(TOKEN_APPEND_2, "2>>", lexer);
+		return (INITIAL);
+	}
 	if (i == 1)
-	{
-		if (lexer->line[lexer->line_iter] == '>')
-		{
-			lexer->tokens[lexer->token_iter] = create_token(TOKEN_APPEND, ">>", lexer);
-			return (INITIAL);
-		}
-		lexer->tokens[lexer->token_iter] = create_token(TOKEN_REDIRECT_STDOUT, ">", lexer);
-		return (handle_initial(lexer));
-	}
+		lexer->tokens[lexer->token_iter]
+			= create_token(TOKEN_REDIRECT_STDOUT, ">", lexer);
 	else if (i == 2)
-	{
-		if (lexer->line[++lexer->line_iter] == '>')
-		{
-			lexer->tokens[lexer->token_iter] = create_token(TOKEN_APPEND_2, "2>>", lexer);
-			return (INITIAL);
-		}
-		lexer->tokens[lexer->token_iter] = create_token(TOKEN_REDIRECT_STDERR, "2>", lexer);
-		return (handle_initial(lexer));
-	}
-	return (INITIAL);
+		lexer->tokens[lexer->token_iter]
+			= create_token(TOKEN_REDIRECT_STDERR, "2>", lexer);
+	return (handle_initial(lexer));
 }
 
 t_state	handle_check_here_doc(t_lexer *lexer, int i)
 {
+	if (lexer->line[lexer->line_iter] == '<')
+	{
+		if (i == 1)
+			lexer->tokens[lexer->token_iter]
+				= create_token(TOKEN_HERE_DOC, "<<", lexer);
+		else if (i == 2)
+			lexer->tokens[lexer->token_iter]
+				= create_token(TOKEN_HERE_DOC_2, "2<<", lexer);
+		return (INITIAL);
+	}
 	if (i == 1)
-	{
-		if (lexer->line[lexer->line_iter] == '<')
-		{
-			lexer->tokens[lexer->token_iter] = create_token(TOKEN_HERE_DOC, "<<", lexer);
-			return (INITIAL);
-		}
-		lexer->tokens[lexer->token_iter] = create_token(TOKEN_REDIRECT_STDIN, "<", lexer);
-		return (handle_initial(lexer));
-	}
+		lexer->tokens[lexer->token_iter]
+			= create_token(TOKEN_REDIRECT_STDIN, "<", lexer);
 	else if (i == 2)
-	{
-		if (lexer->line[++lexer->line_iter] == '<')
-		{
-			lexer->tokens[lexer->token_iter] = create_token(TOKEN_HERE_DOC_2, "2<<", lexer);
-			return (INITIAL);
-		}
-		lexer->tokens[lexer->token_iter] = create_token(TOKEN_REDIRECT_IN_2, "2<", lexer);
-		return (handle_initial(lexer));
-	}
-	return (INITIAL);
+		lexer->tokens[lexer->token_iter]
+			= create_token(TOKEN_REDIRECT_IN_2, "2<", lexer);
+	return (handle_initial(lexer));
 }
 
 t_state	handle_reading_whitespace(t_lexer *lexer)
 {
 	flush_buffer(lexer, TOKEN_WORD);
 	lexer->tokens[lexer->token_iter] = create_token(TOKEN_BLANK, " ", lexer);
-	while ((lexer->line[lexer->line_iter] == ' ') || (lexer->line[lexer->line_iter] == '\t'))
+	while ((lexer->line[lexer->line_iter] == ' ')
+		|| (lexer->line[lexer->line_iter] == '\t'))
 		(lexer->line_iter)++;
 	if (lexer->line[lexer->line_iter] != '\0')
 		return (handle_initial(lexer));
@@ -246,7 +245,7 @@ t_state	handle_reading_whitespace(t_lexer *lexer)
 		return (INITIAL);
 }
 
-t_state exit_variable(t_lexer *lexer)
+t_state	exit_variable(t_lexer *lexer)
 {
 	if (lexer->buf_index > 0)
 		flush_buffer(lexer, TOKEN_VAR);
@@ -271,18 +270,18 @@ t_state	handle_variable(t_lexer *lexer)
 		if (lexer->buf_index == 0 && c == '?')
 		{
 			lexer->buffer[lexer->buf_index++] = c;
-			return(exit_variable(lexer));
+			return (exit_variable(lexer));
 		}
 		if (lexer->buf_index == 0 && (ft_isalpha(c) || c == '_'))
 			lexer->buffer[lexer->buf_index++] = c;
 		else if (lexer->buf_index == 0 && !ft_isalpha(c) && c != '_')
-			return(exit_variable(lexer));
+			return (exit_variable(lexer));
 		else if ((lexer->buf_index > 0) && (ft_isalnum(c) || c == '_'))
 			lexer->buffer[lexer->buf_index++] = c;
 		else
-			break;
+			break ;
 	}
-	return(exit_variable(lexer));
+	return (exit_variable(lexer));
 }
 
 t_state	scan_loop(t_lexer *lexer)
@@ -308,7 +307,7 @@ t_state	scan_loop(t_lexer *lexer)
 	return (current_state);
 }
 
-int scan_the_Line(const char *line, t_lexer *lexer)
+int	scan_the_line(const char *line, t_lexer *lexer)
 {
 	t_state	current_state;
 

@@ -86,7 +86,7 @@ typedef struct s_lexer {
 
 int			exec_ast(t_ast_node *node, int level, t_ast_node *parent);
 
-int			scan_the_Line(const char *line, t_lexer *lexer);
+int			scan_the_line(const char *line, t_lexer *lexer);
 t_token     *create_token(t_token_type type, const char *value, t_lexer *lexer);
 void        flush_buffer(t_lexer *lexer, t_token_type type);
 t_state     handle_initial(t_lexer *lexer);
@@ -112,7 +112,9 @@ void        parse_command_details(t_token **tokens, int *token_pos, t_ast_node *
 void		print_arguments(t_wrd *arguments, int depth);
 void		print_redirections(t_wrd *redir, int depth, t_token_type rt);
 void		skip_blanks(t_token **tokens, int *token_pos, t_wrd *last);
-void		create_wrd(t_wrd *word, t_token *token);
+void		create_wrd(t_wrd *word, t_token *token, t_token_type rt);
+void		parse_loop(t_lexer *lexer, t_ctx *ctx, t_ast_node *cn);
+void		parse_command_loop(t_token **t, int *tp, t_ctx *ctx, t_ast_node *cn);
 void		print_tokens(t_lexer *lexer);
 
 int traverse_and_exec_the_ast2(cmd_t *c, int level, cmd_t *father);
