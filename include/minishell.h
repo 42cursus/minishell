@@ -103,7 +103,7 @@ void		free_tokens(t_lexer *lexer);
 void		parse_redirection(t_token **tokens, int *token_pos, t_ast_node *parent, t_ctx *ctx);
 t_ast_node  *parse_command(t_token **tokens, int *token_pos, t_ctx *ctx);
 int 		parse_pipeline(const char *line, t_ast_node **root, t_ctx *ctx);
-t_ast_node	*create_node(t_node_type type, const char *value, t_ast_node *parent, t_token_type token);
+t_ast_node	*create_node(t_node_type type, t_token *t, t_ast_node *parent);
 void		find_redir_list(t_wrd *redir, t_token_type type, t_cmd_node *cmd);
 void		print_ast(t_ast_node *node, int depth);
 void        free_ast(t_ast_node *node);
@@ -113,7 +113,7 @@ void		print_arguments(t_wrd *arguments, int depth);
 void		print_redirections(t_wrd *redir, int depth, t_token_type rt);
 void		skip_blanks(t_token **tokens, int *token_pos, t_wrd *last);
 void		create_wrd(t_wrd *word, t_token *token, t_token_type rt);
-void		parse_loop(t_lexer *lexer, t_ctx *ctx, t_ast_node *cn);
+t_ast_node	*pipeline_loop(t_lexer *lexer, t_ctx *ctx);
 void		parse_command_loop(t_token **t, int *tp, t_ctx *ctx, t_ast_node *cn);
 void		print_tokens(t_lexer *lexer);
 

@@ -140,8 +140,8 @@ t_state	handle_symbol(t_lexer *lexer, t_state state)
 
 t_state	handle_initial(t_lexer *lexer)
 {
-	if (lexer->line[lexer->line_iter]
-		== ' ' || lexer->line[lexer->line_iter] == '\t')
+	if (lexer->line[lexer->line_iter] == ' '
+		|| lexer->line[lexer->line_iter] == '\t')
 		return (handle_reading_whitespace(lexer));
 	else if (lexer->line[lexer->line_iter] == '$')
 		return (handle_variable(lexer));
