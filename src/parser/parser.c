@@ -256,7 +256,8 @@ int	has_right(t_lexer *l, t_ast_node **right, t_ctx *ctx)
 {
 	t_token_type	type;
 
-	type = l->tokens[l->token_iter]->type;
+	if (l->tokens[l->token_iter])
+		type = l->tokens[l->token_iter]->type;
 	if (l->tokens[l->token_iter] && type == TOKEN_PIPE)
 	{
 		skip_blanks(l->tokens, &l->token_iter, NULL);
