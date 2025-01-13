@@ -82,6 +82,7 @@ typedef struct HeredocEntry
 {
 	char delimiter[FILENAME_BUF_SIZE];
 	char filename[FILENAME_BUF_SIZE];
+	bool quotes;
 }	HeredocEntry;
 
 typedef struct HereArray

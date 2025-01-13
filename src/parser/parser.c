@@ -108,7 +108,7 @@ int	add_random_numbers_to_str(char *str_buf, int rand_count)
 	int		ret_val;
 
 	ret_val = 0;
-	ft_strncpy(str_buf, "/tmp/heredock_", FILENAME_BUF_SIZE);
+	ft_strncpy(str_buf, "/tmp/heredoc_", FILENAME_BUF_SIZE);
 	fd = open("/dev/urandom", O_RDONLY);
 	if (fd >= 0)
 	{
@@ -128,11 +128,12 @@ int	add_random_numbers_to_str(char *str_buf, int rand_count)
 	return (ret_val);
 }
 
-int	create_here_file(t_wrd *here, HeredocEntry *entry)
+int	create_here_file(t_wrd *here, HeredocEntry *entry, bool expand)
 {
 	int	error_code;
 
 	error_code = 0;
+	entry->quotes = expand;
 	error_code = add_random_numbers_to_str(entry->filename, 5);
 	if (!error_code)
 	{
@@ -150,9 +151,11 @@ void	parse_redirection(t_token **t, int *tp, t_ast_node *parent, t_ctx *ctx)
 {
 	t_wrd			*redir;
 	t_token_type	rt;
+	bool			hereexpand;
 	HeredocEntry	*entry;
 
 	rt = t[*tp]->type;
+	hereexpand = t[*tp]->hereexpand;
 	skip_blanks(t, tp, NULL);
 	if (t[*tp] && (t[*tp]->type == TOKEN_WORD || t[*tp]->type == TOKEN_VAR))
 	{
@@ -163,7 +166,7 @@ void	parse_redirection(t_token **t, int *tp, t_ast_node *parent, t_ctx *ctx)
 		{
 			here_doc_cat(redir);
 			entry = &ctx->hd.entries[ctx->hd.ss++];
-			create_here_file(redir, entry);
+			create_here_file(redir, entry, hereexpand);
 		}
 		find_redir_list(redir, rt, parent->cmd);
 	}

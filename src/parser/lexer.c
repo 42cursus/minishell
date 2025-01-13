@@ -62,11 +62,22 @@ void	print_tokens(t_lexer *lexer)
 			   get_idstring(lexer->tokens[lexer->line_iter]->type), lexer->tokens[lexer->line_iter]->value);
 }
 
+void	end_of_heredoc_check(t_lexer *lexer)
+{
+	lexer->hereEOF = false;
+	lexer->first_blank = false;
+}
+
 t_token	*create_token(t_token_type type, const char *value, t_lexer *lexer)
 {
 	t_token	*token;
 
-	token = (t_token *)malloc(sizeof(t_token));
+	if (type == TOKEN_HERE_DOC || type == TOKEN_HERE_DOC_2)
+	{
+		lexer->hereEOF = true;
+		lexer->heredoc_index = lexer->token_iter; 
+	}
+	token = ft_calloc(sizeof(t_token), 1);
 	if (!token)
 		return (NULL);
 	token->type = type;
@@ -134,7 +145,10 @@ t_state	handle_symbol(t_lexer *lexer, t_state state)
 {
 	flush_buffer(lexer, TOKEN_WORD);
 	if (state == INITIAL)
+	{
+		end_of_heredoc_check(lexer);
 		lexer->tokens[lexer->token_iter] = create_token(TOKEN_PIPE, "|", lexer);
+	}
 	return (state);
 }
 
@@ -159,12 +173,15 @@ t_state	handle_initial(t_lexer *lexer)
 		return (handle_symbol(lexer, CHECK_HERE_DOC));
 	else if (lexer->line[lexer->line_iter] == '|')
 		return (handle_symbol(lexer, INITIAL));
+	else if (lexer->hereEOF == true && lexer->first_blank == false)
+		lexer->first_blank = true;
 	lexer->buffer[lexer->buf_index++] = lexer->line[lexer->line_iter];
 	return (INITIAL);
 }
 
 t_state	handle_in_single_quote(t_lexer *lexer)
 {
+	end_of_heredoc_check(lexer);
 	if (lexer->line[lexer->line_iter] == '\'')
 	{
 		flush_buffer(lexer, TOKEN_WORD);
@@ -176,6 +193,11 @@ t_state	handle_in_single_quote(t_lexer *lexer)
 
 t_state	handle_in_double_quote(t_lexer *lexer)
 {
+	if (lexer->hereEOF == true)
+	{
+		lexer->tokens[lexer->heredoc_index]->hereexpand = true;
+		end_of_heredoc_check(lexer);
+	}
 	if (lexer->line[lexer->line_iter] == '$')
 	{
 		lexer->curent_string = '"';
@@ -192,6 +214,7 @@ t_state	handle_in_double_quote(t_lexer *lexer)
 
 t_state	handle_check_append(t_lexer *lexer, int i)
 {
+	end_of_heredoc_check(lexer);
 	if (lexer->line[lexer->line_iter] == '>')
 	{
 		if (i == 1)
@@ -213,6 +236,7 @@ t_state	handle_check_append(t_lexer *lexer, int i)
 
 t_state	handle_check_here_doc(t_lexer *lexer, int i)
 {
+	end_of_heredoc_check(lexer);
 	if (lexer->line[lexer->line_iter] == '<')
 	{
 		if (i == 1)
@@ -233,7 +257,11 @@ t_state	handle_check_here_doc(t_lexer *lexer, int i)
 }
 
 t_state	handle_reading_whitespace(t_lexer *lexer)
-{
+{	
+	if (lexer->hereEOF == true && lexer->first_blank == false)
+		lexer->first_blank = true;
+	else if (lexer->hereEOF == true && lexer->first_blank == true)
+		end_of_heredoc_check(lexer);
 	flush_buffer(lexer, TOKEN_WORD);
 	lexer->tokens[lexer->token_iter] = create_token(TOKEN_BLANK, " ", lexer);
 	while ((lexer->line[lexer->line_iter] == ' ')
@@ -263,6 +291,7 @@ t_state	handle_variable(t_lexer *lexer)
 {
 	char	c;
 
+	end_of_heredoc_check(lexer);
 	flush_buffer(lexer, TOKEN_WORD);
 	while (lexer->line[++(lexer->line_iter)] != '\0')
 	{

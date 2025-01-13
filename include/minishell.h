@@ -57,8 +57,9 @@ typedef enum e_token_type {
 } t_token_type;
 
 typedef struct s_token {
-	t_token_type type;
-	char *value;
+	t_token_type	type;
+	bool			hereexpand;
+	char 			*value;
 } t_token;
 
 typedef enum e_state {
@@ -76,7 +77,9 @@ typedef struct s_lexer {
 	char curent_string;
 	char	*line;
 	int		line_iter;
-
+	bool	first_blank;
+	bool	hereEOF;
+	int		heredoc_index;
 	t_token *tokens[MAX_TOKENS];
 	int		tokens_size;
 	int		token_iter;
@@ -116,6 +119,10 @@ void		create_wrd(t_wrd *word, t_token *token, t_token_type rt);
 t_ast_node	*pipeline_loop(t_lexer *lexer, t_ctx *ctx);
 void		parse_command_loop(t_token **t, int *tp, t_ctx *ctx, t_ast_node *cn);
 void		print_tokens(t_lexer *lexer);
+void		end_of_heredoc_check(t_lexer *lexer);
+void		herefile_lexing(int fd, char *line);
+int			herefile_varname(int i, char *var, char *line);
+void		herefile_expansion(int fd, char *var);
 
 int traverse_and_exec_the_ast2(cmd_t *c, int level, cmd_t *father);
 int traverse_and_exec_the_ast(t_ast_node *cmd, int level, t_ast_node *father);

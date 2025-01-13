@@ -20,12 +20,75 @@ void	ft_sh_init_welcome(void);
 int		ft_sh_execute(t_obj_arr *ops, t_ctx *ctx);
 int		ft_sh_tokenize(t_obj_arr *ops, t_ctx *ctx);
 
+int	herefile_varname(int i, char *var, char *line)
+{
+	int		bi;
+	char	c;
+
+	bi = 0;
+	while (line[++i] != '\0')
+	{
+		c = line[i];
+		if (bi == 0 && (ft_isalpha(c) || c == '_'))
+			var[bi++] = c;
+		else if (bi == 0 && !ft_isalpha(c) && c != '_')
+			return (1);
+		else if ((bi > 0) && (ft_isalnum(c) || c == '_'))
+			var[bi++] = c;
+		else
+			break ;
+	}
+	var[bi] = '\0';
+	if (bi > 0)
+		return (0);
+	return (1);
+}
+
+void	herefile_expansion(int fd, char *var)
+{
+	const char	*value;
+
+	value = getenv(var);
+	if (value != NULL)
+		dprintf(fd, "%s", value);
+	else
+	{
+		dprintf(fd, "$");
+		dprintf(fd, "%s", var);
+	} 
+}
+
+void	herefile_lexing(int fd, char *line)
+{
+	int		i;
+	int		e;
+	char	var[1000];
+
+	i = 0;
+	while (line[i] != '\0')
+	{
+		while (line[i] != '$' && line[i] != '\0')
+			write(fd, &line[i++], 1);
+		if (line[i] == '$')
+		{
+			e = herefile_varname(i, var, line);
+			i += (ft_strlen(var));
+			if (e == 1)
+				write(fd, "$", 1);
+			else if (e == 0)
+				herefile_expansion(fd, var); 
+		}
+		if (line[i] != '\0')
+			i++;
+	}
+	write(fd, "\n", 1);
+}
+
 void	collect_heredocs(t_ctx *ctx)
 {
 	int				fd;
 	int				i;
 	char			*line;
-	const int		flags = O_WRONLY | O_CREAT;
 	const mode_t	mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
 	HeredocEntry	*en;
 
@@ -35,14 +98,15 @@ void	collect_heredocs(t_ctx *ctx)
 	while(++i < ctx->hd.size)
 	{
 		en = &ctx->hd.entries[i];
-		fd = open(en->filename, flags, mode);
+		fd = open(en->filename, O_WRONLY | O_CREAT, mode);
 		if (fd < 0) break;
 		line = ft_sh_read_line(ctx, "> ");
-
-		while(ft_strcmp(line, en->delimiter))
+		while (ft_strcmp(line, en->delimiter))
 		{
-			
-			dprintf(fd, "%s\n", line);
+			if (ft_strchr(line, '$') && en->quotes == false)
+				herefile_lexing(fd, line);
+			else
+				dprintf(fd, "%s\n", line);
 			line = ft_sh_read_line(ctx, "> ");
 		}
 		close(fd);
