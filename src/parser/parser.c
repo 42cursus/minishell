@@ -133,13 +133,18 @@ int	ft_getpid(void)
 	int		fd;
 	char	buf[20];
 	int		i;
+	size_t	bytes_read;
 
 	i = 0;
 	ft_bzero(buf, 20);
 	fd = open("/proc/self/stat", O_RDONLY);
-	read(fd, buf, 15);
+	if (fd < 0)
+		return (-1);
+	bytes_read = read(fd, buf, 15);
+	if (bytes_read <= 0)
+		return (-1);
 	close(fd);
-	while(buf[i] != ' ' && buf[i] != '\t' && buf[i] != '\0')
+	while (ft_isdigit(buf[i]) && buf[i] && buf[i] != '\0')
 		i++;
 	buf[i] = '\0';
 	return (ft_atoi(buf));
