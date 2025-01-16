@@ -81,7 +81,8 @@ t_token	*create_token(t_token_type type, const char *value, t_lexer *lexer)
 	if (!token)
 		return (NULL);
 	token->type = type;
-	token->value = strdup(value);
+	if (value)
+		token->value = strdup(value);
 	lexer->tokens[lexer->token_iter++] = token;
 	return (token);
 }
@@ -205,7 +206,10 @@ t_state	handle_in_double_quote(t_lexer *lexer)
 	}
 	if (lexer->line[lexer->line_iter] == '"')
 	{
-		flush_buffer(lexer, TOKEN_WORD);
+		if (lexer->buf_index == 0)
+			create_token(TOKEN_WORD, "\0", lexer);
+		else
+			flush_buffer(lexer, TOKEN_WORD);
 		return (INITIAL);
 	}
 	lexer->buffer[lexer->buf_index++] = lexer->line[lexer->line_iter];
@@ -273,18 +277,34 @@ t_state	handle_reading_whitespace(t_lexer *lexer)
 		return (INITIAL);
 }
 
-t_state	exit_variable(t_lexer *lexer)
+t_state	exit_variable(t_lexer *l)
 {
-	if (lexer->buf_index > 0)
-		flush_buffer(lexer, TOKEN_VAR);
-	if (lexer->curent_string == '"')
+	if (l->line[(l->line_iter)] == '?' && l->buf_index == 0)
 	{
-		lexer->curent_string = '0';
-		return (handle_in_double_quote(lexer));
+		l->buffer[l->buf_index++] = '?';
+		l->line_iter++;
 	}
-	if (lexer->line[lexer->line_iter] != '\0')
-		return (handle_initial(lexer));
+	if (l->buf_index > 0)
+		flush_buffer(l, TOKEN_VAR);
+	if (l->curent_string == '"')
+	{
+		l->curent_string = '0';
+		return (handle_in_double_quote(l));
+	}
+	if (l->line[l->line_iter] != '\0')
+		return (handle_initial(l));
 	return (INITIAL);
+}
+
+t_state	create_pid_token(t_lexer *lexer)
+{
+	char	*pid;
+
+	pid = ft_itoa(getpid());
+	create_token(TOKEN_WORD, pid, lexer);
+	free(pid);
+	lexer->line_iter++;
+	return (exit_variable(lexer));
 }
 
 t_state	handle_variable(t_lexer *lexer)
@@ -297,10 +317,9 @@ t_state	handle_variable(t_lexer *lexer)
 	{
 		c = lexer->line[(lexer->line_iter)];
 		if (lexer->buf_index == 0 && c == '?')
-		{
-			lexer->buffer[lexer->buf_index++] = c;
 			return (exit_variable(lexer));
-		}
+		if (lexer->buf_index == 0 && c == '$')
+			return create_pid_token(lexer);
 		if (lexer->buf_index == 0 && (ft_isalpha(c) || c == '_'))
 			lexer->buffer[lexer->buf_index++] = c;
 		else if (lexer->buf_index == 0 && !ft_isalpha(c) && c != '_')

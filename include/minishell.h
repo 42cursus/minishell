@@ -95,7 +95,7 @@ void        flush_buffer(t_lexer *lexer, t_token_type type);
 t_state     handle_initial(t_lexer *lexer);
 t_state		handle_symbol(t_lexer *lexer, t_state state);
 t_state		handle_in_single_quote(t_lexer *lexer);
-t_state		exit_variable(t_lexer *lexer);
+t_state		exit_variable(t_lexer *l);
 t_state     handle_variable(t_lexer *lexer);
 t_state     handle_in_double_quote(t_lexer *lexer);
 t_state     handle_check_append(t_lexer *lexer, int i);
@@ -123,6 +123,7 @@ void		end_of_heredoc_check(t_lexer *lexer);
 void		herefile_lexing(int fd, char *line);
 int			herefile_varname(int i, char *var, char *line);
 void		herefile_expansion(int fd, char *var);
+t_state		create_pid_token(t_lexer *lexer);
 
 int traverse_and_exec_the_ast2(cmd_t *c, int level, cmd_t *father);
 int traverse_and_exec_the_ast(t_ast_node *cmd, int level, t_ast_node *father);
