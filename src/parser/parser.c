@@ -101,14 +101,13 @@ void	here_doc_cat(t_wrd *here)
 
 int	add_random_numbers_to_str(char *str_buf, int rand_count)
 {
-	char	random_code[6];
+	char	random_code[20];
 	char	buf[1];
 	int		fd;
 	int		i;
 	int		ret_val;
 
 	ret_val = 0;
-	ft_strncpy(str_buf, "/tmp/heredoc_", FILENAME_BUF_SIZE);
 	fd = open("/dev/urandom", O_RDONLY);
 	if (fd >= 0)
 	{
@@ -128,13 +127,36 @@ int	add_random_numbers_to_str(char *str_buf, int rand_count)
 	return (ret_val);
 }
 
+int	ft_getpid(void)
+{
+	int		pid;
+	int		fd;
+	char	buf[20];
+	int		i;
+
+	i = 0;
+	ft_bzero(buf, 20);
+	fd = open("/proc/self/stat", O_RDONLY);
+	read(fd, buf, 15);
+	close(fd);
+	while(buf[i] != ' ' && buf[i] != '\t' && buf[i] != '\0')
+		i++;
+	buf[i] = '\0';
+	return (ft_atoi(buf));
+}
+
 int	create_here_file(t_wrd *here, HeredocEntry *entry, bool expand)
 {
-	int	error_code;
+	int		error_code;
+	char	*pid;
 
+	pid = ft_itoa(ft_getpid());
 	error_code = 0;
 	entry->quotes = expand;
-	error_code = add_random_numbers_to_str(entry->filename, 5);
+	ft_strncpy(entry->filename, "/tmp/heredoc_", FILENAME_BUF_SIZE);
+	ft_strcat(entry->filename, pid);
+	free(pid);
+	error_code = add_random_numbers_to_str(entry->filename, 10);
 	if (!error_code)
 	{
 		ft_strcpy(entry->delimiter, here->value);
@@ -362,6 +384,8 @@ void print_arguments(t_wrd *arguments, int depth)
 			ft_printf("  ");
 		if (!arguments->value)
 			snprintf(buf, BUFF_SIZE, "NULL");
+		else if (arguments->value && ft_strlen(arguments->value) == 0)
+			snprintf(buf, BUFF_SIZE, "(empty string)");	
 		else if (arguments->value && arguments->expand)
 			snprintf(buf, BUFF_SIZE, "expand(%s)", arguments->value);
 		else
@@ -376,6 +400,8 @@ void print_arguments(t_wrd *arguments, int depth)
 				snprintf(buf, BUFF_SIZE, "NULL");
 			else if (node->value && node->expand)
 				snprintf(buf, BUFF_SIZE, "expand(%s)", node->value);
+			else if (node->value && ft_strlen(node->value) == 0)
+				snprintf(buf, BUFF_SIZE, "(empty string)");
 			else
 				snprintf(buf, 1024, "%s", node->value);
 			ft_printf("; %s", buf);

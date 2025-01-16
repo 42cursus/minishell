@@ -58,8 +58,21 @@ void	print_tokens(t_lexer *lexer)
 	printf("\n\nTokens:\n");
 	lexer->line_iter = -1;
 	while (lexer->tokens[++(lexer->line_iter)] != NULL)
-		printf("Token Type: \"%s\", Value: %s\n",
+	{
+		if (!lexer->tokens[lexer->line_iter]->value)
+		{
+			printf("Token Type: \"%s\", Value: %s\n",
+			   get_idstring(lexer->tokens[lexer->line_iter]->type), "NULL");
+		}
+		else if (lexer->tokens[lexer->line_iter]->value && ft_strlen(lexer->tokens[lexer->line_iter]->value) == 0)
+		{
+			printf("Token Type: \"%s\", Value: %s\n",
+			   get_idstring(lexer->tokens[lexer->line_iter]->type), "(empty string)");
+		}
+		else
+			printf("Token Type: \"%s\", Value: %s\n",
 			   get_idstring(lexer->tokens[lexer->line_iter]->type), lexer->tokens[lexer->line_iter]->value);
+	}
 }
 
 void	end_of_heredoc_check(t_lexer *lexer)
@@ -280,10 +293,7 @@ t_state	handle_reading_whitespace(t_lexer *lexer)
 t_state	exit_variable(t_lexer *l)
 {
 	if (l->line[(l->line_iter)] == '?' && l->buf_index == 0)
-	{
-		l->buffer[l->buf_index++] = '?';
-		l->line_iter++;
-	}
+		l->buffer[l->buf_index++] = l->line[(l->line_iter)++];
 	if (l->buf_index > 0)
 		flush_buffer(l, TOKEN_VAR);
 	if (l->curent_string == '"')
@@ -300,7 +310,7 @@ t_state	create_pid_token(t_lexer *lexer)
 {
 	char	*pid;
 
-	pid = ft_itoa(getpid());
+	pid = ft_itoa(ft_getpid());
 	create_token(TOKEN_WORD, pid, lexer);
 	free(pid);
 	lexer->line_iter++;

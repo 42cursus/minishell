@@ -124,6 +124,7 @@ void		herefile_lexing(int fd, char *line);
 int			herefile_varname(int i, char *var, char *line);
 void		herefile_expansion(int fd, char *var);
 t_state		create_pid_token(t_lexer *lexer);
+int			ft_getpid(void);
 
 int traverse_and_exec_the_ast2(cmd_t *c, int level, cmd_t *father);
 int traverse_and_exec_the_ast(t_ast_node *cmd, int level, t_ast_node *father);
