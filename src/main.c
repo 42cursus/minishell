@@ -50,11 +50,11 @@ void	herefile_expansion(int fd, char *var)
 
 	value = getenv(var);
 	if (value != NULL)
-		dprintf(fd, "%s", value);
+		ft_dprintf(fd, "%s", value);
 	else
 	{
-		dprintf(fd, "$");
-		dprintf(fd, "%s", var);
+		ft_dprintf(fd, "$");
+		ft_dprintf(fd, "%s", var);
 	} 
 }
 
@@ -106,7 +106,7 @@ void	collect_heredocs(t_ctx *ctx)
 			if (ft_strchr(line, '$') && en->quotes == false)
 				herefile_lexing(fd, line);
 			else
-				dprintf(fd, "%s\n", line);
+				ft_dprintf(fd, "%s\n", line);
 			line = ft_sh_read_line(ctx, "> ");
 		}
 		close(fd);

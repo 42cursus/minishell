@@ -29,10 +29,9 @@ char	*ft_sh_read_line(t_ctx *ctx, const char *fmt)
 
 	if (fmt == NULL)
 		fmt = "[%d] "FT_GREEN"%s"FT_RESET"@"FT_BLUE"%s"FT_RESET"-> ";
-	sprintf(ps, fmt, count, p, pwd);
+	ft_sprintf(ps, fmt, count, p, pwd);
 	line = readline(ps);
 	if (line && *line)
 		count++;
 	return (line);
 }
-

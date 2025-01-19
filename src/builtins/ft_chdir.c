@@ -58,11 +58,11 @@ int	ft_chdir(t_ctx *ctx)
 		else
 		{
 			//TODO: fix error handling
-			dprintf(STDERR_FILENO, "minish: cd: HOME not set\n");
+			ft_dprintf(STDERR_FILENO, "minish: cd: HOME not set\n");
 			return (free(oldpwd), -1);
 		}
 	}
-	dprintf(STDOUT_FILENO, "changing directory to: %s\n", path);
+	ft_dprintf(STDOUT_FILENO, "changing directory to: %s\n", path);
 	if (chdir(path) != 0)
 		return (free(oldpwd), -1);
 	ft_chdir_update_env_vars(ctx, oldpwd, path, cwd);
