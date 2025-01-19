@@ -75,7 +75,13 @@ struct word_t
 typedef enum e_errcodes
 {
 	OK = 0,
-	COULDNT_OPEN_URANDOM
+	COULDNT_OPEN_URANDOM ,
+	UNCLOSED_QUOTE ,
+	TOKEN_ALLOC_FAILURE ,
+	PID_ALLOC_FAILURE ,
+	ALLOC_FAILURE ,
+	NO_REDIR_TARGET ,
+	HD_CAT_FAILURE ,
 } t_errcodes;
 
 typedef struct HeredocEntry

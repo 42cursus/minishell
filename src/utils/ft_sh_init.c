@@ -12,6 +12,44 @@
 
 #include "minishell.h"
 
+volatile sig_atomic_t	global_hd = 0;
+
+void	collect_heredocs(t_ctx *ctx)
+{
+	int				fd;
+	int				i;
+	char			*line;
+	const mode_t	mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
+	HeredocEntry	*en;
+
+	i = -1;
+	//disable_ctrl_c_printing();
+	global_hd = 1;
+	while(++i < ctx->hd.size && global_hd == 1)
+	{
+		en = &ctx->hd.entries[i];
+		fd = open(en->filename, O_WRONLY | O_CREAT, mode);
+		if (fd < 0) break;
+		line = ft_sh_read_line(ctx, "> ");
+		while (line && ft_strcmp(line, en->delimiter) && global_hd == 1)
+		{
+			herefile_lexing(fd, line, en->quotes);
+			line = ft_sh_read_line(ctx, "> ");
+
+			if (global_hd == 0)
+				break ;
+		}
+		close(fd);
+	}
+	if (global_hd == 0)
+	{
+		close (fd);
+		unlink_herefiles(ctx);
+	}	
+	//restore_ctrl_c_printing();
+	global_hd = 0;
+}
+
 int	do_init_ops(t_obj_arr **ops)
 {
 	static t_obj_arr	obj;
@@ -40,16 +78,22 @@ void	sig_handler(int sig, siginfo_t *info, void *ctx)
 	sipid = info->si_pid;
 	(void)ctx;
 	(void)sipid;
+	if (global_hd == 1)
+	{
+        if (sig == SIGINT)
+		{
+			global_hd = 0;
+			printf("\n");
+			rl_on_new_line();
+			rl_replace_line("", 0);
+			rl_redisplay();
+			rl_done = 1;
+		}
+        return;
+    }
 	if (sig == SIGINT)
 	{
-		printf("\tSIGINT\n");
-		rl_on_new_line();
-		rl_replace_line("", 0);
-		rl_redisplay();
-	}
-	else if (sig == SIGQUIT)
-	{
-		printf("\tSIGQUIT\n");
+		printf("\n");
 		rl_on_new_line();
 		rl_replace_line("", 0);
 		rl_redisplay();
@@ -64,8 +108,10 @@ void	ft_sh_set_signal(t_ctx *const *ctx)
 	act.sa_sigaction = &sig_handler;
 	sigemptyset(&act.sa_mask);
 	sigaddset(&act.sa_mask, SIGINT);
-	sigaddset(&act.sa_mask, SIGQUIT);
-	if (sigaction(SIGINT, &act, NULL) || sigaction(SIGQUIT, &act, NULL))
+	//sigaddset(&act.sa_mask, SIGQUIT);
+
+	signal(SIGQUIT, SIG_IGN);
+	if (sigaction(SIGINT, &act, NULL))
 	{
 		ft_sh_destroy_ctx(*ctx);
 		exit(EXIT_FAILURE);

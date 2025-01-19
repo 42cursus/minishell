@@ -20,6 +20,24 @@ void	ft_sh_init_welcome(void);
 int		ft_sh_execute(t_obj_arr *ops, t_ctx *ctx);
 int		ft_sh_tokenize(t_obj_arr *ops, t_ctx *ctx);
 
+void	disable_ctrl_c_printing(void)
+{
+    struct termios	term;
+
+	tcgetattr(0, &term);
+    term.c_lflag &= ~ECHOCTL;
+    tcsetattr(0, TCSANOW, &term);
+}
+
+void	restore_ctrl_c_printing(void)
+{
+    struct termios	term;
+
+    tcgetattr(0, &term);
+	term.c_lflag |= ECHOCTL;
+    tcsetattr(0, TCSANOW, &term);
+}
+
 int	herefile_varname(int i, char *var, char *line)
 {
 	int		bi;
@@ -44,6 +62,24 @@ int	herefile_varname(int i, char *var, char *line)
 	return (1);
 }
 
+int		unlink_herefiles(t_ctx *ctx)
+{
+	const char	*filename;
+	int			i;
+	int			err;
+
+	i = -1;
+	err = 0;
+	while(++i < ctx->hd.size)
+	{
+		filename = ctx->hd.entries[i].filename;
+		err = unlink(filename);
+		if (err != 0)
+			return (1);
+	}
+	return (0);
+}
+
 void	herefile_expansion(int fd, char *var)
 {
 	const char	*value;
@@ -58,17 +94,15 @@ void	herefile_expansion(int fd, char *var)
 	} 
 }
 
-void	herefile_lexing(int fd, char *line)
+void	herefile_lexing(int fd, char *line, bool quotes)
 {
 	int		i;
 	int		e;
 	char	var[1000];
 
-	i = 0;
-	while (line[i] != '\0')
+	i = -1;
+	while (line[++i] != '\0' && quotes == false)
 	{
-		while (line[i] != '$' && line[i] != '\0')
-			write(fd, &line[i++], 1);
 		if (line[i] == '$')
 		{
 			e = herefile_varname(i, var, line);
@@ -78,39 +112,18 @@ void	herefile_lexing(int fd, char *line)
 			else if (e == 0)
 				herefile_expansion(fd, var); 
 		}
-		if (line[i] != '\0')
-			i++;
+		else 
+			write(fd, &line[i], 1);
 	}
+	if (quotes == true)
+		ft_dprintf(fd, "%s", line);
 	write(fd, "\n", 1);
 }
 
-void	collect_heredocs(t_ctx *ctx)
+void handle_sigint(int sig)
 {
-	int				fd;
-	int				i;
-	char			*line;
-	const mode_t	mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
-	HeredocEntry	*en;
-
-	if (ctx == NULL)
-		return;
-	i = -1;
-	while(++i < ctx->hd.size)
-	{
-		en = &ctx->hd.entries[i];
-		fd = open(en->filename, O_WRONLY | O_CREAT, mode);
-		if (fd < 0) break;
-		line = ft_sh_read_line(ctx, "> ");
-		while (ft_strcmp(line, en->delimiter))
-		{
-			if (ft_strchr(line, '$') && en->quotes == false)
-				herefile_lexing(fd, line);
-			else
-				ft_dprintf(fd, "%s\n", line);
-			line = ft_sh_read_line(ctx, "> ");
-		}
-		close(fd);
-	}
+    
+    printf("\nCaught SIGINT (Ctrl+C)!\n");
 }
 
 int	ft_sh_loop2(t_ctx *ctx)
@@ -123,6 +136,7 @@ int	ft_sh_loop2(t_ctx *ctx)
 	status = 0;
 	ctx->argv = NULL;
 	ctx->argc = 0;
+
 
 	line = "<<HERE cat | grep $?hdbf";
 
@@ -150,12 +164,19 @@ int	ft_sh_loop2(t_ctx *ctx)
 	return (status);
 }
 
+
+int event(void) { return(0); }
+
 int	ft_sh_loop(t_ctx *ctx)
 {
 	char	*line;
 	int		status;
 	cmd_t *root = NULL;
 	t_ast_node *ast = NULL;
+
+
+	// rl_getc_function = getc;
+	rl_event_hook=event;
 
 	ft_sh_init_welcome();
 	status = 0;
@@ -174,12 +195,6 @@ int	ft_sh_loop(t_ctx *ctx)
 				ctx->hd.size = 1024;
 				ft_memset(ctx->hd.entries, 0, sizeof(HeredocEntry) * HEREDOC_ARRAY_SIZE);
 				int errcode = parse_pipeline(line, &ast, ctx);
-				if (errcode)
-				{
-					// clean and break
-					status = SHELL_EXIT;
-					break;
-				}
 				if (!ast)
 					ft_printf("Error: Failed to parse the command.\n");
 				else
@@ -208,6 +223,7 @@ int	ft_sh_loop(t_ctx *ctx)
 // 					free_parse_memory();
 // 				}
 				free_ast(ast);
+				unlink_herefiles(ctx);
 			}
 			free(line);
 		}

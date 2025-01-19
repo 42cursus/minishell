@@ -25,7 +25,7 @@ t_ast_node	*create_node(t_node_type type, t_token *t, t_ast_node *parent)
 	{
 		node->cmd->args = ft_calloc(sizeof(t_wrd), 1);
 		node->cmd->args->value = strdup(t->value);
-		if (t->type == TOKEN_VAR)
+		if (t->type == T_VAR)
 			node->cmd->args->expand = true;
 	}
 	node->parent = parent;
@@ -51,7 +51,7 @@ void	list_append(t_wrd **list, t_wrd *redir)
 
 void	find_redir_list(t_wrd *redir, t_token_type type, t_cmd_node *cmd)
 {
-	if (type == TOKEN_REDIRECT_STDOUT || type == TOKEN_APPEND)
+	if (type == T_REDIRECT_STDOUT || type == TOKEN_APPEND)
 		list_append(&cmd->redirects_out, redir);
 	else if (type == TOKEN_REDIRECT_STDIN || type == TOKEN_HERE_DOC)
 		list_append(&cmd->redirects_in, redir);
@@ -61,11 +61,13 @@ void	find_redir_list(t_wrd *redir, t_token_type type, t_cmd_node *cmd)
 		list_append(&cmd->redirects_err_in, redir);
 }
 
-char	*hd_cat_loop(t_wrd *here, size_t len)
+char	*hd_cat_loop(t_wrd *here, size_t len, t_lexer *l)
 {
 	char	*str;
 
 	str = ft_calloc(sizeof(char), len + 1);
+	if (str == NULL)
+		l->err = ALLOC_FAILURE;
 	while (here)
 	{
 		ft_strcat(str, here->value);
@@ -74,7 +76,7 @@ char	*hd_cat_loop(t_wrd *here, size_t len)
 	return (str);
 }
 
-void	here_doc_cat(t_wrd *here)
+int	here_doc_cat(t_wrd *here, t_lexer *l)
 {
 	t_wrd		*origin;
 	char		*str;
@@ -90,13 +92,16 @@ void	here_doc_cat(t_wrd *here)
 			here = here->next_part;
 		}
 		here = origin;
-		str = hd_cat_loop(here, len);
+		str = hd_cat_loop(here, len, l);
+		if (!str)
+			return (HD_CAT_FAILURE);
 		free((void *)origin->value);
 		free_wrd(origin->next_part);
 		origin->value = ft_strdup(str);
 		free(str);
 		origin->next_part = NULL;
 	}
+	return (0);
 }
 
 int	add_random_numbers_to_str(char *str_buf, int rand_count)
@@ -129,7 +134,6 @@ int	add_random_numbers_to_str(char *str_buf, int rand_count)
 
 int	ft_getpid(void)
 {
-	int		pid;
 	int		fd;
 	char	buf[20];
 	int		i;
@@ -156,91 +160,94 @@ int	create_here_file(t_wrd *here, HeredocEntry *entry, bool expand)
 	char	*pid;
 
 	pid = ft_itoa(ft_getpid());
+	error_code = PID_ALLOC_FAILURE;
 	error_code = 0;
-	entry->quotes = expand;
-	ft_strncpy(entry->filename, "/tmp/heredoc_", FILENAME_BUF_SIZE);
-	ft_strcat(entry->filename, pid);
-	free(pid);
-	error_code = add_random_numbers_to_str(entry->filename, 10);
 	if (!error_code)
 	{
-		ft_strcpy(entry->delimiter, here->value);
-		free((void *)here->value);
-		here->value = NULL;
-		here->value = ft_strdup(entry->filename);
+		entry->quotes = expand;
+		ft_strncpy(entry->filename, "/tmp/heredoc_", FILENAME_BUF_SIZE);
+		ft_strcat(entry->filename, pid);
+		free(pid);
+		error_code = add_random_numbers_to_str(entry->filename, 10);
+		if (!error_code)
+		{
+			ft_strcpy(entry->delimiter, here->value);
+			free((void *)here->value);
+			here->value = NULL;
+			here->value = ft_strdup(entry->filename);
+		}
 	}
-	else
-		perror("Couldn't add_random_numbers_to_str");
 	return (error_code);
 }
 
-void	parse_redirection(t_token **t, int *tp, t_ast_node *parent, t_ctx *ctx)
+void	parse_redirection(int *tp, t_ast_node *p, t_ctx *ctx, t_lexer *l)
 {
 	t_wrd			*redir;
 	t_token_type	rt;
 	bool			hereexpand;
 	HeredocEntry	*entry;
 
-	rt = t[*tp]->type;
-	hereexpand = t[*tp]->hereexpand;
-	skip_blanks(t, tp, NULL);
-	if (t[*tp] && (t[*tp]->type == TOKEN_WORD || t[*tp]->type == TOKEN_VAR))
+	rt = l->t[*tp]->type;
+	hereexpand = l->t[*tp]->hereexpand;
+	skip_blanks(l->t, tp, NULL, l);
+	if (l->t[*tp] && (l->t[*tp]->type == T_WORD || l->t[*tp]->type == T_VAR))
 	{
 		redir = ft_calloc(sizeof(t_wrd), 1);
-		create_wrd(redir, t[*tp], rt);
-		skip_blanks(t, tp, redir);
+		create_wrd(redir, l->t[*tp], rt);
+		skip_blanks(l->t, tp, redir, l);
 		if (rt == TOKEN_HERE_DOC || rt == TOKEN_HERE_DOC_2)
 		{
-			here_doc_cat(redir);
+			l->err = here_doc_cat(redir, l);
 			entry = &ctx->hd.entries[ctx->hd.ss++];
-			create_here_file(redir, entry, hereexpand);
+			if (l->err == 0)
+				l->err = create_here_file(redir, entry, hereexpand);
 		}
-		find_redir_list(redir, rt, parent->cmd);
+		find_redir_list(redir, rt, p->cmd);
 	}
 	else
-		ft_printf("Syntax error: Expected target after redirection\n");
+		l->err = NO_REDIR_TARGET;
 }
 
-void	parse_command_loop(t_token **t, int *tp, t_ctx *ctx, t_ast_node *cn)
+void	parse_command_loop(int *tp, t_ctx *ctx, t_ast_node *cn, t_lexer *l)
 {
 	t_wrd	*arg;
 	t_wrd	*la;
 
 	la = cn->cmd->args;
-	while (t[*tp] != NULL)
+	while (l->t[*tp] != NULL && l->err == 0)
 	{
-		if (t[*tp]->type == TOKEN_WORD || t[*tp]->type == TOKEN_VAR)
+		if (l->t[*tp]->type == T_WORD || l->t[*tp]->type == T_VAR)
 		{
 			arg = ft_calloc(sizeof(t_wrd), 1);
-			create_wrd(arg, t[*tp], t[*tp]->type);
+			create_wrd(arg, l->t[*tp], l->t[*tp]->type);
 			if (cn->cmd->args == NULL)
 				cn->cmd->args = arg;
 			else if (la != NULL)
 				la->next_word = arg;
 			la = arg;
-			skip_blanks(t, tp, arg);
+			skip_blanks(l->t, tp, arg, l);
 		}
-		else if (t[*tp]->type >= TOKEN_REDIRECT_STDOUT && t[*tp]->type < 16)
-			parse_redirection(t, tp, cn, ctx);
+		else if (l->t[*tp]->type >= T_REDIRECT_STDOUT && l->t[*tp]->type < 16)
+			parse_redirection(tp, cn, ctx, l);
 		else
 			break ;
 	}
 }
 
-t_ast_node	*parse_command(t_token **t, int *tp, t_ctx *ctx)
+t_ast_node	*parse_command(t_token **t, int *tp, t_ctx *ctx, t_lexer *l)
 {
 	t_ast_node	*command_node;
 
-	if (t[*tp]->type == TOKEN_WORD || t[*tp]->type == TOKEN_VAR)
+	if (t[*tp]->type == T_WORD || t[*tp]->type == T_VAR)
 	{
 		command_node = create_node(NODE_COMMAND, t[*tp], NULL);
-		skip_blanks(t, tp, command_node->cmd->args);
+		skip_blanks(t, tp, command_node->cmd->args, l);
 	}
 	else
 		command_node = create_node(NODE_COMMAND, NULL, NULL);
 	if (!command_node)
 		return (NULL);
-	parse_command_loop(t, tp, ctx, command_node);
+	parse_command_loop(tp, ctx, command_node, l);
 	return (command_node);
 }
 
@@ -250,7 +257,7 @@ void	create_wrd(t_wrd *word, t_token *token, t_token_type rt)
 	if (token)
 	{
 		word->value = ft_strdup(token->value);
-		if (token->type == TOKEN_VAR)
+		if (token->type == T_VAR)
 			word->expand = true;
 		else
 			word->expand = false;
@@ -259,15 +266,17 @@ void	create_wrd(t_wrd *word, t_token *token, t_token_type rt)
 		word->append = true;
 }
 
-void	skip_blanks(t_token **ts, int *tp, t_wrd *last)
+void	skip_blanks(t_token **ts, int *tp, t_wrd *last, t_lexer *l)
 {
 	t_token	*t;
 
 	if (ts[++(*tp)] && last != NULL)
 	{
-		while (ts[*tp]->type == TOKEN_WORD || ts[*tp]->type == TOKEN_VAR)
+		while (ts[*tp]->type == T_WORD || ts[*tp]->type == T_VAR)
 		{
 			last->next_part = ft_calloc(sizeof(t_wrd), 1);
+			if (!last->next_part)
+				l->err = ALLOC_FAILURE;
 			create_wrd(last->next_part, ts[*tp], ts[*tp]->type);
 			last = last->next_part;
 			if (!ts[++(*tp)])
@@ -286,12 +295,12 @@ int	has_right(t_lexer *l, t_ast_node **right, t_ctx *ctx)
 {
 	t_token_type	type;
 
-	if (l->tokens[l->token_iter])
-		type = l->tokens[l->token_iter]->type;
-	if (l->tokens[l->token_iter] && type == TOKEN_PIPE)
+	if (l->t[l->token_iter])
+		type = l->t[l->token_iter]->type;
+	if (l->t[l->token_iter] && type == TOKEN_PIPE)
 	{
-		skip_blanks(l->tokens, &l->token_iter, NULL);
-		*right = parse_command(l->tokens, &l->token_iter, ctx);
+		skip_blanks(l->t, &l->token_iter, NULL, l);
+		*right = parse_command(l->t, &l->token_iter, ctx, l);
 		return (true);
 	}
 	*right = NULL;
@@ -304,10 +313,10 @@ t_ast_node	*pipeline_loop(t_lexer *lexer, t_ctx *ctx)
 	t_ast_node	*nn;
 	t_ast_node	*pipe_node;
 
-	cn = parse_command(lexer->tokens, &lexer->token_iter, ctx);
+	cn = parse_command(lexer->t, &lexer->token_iter, ctx, lexer);
 	if (cn != NULL)
 	{
-		while (has_right(lexer, &nn, ctx))
+		while (has_right(lexer, &nn, ctx) && lexer->err == 0)
 		{
 			pipe_node = create_node(NODE_PIPE, NULL, NULL);
 			pipe_node->cmd = (free(pipe_node->cmd), NULL);
@@ -321,21 +330,50 @@ t_ast_node	*pipeline_loop(t_lexer *lexer, t_ctx *ctx)
 	return (cn);
 }
 
+int	handle_parser_err(int errcode, t_lexer *lexer)
+{
+	if (errcode == UNCLOSED_QUOTE)
+		ft_putstr_fd("Error: Input contained an un-closed quote.\n", 2);
+	else if (errcode == TOKEN_ALLOC_FAILURE)
+	{
+		ft_putstr_fd("Error: Token allocation failure near line[", 2);
+		ft_putnbr_fd(lexer->line_iter, 2);
+		ft_putstr_fd("].\n", 2);
+	}
+	else if (errcode == PID_ALLOC_FAILURE)
+		ft_putstr_fd("Error: PID allocation failure.\n", 2);
+	else if (errcode == COULDNT_OPEN_URANDOM)
+		ft_putstr_fd("Error: Failure to open /dev/urandom.\n", 2);
+	else if (errcode == ALLOC_FAILURE)
+		ft_putstr_fd("Error: Memory allocation failure.\n", 2);
+	else if (errcode == NO_REDIR_TARGET)
+		ft_putstr_fd("Error: Reidirection without a target.\n", 2);
+	else if (errcode == HD_CAT_FAILURE)
+		ft_putstr_fd("Error: Failed to concatenate HERE DOC delimiter.\n", 2);
+	return (1);
+}
+
 int	parse_pipeline(const char *line, t_ast_node **root, t_ctx *ctx)
 {
 	t_lexer		lexer;
 	int			errcode;
 
+	errcode = 0;
 	errcode = scan_the_line(line, &lexer);
-	if (lexer.tokens[lexer.token_iter]->type == TOKEN_BLANK)
-		skip_blanks(lexer.tokens, &lexer.token_iter, NULL);
-	if (!errcode)
+	if (errcode != 0)
+		errcode = handle_parser_err(errcode, &lexer);
+	if (errcode == 0)
 	{
+		if (lexer.t[lexer.token_iter]->type == TOKEN_BLANK)
+			skip_blanks(lexer.t, &lexer.token_iter, NULL, &lexer);
 		*root = pipeline_loop(&lexer, ctx);
-		free_tokens(&lexer);
+		ctx->hd.size = ctx->hd.ss;
+		ctx->hd.ss = 0;
+		errcode = lexer.err;
+		if (errcode != 0)
+			errcode = handle_parser_err(errcode, &lexer);
 	}
-	ctx->hd.size = ctx->hd.ss;
-	ctx->hd.ss = 0;
+	free_tokens(&lexer);
 	return (errcode);
 }
 
@@ -421,7 +459,7 @@ void	print_redirections(t_wrd *redir, int depth, t_token_type rt)
 {
 	const char	*type;
 
-	if (rt == TOKEN_REDIRECT_STDOUT)
+	if (rt == T_REDIRECT_STDOUT)
 		type = ">";
 	else if (rt == TOKEN_REDIRECT_STDERR)
 		type = "2>";
@@ -509,7 +547,7 @@ void	print_ast(t_ast_node *node, int depth)
 			while (++i < depth + 1)
 				ft_printf("  ");
 			ft_printf("Output Redirections:\n");
-			print_redirections(node->cmd->redirects_out, depth + 2, TOKEN_REDIRECT_STDOUT);
+			print_redirections(node->cmd->redirects_out, depth + 2, T_REDIRECT_STDOUT);
 		}
 		if (node->cmd->redirects_err_in)
 		{
