@@ -104,25 +104,58 @@ int	here_doc_cat(t_wrd *here, t_lexer *l)
 	return (0);
 }
 
+void	remove_non_compliant_chars(char *buf, int buf_size)
+{
+	char	*dst;
+
+	dst = buf;
+	while (*buf)
+	{
+		if (ft_isalnum((unsigned char) *buf))
+			*dst++ = *buf;
+		buf++;
+	}
+	*dst = '\0';
+}
+
 int	add_random_numbers_to_str(char *str_buf, int rand_count)
 {
-	char	random_code[20];
-	char	buf[1];
+	char	buf[OPTIMISTIC + 1];
 	int		fd;
-	int		i;
+	ssize_t bytes_read;
 	int		ret_val;
+	int 	len;
 
 	ret_val = 0;
 	fd = open("/dev/urandom", O_RDONLY);
 	if (fd >= 0)
 	{
-		i = 0;
-		while (read(fd, buf, 1) && i < rand_count)
-			if (ft_isalnum(buf[0]))
-				random_code[i++] = buf[0];
+		len = 0;
+		bytes_read = 1;
+/*
+		//TODO: could have been just a ft_getrandom syscall
+		while (rand_count > len)
+		{
+			if (bytes_read < 0)
+				break;
+			buf[bytes_read] = '\0';
+			remove_non_compliant_chars(buf, OPTIMISTIC);
+			len = (int) ft_strlen(buf);
+			bytes_read = ft_getrandom(buf + len, OPTIMISTIC - len, 0);
+		}
+*/
+		while (rand_count > len)
+		{
+			if (bytes_read < 0)
+				break;
+			buf[bytes_read] = '\0';
+			remove_non_compliant_chars(buf, OPTIMISTIC);
+			len = (int) ft_strlen(buf);
+			bytes_read = read(fd, buf + len, OPTIMISTIC - len);
+		}
 		close(fd);
-		random_code[i] = '\0';
-		ft_strcat(str_buf, random_code);
+
+		ft_strlcat(str_buf, buf, rand_count + 1);
 	}
 	else
 	{
@@ -132,7 +165,7 @@ int	add_random_numbers_to_str(char *str_buf, int rand_count)
 	return (ret_val);
 }
 
-int	ft_getpid(void)
+int	ft_getpid_c(void)
 {
 	int		fd;
 	char	buf[20];
@@ -154,30 +187,27 @@ int	ft_getpid(void)
 	return (ft_atoi(buf));
 }
 
+#define HEREFILE_BUF_LEN 80
+#include <sys/random.h>
+
 int	create_here_file(t_wrd *here, HeredocEntry *entry, bool expand)
 {
-	int		error_code;
-	char	*pid;
+	ssize_t	error_code;
+	char	buf[HEREFILE_BUF_LEN + 1];
 
-	pid = ft_itoa(ft_getpid());
-	error_code = PID_ALLOC_FAILURE;
-	error_code = 0;
-	if (!error_code)
+	add_random_numbers_to_str(buf, 20);
+	error_code = errno;
+	if (!error_code && here)
 	{
 		entry->quotes = expand;
-		ft_strncpy(entry->filename, "/tmp/heredoc_", FILENAME_BUF_SIZE);
-		ft_strcat(entry->filename, pid);
-		free(pid);
-		error_code = add_random_numbers_to_str(entry->filename, 10);
-		if (!error_code)
-		{
-			ft_strcpy(entry->delimiter, here->value);
-			free((void *)here->value);
-			here->value = NULL;
-			here->value = ft_strdup(entry->filename);
-		}
+		ft_snprintf(entry->filename, FILENAME_BUF_SIZE,
+					"/tmp/heredoc_%d_%s", ft_getpid(), buf);
+		ft_strcpy(entry->delimiter, here->value);
+		free((void *)here->value);
+		here->value = NULL;
+		here->value = ft_strdup(entry->filename);
 	}
-	return (error_code);
+	return ((int)error_code);
 }
 
 void	parse_redirection(int *tp, t_ast_node *p, t_ctx *ctx, t_lexer *l)
@@ -333,23 +363,21 @@ t_ast_node	*pipeline_loop(t_lexer *lexer, t_ctx *ctx)
 int	handle_parser_err(int errcode, t_lexer *lexer)
 {
 	if (errcode == UNCLOSED_QUOTE)
-		ft_putstr_fd("Error: Input contained an un-closed quote.\n", 2);
+		ft_putstr_fd("Error: Input contained an un-closed quote.\n", STDERR_FILENO);
 	else if (errcode == TOKEN_ALLOC_FAILURE)
-	{
-		ft_putstr_fd("Error: Token allocation failure near line[", 2);
-		ft_putnbr_fd(lexer->line_iter, 2);
-		ft_putstr_fd("].\n", 2);
-	}
+		ft_dprintf(STDERR_FILENO,
+				   "Error: Token allocation failure near line[%s].\n",
+				   lexer->line_iter);
 	else if (errcode == PID_ALLOC_FAILURE)
-		ft_putstr_fd("Error: PID allocation failure.\n", 2);
+		ft_putstr_fd("Error: PID allocation failure.\n", STDERR_FILENO);
 	else if (errcode == COULDNT_OPEN_URANDOM)
-		ft_putstr_fd("Error: Failure to open /dev/urandom.\n", 2);
+		ft_putstr_fd("Error: Failure to open /dev/urandom.\n", STDERR_FILENO);
 	else if (errcode == ALLOC_FAILURE)
-		ft_putstr_fd("Error: Memory allocation failure.\n", 2);
+		ft_putstr_fd("Error: Memory allocation failure.\n", STDERR_FILENO);
 	else if (errcode == NO_REDIR_TARGET)
-		ft_putstr_fd("Error: Reidirection without a target.\n", 2);
+		ft_putstr_fd("Error: Reidirection without a target.\n", STDERR_FILENO);
 	else if (errcode == HD_CAT_FAILURE)
-		ft_putstr_fd("Error: Failed to concatenate HERE DOC delimiter.\n", 2);
+		ft_putstr_fd("Error: Failed to concatenate HERE DOC delimiter.\n", STDERR_FILENO);
 	return (1);
 }
 
@@ -425,28 +453,24 @@ void print_arguments(t_wrd *arguments, int depth)
 		*buf = '\0';
 		for (int i = 0; i < depth; i++)
 			ft_printf("  ");
-		if (!arguments->value)
-			snprintf(buf, BUFF_SIZE, "NULL");
-		else if (arguments->value && ft_strlen(arguments->value) == 0)
-			snprintf(buf, BUFF_SIZE, "(empty string)");	
+		if (arguments->value && ft_strlen(arguments->value) == 0)
+			ft_snprintf(buf, BUFF_SIZE, "(empty string)");
 		else if (arguments->value && arguments->expand)
-			snprintf(buf, BUFF_SIZE, "expand(%s)", arguments->value);
+			ft_snprintf(buf, BUFF_SIZE, "expand(%s)", arguments->value);
 		else
-			snprintf(buf, BUFF_SIZE, "%s", arguments->value);
+			ft_snprintf(buf, BUFF_SIZE, "%s", arguments->value);
 		ft_printf("ARGUMENT: %s", buf);
 		t_wrd	*cont_node = arguments;
 		while (cont_node->next_part)
 		{
 			*buf = '\0';
 			node = cont_node->next_part;
-			if (!node->value)
-				snprintf(buf, BUFF_SIZE, "NULL");
-			else if (node->value && node->expand)
-				snprintf(buf, BUFF_SIZE, "expand(%s)", node->value);
+			if (node->value && node->expand)
+				ft_snprintf(buf, BUFF_SIZE, "expand(%s)", node->value);
 			else if (node->value && ft_strlen(node->value) == 0)
-				snprintf(buf, BUFF_SIZE, "(empty string)");
+				ft_snprintf(buf, BUFF_SIZE, "(empty string)");
 			else
-				snprintf(buf, 1024, "%s", node->value);
+				ft_snprintf(buf, BUFF_SIZE, "%s", node->value);
 			ft_printf("; %s", buf);
 			cont_node = cont_node->next_part;
 		}

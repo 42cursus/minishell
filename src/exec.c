@@ -34,7 +34,7 @@ int	ft_sh_lookup_pathname(t_ctx *ctx)
 		str = ft_strtok_r(dup, ":", &sptr);
 		while ((not_found == -1) && str)
 		{
-			snprintf(pathname, PATH_MAX, "%s/%s", str, ctx->argv[0]);
+			ft_snprintf(pathname, PATH_MAX, "%s/%s", str, ctx->argv[0]);
 			not_found = access(pathname, X_OK);
 			str = ft_strtok_r(NULL, ":", &sptr);
 		}
@@ -44,7 +44,7 @@ int	ft_sh_lookup_pathname(t_ctx *ctx)
 //			str = ft_strtok_r(dup, ":", &sptr);
 //			while ((not_found == -1) && str)
 //			{
-//				snprintf(pathname, PATH_MAX, "%s/%s", str, ctx->argv[0]);
+//				ft_snprintf(pathname, PATH_MAX, "%s/%s", str, ctx->argv[0]);
 //				not_found = access(pathname, X_OK);
 //				str = ft_strtok_r(NULL, ":", &sptr);
 //			}
@@ -58,10 +58,10 @@ static void shell_redirect_stdin(simple_cmd_t *s)
 {
 	char path[1024];
 
-	snprintf(path, sizeof(path), "%s", s->in->string);
+	ft_snprintf(path, sizeof(path), "%s", s->in->string);
 
 	if (s->in->next_part)
-		strcat(path, get_word(s->in->next_part, s->ctx));
+		ft_strncat(path, get_word(s->in->next_part, s->ctx), 1024);
 
 	int fd = open(path, O_RDONLY, 0644);
 
@@ -72,14 +72,18 @@ static void shell_redirect_stdin(simple_cmd_t *s)
 static void shell_redirect_stdout(simple_cmd_t *s)
 {
 	char path[PATH_MAX];
+	char *word;
 
-	snprintf(path, PATH_MAX, "%s", s->out->string);
-
+	ft_snprintf(path, PATH_MAX, "%s", s->out->string);
 	if (s->out->next_word)
-		
-
-	if (s->out->next_part)
-		ft_strcat(path, get_word(s->out->next_part, s->ctx));
+	{
+		if (s->out->next_part)
+		{
+			word = get_word(s->out->next_part, s->ctx);
+			ft_strcat(path, word);
+			free(word);
+		}
+	}
 
 	int flags = O_WRONLY | O_CREAT;
 
@@ -101,7 +105,7 @@ static void shell_redirect_stderr(simple_cmd_t *s)
 	int flags;
 	char path[1024];
 
-	snprintf(path, sizeof(path), "%s", s->err->string);
+	ft_snprintf(path, sizeof(path), "%s", s->err->string);
 
 	if (s->err->next_part)
 		strcat(path, get_word(s->err->next_part, s->ctx));
@@ -150,8 +154,6 @@ int ft_sh_launch(t_cmd_node *cmd, t_ctx *ctx)
 		}
 		else
 		{
-
-			write(STDOUT_FILENO, "hello", 5);
 			waitpid(pid, &status, WUNTRACED);        // Parent process
 			while (!WIFEXITED(status) && !WIFSIGNALED(status))
 				waitpid(pid, &status, WUNTRACED);

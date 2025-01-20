@@ -26,17 +26,32 @@
  */
 void ft_shell_redirect_stdin(t_cmd_node *cmd)
 {
-	char path[1024];
+	char			path[MAX_PATH_LEN];
+	t_wrd			*wrd;
+	t_wrd			*next;
+	char 			*word;
+	int				fd;
+	const mode_t	mode = (S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+	char 			buf[PATH_MAX];
 
-	snprintf(path, sizeof(path), "%s", cmd->redirects_in->value);
+	wrd = cmd->redirects_in;
+	while (wrd && wrd->next_word)
+	{
+		word = ft_get_word(wrd, cmd->ctx);
+		fd = open(word, O_RDONLY, mode);
+		if (fd < 0 && errno == ENOENT)
+		{
+			ft_snprintf(buf, PATH_MAX, "minishell: %s ", word);
+			perror(buf);
+			ft_dprintf(STDERR_FILENO, "on %s at %s:%d", __FILE__, __LINE__, __func__);
+		}
+	}
+
+	ft_snprintf(path, sizeof(path), "%s", cmd->redirects_in->value);
 
 	if (cmd->redirects_in->next_part)
-		strcat(path, ft_get_word(cmd->redirects_in->next_part, cmd->ctx));
-
-
-	mode_t mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
-	int fd = open(path, O_RDONLY, mode);
-
+		ft_strcat(path, ft_get_word(cmd->redirects_in->next_part, cmd->ctx));
+	fd = open(path, O_RDONLY, mode);
 	dup2(fd, STDIN_FILENO);
 	close(fd);
 }
@@ -45,7 +60,7 @@ void ft_shell_redirect_stdout(t_cmd_node *cmd)
 {
 	char path[PATH_MAX];
 
-	snprintf(path, PATH_MAX, "%s", cmd->redirects_out->value);
+	ft_snprintf(path, PATH_MAX, "%s", cmd->redirects_out->value);
 
 	if (cmd->redirects_out->next_word)
 		if (cmd->redirects_out->next_part)
@@ -60,7 +75,7 @@ void ft_shell_redirect_stdout(t_cmd_node *cmd)
 
 
 	mode_t mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
-	fprintf(stderr, "opening file : \"%s\" with permissions %d", path, mode);
+	ft_dprintf(STDERR_FILENO, "opening file : \"%s\" with permissions %d", path, mode);
 	int fd = open(path, flags, mode);
 
 	dup2(fd, STDOUT_FILENO);
@@ -79,7 +94,7 @@ void ft_shell_redirect_stderr(t_cmd_node *cmd)
 	int flags;
 	char path[1024];
 
-	snprintf(path, sizeof(path), "%s", cmd->redirects_err->value);
+	ft_snprintf(path, sizeof(path), "%s", cmd->redirects_err->value);
 
 	if (cmd->redirects_err->next_part)
 		strcat(path, ft_get_word(cmd->redirects_err->next_part, cmd->ctx));

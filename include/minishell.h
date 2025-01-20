@@ -37,6 +37,8 @@
 # include <ctype.h>
 
 # define MAX_TOKENS 1024
+# define MAX_PATH_LEN 1024
+
 
 typedef enum e_token_type
 {

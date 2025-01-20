@@ -112,7 +112,7 @@ void	herefile_lexing(int fd, char *line, bool quotes)
 			else if (e == 0)
 				herefile_expansion(fd, var); 
 		}
-		else 
+		else
 			write(fd, &line[i], 1);
 	}
 	if (quotes == true)
@@ -122,7 +122,7 @@ void	herefile_lexing(int fd, char *line, bool quotes)
 
 void handle_sigint(int sig)
 {
-    
+
     printf("\nCaught SIGINT (Ctrl+C)!\n");
 }
 
@@ -137,8 +137,8 @@ int	ft_sh_loop2(t_ctx *ctx)
 	ctx->argv = NULL;
 	ctx->argc = 0;
 
-
-	line = "<<HERE cat | grep $?hdbf";
+	line = "cat '' '' '' ''$HOME/../$USER/.emacs'' '' ''$PWD | "
+		   "sleep > $HOME/\"tmp\"/stdout.txt 2>> $HOME/tmp/stderr.txt";
 
 	ctx->hd.ss = 0;
 	ctx->hd.size = 1024;
@@ -151,8 +151,8 @@ int	ft_sh_loop2(t_ctx *ctx)
 		else
 		{
 			collect_heredocs(ctx);
-			// ft_pritintf("\n\nAbstract Syntax Tree:\n");
-			// print_ast(ast, 0);
+			 ft_printf("\n\nAbstract Syntax Tree:\n");
+			 print_ast(ast, 0);
 			ast->ctx = ctx;
 			status = traverse_and_exec_the_ast(ast, 0, NULL);
 			free_ast(ast);

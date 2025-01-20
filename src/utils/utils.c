@@ -54,12 +54,15 @@ char *ft_get_word(t_wrd *wrd, t_ctx *ctx)
 
 		int substring_length = ft_strlen(substring);
 
-		string = realloc(string, string_length + substring_length + 1);
+		string = ft_reallocarray(string, string_length,
+								 string_length + substring_length + 1,
+								 sizeof(char));
 		if (string == NULL)
 		{
-			fprintf(stderr, "(%s:%d, %s): ", __FILE__, __LINE__, __func__);
+			ft_dprintf(STDERR_FILENO, "on %s at %s:%d", __FILE__, __LINE__, __func__);
+			errno = ENOMEM;
 			perror("Error allocating word string.");
-			exit(1);
+			exit(EXIT_FAILURE);
 		}
 
 		string[string_length] = '\0';
