@@ -31,40 +31,31 @@ int	ft_sh_lookup_pathname(t_ctx *ctx)
 	else
 	{
 		dup = ft_strdup(ft_sh_env_map_get_val("PATH", ctx));
-		str = ft_strtok_r(dup, ":", &sptr);
-		while ((not_found == -1) && str)
+		if (dup)
 		{
-			ft_snprintf(pathname, PATH_MAX, "%s/%s", str, ctx->argv[0]);
-			not_found = access(pathname, X_OK);
-			str = ft_strtok_r(NULL, ":", &sptr);
+			str = ft_strtok_r(dup, ":", &sptr);
+			while ((not_found == -1) && str)
+			{
+				ft_snprintf(pathname, PATH_MAX, "%s/%s", str, ctx->argv[0]);
+				//TODO: early break
+				not_found = access(pathname, X_OK);
+				str = ft_strtok_r(NULL, ":", &sptr);
+			}
+			free(dup);
 		}
-		free(dup);
-//		if (dup)
-//		{
-//			str = ft_strtok_r(dup, ":", &sptr);
-//			while ((not_found == -1) && str)
-//			{
-//				ft_snprintf(pathname, PATH_MAX, "%s/%s", str, ctx->argv[0]);
-//				not_found = access(pathname, X_OK);
-//				str = ft_strtok_r(NULL, ":", &sptr);
-//			}
-//			free(dup);
-//		}
 	}
 	return (not_found);
 }
 
 static void shell_redirect_stdin(simple_cmd_t *s)
 {
-	char path[1024];
+	int fd;
+	char path[PATH_MAX];
 
 	ft_snprintf(path, sizeof(path), "%s", s->in->string);
-
 	if (s->in->next_part)
 		ft_strncat(path, get_word(s->in->next_part, s->ctx), 1024);
-
-	int fd = open(path, O_RDONLY, 0644);
-
+	fd = open(path, O_RDONLY, (S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH));
 	dup2(fd, STDIN_FILENO);
 	close(fd);
 }
@@ -92,8 +83,8 @@ static void shell_redirect_stdout(simple_cmd_t *s)
 	else
 		flags = flags | O_TRUNC;
 
-	fprintf(stderr, "opening file : \"%s\" with permissions %d", path, 0644);
-	int fd = open(path, flags, 0644);
+	ft_dprintf(STDERR_FILENO, "opening file : \"%s\" with permissions %d", path,(S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH));
+	int fd = open(path, flags, (S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH));
 
 	dup2(fd, STDOUT_FILENO);
 	close(fd);
@@ -116,7 +107,7 @@ static void shell_redirect_stderr(simple_cmd_t *s)
 	else
 		flags |= O_APPEND;
 
-	fd = open(path, flags, 0644);
+	fd = open(path, flags, (S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH));
 
 	dup2(fd, STDERR_FILENO);
 	close(fd);
@@ -141,17 +132,11 @@ int ft_sh_launch(t_cmd_node *cmd, t_ctx *ctx)
 			if (cmd->redirects_err)
 				ft_shell_redirect_stderr(cmd);
 			if (execve(ctx->pathname, ctx->argv,
-					   ft_sh_render_envp(ctx)))    // Child process
-			{
-				perror("ft_sh: error in execve");
-				return (SHELL_EXIT);
-			}
+					   ft_sh_render_envp(ctx)))
+				return (perror("ft_sh: error in execve"), SHELL_EXIT);
 		}
 		else if (pid < 0)
-		{
-			perror("ft_sh: error forking");            // Error forking
-			return (SHELL_EXIT);
-		}
+			return (perror("ft_sh: error forking"), SHELL_EXIT);
 		else
 		{
 			waitpid(pid, &status, WUNTRACED);        // Parent process
@@ -182,16 +167,10 @@ int ft_sh_launch2(t_ctx *ctx, simple_cmd_t *s)
 				shell_redirect_stderr(s);
 			if (execve(ctx->pathname, ctx->argv,
 					   ft_sh_render_envp(ctx)))    // Child process
-			{
-				perror("ft_sh: error in execve");
-				return (SHELL_EXIT);
-			}
+				return (perror("ft_sh: error in execve"), SHELL_EXIT);
 		}
 		else if (pid < 0)
-		{
-			perror("ft_sh: error forking");            // Error forking
-			return (SHELL_EXIT);
-		}
+			return (perror("ft_sh: error forking"), SHELL_EXIT);
 		else
 		{
 			waitpid(pid, &status, WUNTRACED);        // Parent process

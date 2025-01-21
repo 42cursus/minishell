@@ -23,9 +23,9 @@ static int ft_run_on_pipe(t_ast_node *left, t_ast_node *right, int level,
 
 	if (pipe(fd) < 0)
 	{
-		fprintf(stderr, "(%s:%d, %s): ", __FILE__, __LINE__, __func__);
+		ft_dprintf(STDERR_FILENO, "on %s at %s:%d", __FILE__, __LINE__, __func__);
 		perror("pipe failed");
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
 
 	pid_t pid_cmd1 = fork();

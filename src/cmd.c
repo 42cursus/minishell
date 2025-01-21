@@ -24,7 +24,7 @@
 
 void parse_error(const char *str, const int where)
 {
-	fprintf(stderr, "Parse error near %d: %s\n", where, str);
+	ft_dprintf(STDERR_FILENO, "Parse error near %d: %s\n", where, str);
 }
 
 static int parse_simple(simple_cmd_t *s, int level, cmd_t *father)
@@ -66,15 +66,11 @@ static int parse_simple(simple_cmd_t *s, int level, cmd_t *father)
 	}
 
 	char cwd[1024];
-
 	if (getcwd(cwd, sizeof(cwd)) == NULL)
 		return (SHELL_EXIT);
-
 	if (strcmp(s->verb->string, "exit") == 0 || strcmp(s->verb->string, "quit") == 0)
 		return (SHELL_EXIT);
-
 	ctx->argv = get_argv(s, &ctx->argc, ctx);
-
 	op = ft_bsearch_obj(&(t_shell_op) {.instruction = ctx->argv[0]}, ctx->ops);
 	if (op != NULL)
 		status = op->fun(ctx);
@@ -89,22 +85,19 @@ static int parse_simple(simple_cmd_t *s, int level, cmd_t *father)
 
 static bool run_in_parallel(cmd_t *cmd1, cmd_t *cmd2, int level, cmd_t *father)
 {
-	pid_t pid_cmd1 = fork();
+	pid_t	pid_cmd1;
+	pid_t	pid_cmd2;
+	int		status_cmd1;
+	int		status_cmd2;
 
+	pid_cmd1 = fork();
 	if (pid_cmd1 == 0)
 		exit(traverse_and_exec_the_ast2(cmd1, level + 1, father));
-
-	pid_t pid_cmd2 = fork();
-
+	pid_cmd2 = fork();
 	if (pid_cmd2 == 0)
 		exit(traverse_and_exec_the_ast2(cmd2, level + 1, father));
-
-	int status_cmd1;
-	int status_cmd2;
-
 	waitpid(pid_cmd1, &status_cmd1, 0);
 	waitpid(pid_cmd2, &status_cmd2, 0);
-
 	return status_cmd1 == 0 && status_cmd2 == 0;
 }
 
@@ -116,45 +109,31 @@ static bool run_on_pipe(cmd_t *left, cmd_t *right, int level, cmd_t *father)
 
 	if (pipe(fd) < 0)
 	{
-		fprintf(stderr, "(%s:%d, %s): ", __FILE__, __LINE__, __func__);
+		ft_dprintf(STDERR_FILENO, "on %s at %s:%d", __FILE__, __LINE__, __func__);
 		perror("pipe failed");
-		exit(1);
+		ft_exit(EXIT_FAILURE);
 	}
-
 	pid_t pid_cmd1 = fork();
-
 	if (pid_cmd1 == 0)
 	{
 		dup2(fd[1], STDOUT_FILENO);
-
 		close(fd[0]);
 		close(fd[1]);
-
-		int status_code = traverse_and_exec_the_ast2(left, level + 1, father);
-		exit(status_code);
+		exit(traverse_and_exec_the_ast2(left, level + 1, father));
 	}
-
 	pid_t pid_cmd2 = fork();
-
 	if (pid_cmd2 == 0)
 	{
 		dup2(fd[0], STDIN_FILENO);
-
 		close(fd[0]);
 		close(fd[1]);
-
-
-		int status_code = traverse_and_exec_the_ast2(right, level + 1, father);
-		exit(status_code);
+		exit(traverse_and_exec_the_ast2(right, level + 1, father));
 	}
-
 	close(fd[0]);
 	close(fd[1]);
-
 	waitpid(pid_cmd1, &status_cmd1, 0);
 	waitpid(pid_cmd2, &status_cmd2, 0);
-
-	return status_cmd2;
+	return (status_cmd2);
 }
 
 int traverse_and_exec_the_ast2(cmd_t *c, int level, cmd_t *father)
@@ -204,6 +183,5 @@ int traverse_and_exec_the_ast2(cmd_t *c, int level, cmd_t *father)
 		default:
 			return (SHELL_EXIT);
 	}
-
 	return exit_status;
 }

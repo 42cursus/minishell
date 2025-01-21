@@ -211,7 +211,7 @@ int	ft_sh_loop(t_ctx *ctx)
 // 				if (!parse_line(line, &root))
 // 				{
 // 					/* There was an error parsing the command. */
-// 					fprintf(stderr, "Error while parsing command!\n");
+// 					ft_dprintf(STDERR_FILENO, "Error while parsing command!\n");
 // 					status = -1;
 // 				}
 // 				else

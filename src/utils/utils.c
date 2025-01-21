@@ -130,7 +130,7 @@ char **ft_get_argv(t_cmd_node *cmd, int *size, t_ctx *ctx)
 	argv = calloc(argc + 1, sizeof(char *));
 	if (argv == NULL)
 	{
-		fprintf(stderr, "(%s:%d, %s): ", __FILE__, __LINE__, __func__);
+		ft_dprintf(STDERR_FILENO, "on %s at %s:%d", __FILE__, __LINE__, __func__);
 		perror("Error allocating argv.");
 		exit(1);
 	}
@@ -143,7 +143,7 @@ char **ft_get_argv(t_cmd_node *cmd, int *size, t_ctx *ctx)
 
 		if (word == NULL)
 		{
-			fprintf(stderr, "(%s:%d, %s): ", __FILE__, __LINE__, __func__);
+			ft_dprintf(STDERR_FILENO, "on %s at %s:%d", __FILE__, __LINE__, __func__);
 			perror("Error retrieving word.");
 			exit(1);
 		}
