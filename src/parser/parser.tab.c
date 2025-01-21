@@ -159,9 +159,9 @@ void pointerToMallocMemory(const void *ptr)
 }
 
 
-static simple_cmd_t *bind_parts(word_t *exe_name, word_t *params, redirect_t red)
+static scmd_t *bind_parts(word_t *exe_name, word_t *params, redirect_t red)
 {
-	simple_cmd_t *s = (simple_cmd_t *) malloc(sizeof(simple_cmd_t));
+	scmd_t *s = (scmd_t *) malloc(sizeof(scmd_t));
 	pointerToMallocMemory(s);
 
 	memset(s, 0, sizeof(*s));
@@ -179,7 +179,7 @@ static simple_cmd_t *bind_parts(word_t *exe_name, word_t *params, redirect_t red
 }
 
 
-static cmd_t	*new_command(simple_cmd_t *scmd)
+static cmd_t	*new_command(scmd_t *scmd)
 {
 	cmd_t *c = (cmd_t *) malloc(sizeof(cmd_t));
 
@@ -375,7 +375,7 @@ union YYSTYPE
 	cmd_t *command_un;
 	const char *string_un;
 	redirect_t redirect_un;
-	simple_cmd_t *simple_command_un;
+	scmd_t *simple_command_un;
 	word_t *exe_un;
 	word_t *params_un;
 	word_t *word_un;

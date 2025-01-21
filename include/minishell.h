@@ -39,6 +39,12 @@
 # define MAX_TOKENS 1024
 # define MAX_PATH_LEN 1024
 
+# define ATT_EXPORTED	0x0000001	/* export to environment */
+# define ATT_READONLY	0x0000002	/* cannot change */
+# define ATT_INTEGER	0x0000010	/* internal representation is int */
+# define ATT_NOUNSET 	0x0002000	/* cannot unset */
+# define ATT_NOASSIGN	0x0004000	/* assignment not allowed */
+# define ATT_IMPORTED	0x0008000	/* came from environment */
 
 typedef enum e_token_type
 {
@@ -140,14 +146,22 @@ void		handle_sigint(int sig);
 void		collect_heredocs(t_ctx *ctx);
 
 int			traverse_and_exec_the_ast2(cmd_t *c, int level, cmd_t *father);
-int			traverse_and_exec_the_ast(t_ast_node *cmd, int level, t_ast_node *father);
+int			traverse_and_exec_the_ast(t_ast_node *cmd, int level,
+				t_ast_node *father);
 void		ft_shell_redirect_stdin(t_cmd_node *cmd);
 void		ft_shell_redirect_stdout(t_cmd_node *cmd);
 void		ft_shell_redirect_stderr(t_cmd_node *cmd);
 void		ft_shell_redirect_stderr_in(t_cmd_node *cmd);
 
-enum	{ VAR_MAX = 256 };
-enum	{ MAXC = 128 };
+enum
+{
+	VAR_MAX = 256
+};
+
+enum
+{
+	MAXC = 128
+};
 
 typedef struct sigaction	t_sigaction;
 
@@ -160,17 +174,8 @@ typedef struct s_shell_var
 {
 	const char	*k;
 	const char	*v;
-	int 		attrs;
+	int			attrs;
 }	t_sh_var;
-
-
-
-# define ATT_EXPORTED	0x0000001	/* export to environment */
-# define ATT_READONLY	0x0000002	/* cannot change */
-# define ATT_INTEGER	0x0000010	/* internal representation is int */
-# define ATT_NOUNSET 	0x0002000	/* cannot unset */
-# define ATT_NOASSIGN	0x0004000	/* assignment not allowed */
-# define ATT_IMPORTED	0x0008000	/* came from environment */
 
 /** Basic text colors
  * character 27 = 033 = 0x1b = ^[ = \e
@@ -182,22 +187,22 @@ typedef struct s_shell_var
  * 	then finally by a single "final byte" in the range 0x40–0x7E
  * 	(ASCII @A–Z[\]^_`a–z{|}~).
  */
-#define FT_BLACK "\033[0;30m"
-#define FT_RED "\e[0;31m"
-#define FT_GREEN "\e[0;32m"
-#define FT_YELLOW "\e[0;33m"
-#define FT_BLUE "\e[:;34m"
-#define FT_PURPLE "\e[0;35m"
-#define FT_CYAN "\e[0;36m"
-#define FT_WHITE "\e[0;37m"
-#define FT_RESET "\e[0;m"
+# define FT_BLACK "\033[0;30m"
+# define FT_RED "\e[0;31m"
+# define FT_GREEN "\e[0;32m"
+# define FT_YELLOW "\e[0;33m"
+# define FT_BLUE "\e[:;34m"
+# define FT_PURPLE "\e[0;35m"
+# define FT_CYAN "\e[0;36m"
+# define FT_WHITE "\e[0;37m"
+# define FT_RESET "\e[0;m"
 
 /* ---------- TESTS -------------------- */
 
 void		check(bool succes);
 void		ft_print_title(char *title);
 
-typedef int	(*t_shell_fun)(t_ctx *);
+typedef int					(*t_shell_fun)(t_ctx *);
 typedef struct s_shell_op
 {
 	const char	*instruction;
@@ -222,7 +227,7 @@ int			ft_sh_var_cmp(const void *a, const void *b);
 int			ft_sh_parse_env_map(t_obj_arr *map, char **env_tab);
 char		**ft_sh_render_envp(t_ctx *ctx);
 int			ft_sh_launch(t_cmd_node *cmd, t_ctx *ctx);
-int			ft_sh_launch2(t_ctx *ctx, simple_cmd_t *s);
+int			ft_sh_launch2(t_ctx *ctx, scmd_t *s);
 int			ft_sh_env_map_del_entry(t_sh_var var, t_ctx *ctx);
 int			ft_sh_env_map_add_entry(t_sh_var var, t_ctx *ctx);
 t_sh_var	*ft_sh_env_map_get_entry(const char *key, t_ctx *ctx);

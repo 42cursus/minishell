@@ -81,7 +81,7 @@ union YYSTYPE
 	cmd_t * command_un;
 	const char * string_un;
 	redirect_t redirect_un;
-	simple_cmd_t * simple_command_un;
+	scmd_t * simple_command_un;
 	word_t * exe_un;
 	word_t * params_un;
 	word_t * word_un;

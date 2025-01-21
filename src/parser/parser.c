@@ -190,7 +190,7 @@ int	ft_getpid_c(void)
 #define HEREFILE_BUF_LEN 80
 #include <sys/random.h>
 
-int	create_here_file(t_wrd *here, HeredocEntry *entry, bool expand)
+int	create_here_file(t_wrd *here, t_hd_entry *entry, bool expand)
 {
 	ssize_t	error_code;
 	char	buf[HEREFILE_BUF_LEN + 1];
@@ -215,7 +215,7 @@ void	parse_redirection(int *tp, t_ast_node *p, t_ctx *ctx, t_lexer *l)
 	t_wrd			*redir;
 	t_token_type	rt;
 	bool			hereexpand;
-	HeredocEntry	*entry;
+	t_hd_entry	*entry;
 
 	rt = l->t[*tp]->type;
 	hereexpand = l->t[*tp]->hereexpand;

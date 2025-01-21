@@ -47,7 +47,7 @@ int	ft_sh_lookup_pathname(t_ctx *ctx)
 	return (not_found);
 }
 
-static void shell_redirect_stdin(simple_cmd_t *s)
+static void shell_redirect_stdin(scmd_t *s)
 {
 	int fd;
 	char path[PATH_MAX];
@@ -60,7 +60,7 @@ static void shell_redirect_stdin(simple_cmd_t *s)
 	close(fd);
 }
 
-static void shell_redirect_stdout(simple_cmd_t *s)
+static void shell_redirect_stdout(scmd_t *s)
 {
 	char path[PATH_MAX];
 	char *word;
@@ -90,7 +90,7 @@ static void shell_redirect_stdout(simple_cmd_t *s)
 	close(fd);
 }
 
-static void shell_redirect_stderr(simple_cmd_t *s)
+static void shell_redirect_stderr(scmd_t *s)
 {
 	int fd;
 	int flags;
@@ -149,7 +149,7 @@ int ft_sh_launch(t_cmd_node *cmd, t_ctx *ctx)
 	return (status);
 }
 
-int ft_sh_launch2(t_ctx *ctx, simple_cmd_t *s)
+int ft_sh_launch2(t_ctx *ctx, scmd_t *s)
 {
 	pid_t	pid;
 	int		status = -1;

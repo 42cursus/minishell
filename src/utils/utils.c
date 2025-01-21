@@ -156,7 +156,7 @@ char **ft_get_argv(t_cmd_node *cmd, int *size, t_ctx *ctx)
 	return (argv);
 }
 
-char **get_argv(simple_cmd_t *command, int *size, t_ctx *ctx)
+char **get_argv(scmd_t *command, int *size, t_ctx *ctx)
 {
 	char **argv;
 	int argc;

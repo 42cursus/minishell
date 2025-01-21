@@ -142,7 +142,7 @@ int	ft_sh_loop2(t_ctx *ctx)
 
 	ctx->hd.ss = 0;
 	ctx->hd.size = 1024;
-	ft_memset(ctx->hd.entries, 0, sizeof(HeredocEntry) * HEREDOC_ARRAY_SIZE);
+	ft_memset(ctx->hd.entries, 0, sizeof(t_hd_entry) * HEREDOC_ARRAY_SIZE);
 	int errcode = parse_pipeline(line, &ast, ctx);
 	if (!errcode)
 	{
@@ -193,7 +193,7 @@ int	ft_sh_loop(t_ctx *ctx)
 				add_history(line);
 				ctx->hd.ss = 0;
 				ctx->hd.size = 1024;
-				ft_memset(ctx->hd.entries, 0, sizeof(HeredocEntry) * HEREDOC_ARRAY_SIZE);
+				ft_memset(ctx->hd.entries, 0, sizeof(t_hd_entry) * HEREDOC_ARRAY_SIZE);
 				int errcode = parse_pipeline(line, &ast, ctx);
 				if (!ast)
 					ft_printf("Error: Failed to parse the command.\n");

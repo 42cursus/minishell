@@ -20,7 +20,7 @@ void	collect_heredocs(t_ctx *ctx)
 	int				i;
 	char			*line;
 	const mode_t	mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
-	HeredocEntry	*en;
+	t_hd_entry	*en;
 
 	i = -1;
 	//disable_ctrl_c_printing();
