@@ -1,7 +1,7 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   executor.c                                         :+:      :+:    :+:   */
+/*   ft_shell_redirect.c                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: abelov <abelov@student.42london.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
@@ -10,13 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-
 #include "minishell.h"
-#include "utils.h"
 
 /**
  * S_IRUSR: Read permission for the owner (0400 in octal).
@@ -97,7 +91,7 @@ void ft_shell_redirect_stderr(t_cmd_node *cmd)
 	ft_snprintf(path, sizeof(path), "%s", cmd->redirects_err->value);
 
 	if (cmd->redirects_err->next_part)
-		strcat(path, ft_get_word(cmd->redirects_err->next_part, cmd->ctx));
+		ft_strcat(path, ft_get_word(cmd->redirects_err->next_part, cmd->ctx));
 
 	flags = O_WRONLY | O_CREAT;
 	if (cmd->redirects_err->append)
@@ -111,17 +105,3 @@ void ft_shell_redirect_stderr(t_cmd_node *cmd)
 	dup2(fd, STDERR_FILENO);
 	close(fd);
 }
-
-int exec_ast(t_ast_node *command, int level, t_ast_node *parent)
-{
-	if (command == NULL)
-		return (SHELL_EXIT);
-
-	if (command->type == NODE_COMMAND)
-	{
-
-	}
-
-	return 0;
-}
-

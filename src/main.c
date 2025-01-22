@@ -10,33 +10,9 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <stdio.h>
-#include <readline/history.h>
-#include <readline/readline.h>
-#include <errno.h>
+#include <history.h>
+#include <readline.h>
 #include "minishell.h"
-
-void	ft_sh_init_welcome(void);
-int		ft_sh_execute(t_obj_arr *ops, t_ctx *ctx);
-int		ft_sh_tokenize(t_obj_arr *ops, t_ctx *ctx);
-
-void	disable_ctrl_c_printing(void)
-{
-    struct termios	term;
-
-	tcgetattr(0, &term);
-    term.c_lflag &= ~ECHOCTL;
-    tcsetattr(0, TCSANOW, &term);
-}
-
-void	restore_ctrl_c_printing(void)
-{
-    struct termios	term;
-
-    tcgetattr(0, &term);
-	term.c_lflag |= ECHOCTL;
-    tcsetattr(0, TCSANOW, &term);
-}
 
 int	herefile_varname(int i, char *var, char *line)
 {
@@ -44,15 +20,15 @@ int	herefile_varname(int i, char *var, char *line)
 	char	c;
 
 	bi = 0;
+	//TODO: check for buffersize
 	while (line[++i] != '\0')
 	{
 		c = line[i];
-		if (bi == 0 && (ft_isalpha(c) || c == '_'))
+		if ((bi == 0 && (ft_isalpha(c) || c == '_'))
+			|| ((bi > 0) && (ft_isalnum(c) || c == '_')))
 			var[bi++] = c;
-		else if (bi == 0 && !ft_isalpha(c) && c != '_')
+		else if (bi == 0 && !ft_isalpha(c))
 			return (1);
-		else if ((bi > 0) && (ft_isalnum(c) || c == '_'))
-			var[bi++] = c;
 		else
 			break ;
 	}
@@ -80,25 +56,27 @@ int		unlink_herefiles(t_ctx *ctx)
 	return (0);
 }
 
-void	herefile_expansion(int fd, char *var)
+void	herefile_expansion(int fd, const char *varname, t_ctx *ctx)
 {
 	const char	*value;
 
-	value = getenv(var);
+	//TODO: expand $$ and $?
+	value = ft_sh_env_map_get_val(varname, ctx);
 	if (value != NULL)
 		ft_dprintf(fd, "%s", value);
-	else
-	{
-		ft_dprintf(fd, "$");
-		ft_dprintf(fd, "%s", var);
-	} 
 }
 
-void	herefile_lexing(int fd, char *line, bool quotes)
+
+/**
+ * What is the maximum size of a Linux environment variable value?
+ * 	https://stackoverflow.com/questions/1078031/1078125#1078125
+ * 	https://man7.org/linux/man-pages/man2/execve.2.html
+ */
+void	herefile_lexing(int fd, char *line, bool quotes, t_ctx *ctx)
 {
 	int		i;
 	int		e;
-	char	var[1000];
+	char	var[ARG_MAX + 1];
 
 	i = -1;
 	while (line[++i] != '\0' && quotes == false)
@@ -106,84 +84,38 @@ void	herefile_lexing(int fd, char *line, bool quotes)
 		if (line[i] == '$')
 		{
 			e = herefile_varname(i, var, line);
-			i += (ft_strlen(var));
+			i += (int)ft_strlen(var);
 			if (e == 1)
-				write(fd, "$", 1);
-			else if (e == 0)
-				herefile_expansion(fd, var); 
+				ft_dprintf(fd, "$");
+			else
+				herefile_expansion(fd, var, ctx);
 		}
 		else
 			write(fd, &line[i], 1);
 	}
 	if (quotes == true)
 		ft_dprintf(fd, "%s", line);
-	write(fd, "\n", 1);
+	ft_dprintf(fd, "\n");
 }
 
-void handle_sigint(int sig)
+int	event(void)
 {
-
-    printf("\nCaught SIGINT (Ctrl+C)!\n");
+	return (0);
 }
-
-int	ft_sh_loop2(t_ctx *ctx)
-{
-	const char	*line;
-	int			status;
-	t_ast_node	*ast = NULL;
-
-	ft_sh_init_welcome();
-	status = 0;
-	ctx->argv = NULL;
-	ctx->argc = 0;
-
-	line = "cat '' '' '' ''$HOME/../$USER/.emacs'' '' ''$PWD | "
-		   "sleep > $HOME/\"tmp\"/stdout.txt 2>> $HOME/tmp/stderr.txt";
-
-	ctx->hd.ss = 0;
-	ctx->hd.size = 1024;
-	ft_memset(ctx->hd.entries, 0, sizeof(t_hd_entry) * HEREDOC_ARRAY_SIZE);
-	int errcode = parse_pipeline(line, &ast, ctx);
-	if (!errcode)
-	{
-		if (!ast)
-			ft_printf("Error: Failed to parse the command.\n");
-		else
-		{
-			collect_heredocs(ctx);
-			 ft_printf("\n\nAbstract Syntax Tree:\n");
-			 print_ast(ast, 0);
-			ast->ctx = ctx;
-			status = traverse_and_exec_the_ast(ast, 0, NULL);
-			free_ast(ast);
-		}
-	}
-	else
-		status = SHELL_EXIT;
-
-	return (status);
-}
-
-
-int event(void) { return(0); }
 
 int	ft_sh_loop(t_ctx *ctx)
 {
-	char	*line;
-	int		status;
-	cmd_t *root = NULL;
-	t_ast_node *ast = NULL;
+	char		*line;
+	t_ast_node	*ast;
+	int			errcode;
 
-
-	// rl_getc_function = getc;
-	rl_event_hook=event;
-
+	ast = NULL;
+	rl_event_hook = event;
 	ft_sh_init_welcome();
-	status = 0;
 	ctx->argv = NULL;
 	ctx->argc = 0;
 	using_history();
-	while (status != SHELL_EXIT)
+	while (!ctx->status_code)
 	{
 		line = ft_sh_read_line(ctx, NULL);
 		if (line)
@@ -193,53 +125,38 @@ int	ft_sh_loop(t_ctx *ctx)
 				add_history(line);
 				ctx->hd.ss = 0;
 				ctx->hd.size = 1024;
-				ft_memset(ctx->hd.entries, 0, sizeof(t_hd_entry) * HEREDOC_ARRAY_SIZE);
-				int errcode = parse_pipeline(line, &ast, ctx);
+				ft_memset(ctx->hd.entries, 0,
+					sizeof(t_hd_entry) * HEREDOC_ARRAY_SIZE);
+				errcode = ft_do_parse(line, &ast, ctx);
 				if (!ast)
-					ft_printf("Error: Failed to parse the command.\n");
+					ft_printf("Error: Failed to parse the command."
+							  "code: %d\n", errcode);
 				else
 				{
 					collect_heredocs(ctx);
 					ft_printf("\n\nAbstract Syntax Tree:\n");
 					print_ast(ast, 0);
 					ast->ctx = ctx;
-					status = traverse_and_exec_the_ast(ast, 0, NULL);
+					ctx->status_code = ft_sh_execute(ast, 0, NULL);
 				}
-
-// 				root = NULL;
-// 				/* We might have not read the entire line... */
-// 				if (!parse_line(line, &root))
-// 				{
-// 					/* There was an error parsing the command. */
-// 					ft_dprintf(STDERR_FILENO, "Error while parsing command!\n");
-// 					status = -1;
-// 				}
-// 				else
-// 				{
-// 					root->ctx = ctx;
-// 					root->ast = ast;
-// 					status = traverse_and_exec_the_ast2(root, 0, NULL);
-// //					status = exec_ast(ast, 0, NULL);
-// 					free_parse_memory();
-// 				}
 				free_ast(ast);
 				unlink_herefiles(ctx);
 			}
 			free(line);
 		}
 		else
-			status = SHELL_EXIT;
+			ctx->status_code = SHELL_EXIT;
 	}
-	return (status);
+	return (ctx->status_code);
 }
 
 /**
  * https://brennan.io/2015/01/16/write-a-shell-in-c/
  * https://www.geeksforgeeks.org/making-linux-shell-c/
  */
-int main(int argc, char **argv, char **envp)
+int	main(int argc, char **argv, char **envp)
 {
-	int 		exitcode;
+	int			exitcode;
 	t_ctx		*global;
 	t_obj_arr	*ops;
 

@@ -28,6 +28,8 @@ set detach-on-fork off
 
 #catch fork
 
+handle SIGSEGV
+
 #Links:
 #  - https://sourceware.org/gdb/onlinedocs/gdb/Forks.html
 #  - https://sourceware.org/gdb/onlinedocs/gdb/Inferiors-and-Programs.html

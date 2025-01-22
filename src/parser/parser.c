@@ -109,7 +109,7 @@ void	remove_non_compliant_chars(char *buf, int buf_size)
 	char	*dst;
 
 	dst = buf;
-	while (*buf)
+	while (*buf && buf_size--)
 	{
 		if (ft_isalnum((unsigned char) *buf))
 			*dst++ = *buf;
@@ -215,7 +215,7 @@ void	parse_redirection(int *tp, t_ast_node *p, t_ctx *ctx, t_lexer *l)
 	t_wrd			*redir;
 	t_token_type	rt;
 	bool			hereexpand;
-	t_hd_entry	*entry;
+	t_hd_entry		*entry;
 
 	rt = l->t[*tp]->type;
 	hereexpand = l->t[*tp]->hereexpand;
@@ -381,30 +381,6 @@ int	handle_parser_err(int errcode, t_lexer *lexer)
 	return (1);
 }
 
-int	parse_pipeline(const char *line, t_ast_node **root, t_ctx *ctx)
-{
-	t_lexer		lexer;
-	int			errcode;
-
-	errcode = 0;
-	errcode = scan_the_line(line, &lexer);
-	if (errcode != 0)
-		errcode = handle_parser_err(errcode, &lexer);
-	if (errcode == 0)
-	{
-		if (lexer.t[lexer.token_iter]->type == TOKEN_BLANK)
-			skip_blanks(lexer.t, &lexer.token_iter, NULL, &lexer);
-		*root = pipeline_loop(&lexer, ctx);
-		ctx->hd.size = ctx->hd.ss;
-		ctx->hd.ss = 0;
-		errcode = lexer.err;
-		if (errcode != 0)
-			errcode = handle_parser_err(errcode, &lexer);
-	}
-	free_tokens(&lexer);
-	return (errcode);
-}
-
 void	free_wrd(t_wrd *word)
 {
 	if (word->value)
@@ -513,100 +489,5 @@ void	print_redirections(t_wrd *redir, int depth, t_token_type rt)
 		}
 		printf("\n");
 		redir = redir->next_word;
-	}
-}
-
-void	print_ast(t_ast_node *node, int depth)
-{
-	int	i;
-	i = -1;
-
-	if (!node)
-		return;
-	while (++i < depth)
-		ft_printf("  ");
-	if (node->type == NODE_COMMAND)
-		printf("COMMAND: ");
-	else if (node->type == NODE_PIPE)
-		printf("PIPE: ");
-	if (node->type == NODE_COMMAND && node->cmd->args)
-	{
-		printf("%s", node->cmd->args->value);
-		if (node->cmd->args->expand == true)
-			printf(" - TO EXPAND");
-		t_wrd	*cont = node->cmd->args;
-		while (cont->next_part)
-		{
-			printf("; %s", cont->next_part->value ? cont->next_part->value : "NULL");
-			if (cont->next_part->expand == true)
-				printf(" - TO EXPAND");
-			cont = cont->next_part;
-		}
-	}
-	printf("\n");
-	if (node->type == NODE_COMMAND)
-	{
-
-		
-		t_wrd *arg = node->cmd->args;
-		if (arg && arg->next_word)
-		{
-			i = -1;
-			while (++i < depth + 1)
-				ft_printf("  ");
-			ft_printf("Arguments:\n");
-			print_arguments(arg->next_word, depth + 2);
-		}
-		if (node->cmd->redirects_in)
-		{
-			i = -1;
-			while (++i < depth + 1)
-				ft_printf("  ");
-			ft_printf("Input Redirections:\n");
-			print_redirections(node->cmd->redirects_in, depth + 2, TOKEN_REDIRECT_STDIN);
-		}
-		if (node->cmd->redirects_out)
-		{
-			i = -1;
-			while (++i < depth + 1)
-				ft_printf("  ");
-			ft_printf("Output Redirections:\n");
-			print_redirections(node->cmd->redirects_out, depth + 2, T_REDIRECT_STDOUT);
-		}
-		if (node->cmd->redirects_err_in)
-		{
-			i = -1;
-			while (++i < depth + 1)
-				ft_printf("  ");
-			ft_printf("Error Input Redirections:\n");
-			print_redirections(node->cmd->redirects_err_in, depth + 2, TOKEN_REDIRECT_IN_2);
-		}
-		if (node->cmd->redirects_err)
-		{
-			i = -1;
-			while (++i < depth + 1)
-				ft_printf("  ");
-			ft_printf("Error Output Redirections:\n");
-			print_redirections(node->cmd->redirects_err, depth + 2, TOKEN_REDIRECT_STDERR);
-		}
-	}
-	else if (node->type == NODE_PIPE)
-	{
-		if (node->left)
-		{
-			i = -1;
-			while (++i < depth + 1)
-				ft_printf("  ");
-			ft_printf("Left Command ->\n");
-			print_ast(node->left, depth + 2);
-		}
-		if (node->right)
-		{
-			i = -1;
-			while (++i < depth + 1)
-				ft_printf("  ");
-			ft_printf("Right Command ->\n");
-			print_ast(node->right, depth + 2);
-		}
 	}
 }

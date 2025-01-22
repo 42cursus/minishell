@@ -42,6 +42,7 @@ int	ft_sh_is_legal_identifier(const char *name)
 int	ft_unset(t_ctx *ctx)
 {
 	int		i;
+	int		retval;
 	char	*str;
 
 	i = 0;
@@ -49,9 +50,15 @@ int	ft_unset(t_ctx *ctx)
 	{
 		str = ctx->argv[i];
 		if (ft_sh_is_legal_identifier(str))
-			ft_sh_env_map_unbind_var((t_sh_var){.k = str}, ctx);
+		{
+			ft_sh_env_map_unbind_var((t_sh_var) {.k = str}, ctx);
+			retval = 0;
+		}
 		else
+		{
 			perror("not a valid identifier");
+			retval = -1;
+		}
 	}
-	return (0);
+	return (retval);
 }

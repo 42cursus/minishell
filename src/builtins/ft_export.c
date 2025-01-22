@@ -17,18 +17,20 @@ int	ft_export(t_ctx *ctx)
 	char		*str;
 	char		*sptr;
 	t_sh_var	var;
+	int 		i;
 
 	if (ctx->argc == 1)
 		return (ft_env(ctx));
 	var = (t_sh_var){.k = NULL, .v = NULL};
-	str = ft_strdup(*(ctx->argv));
-	while (str && !ft_strchr(str, '='))
+
+	i = 0;
+	while (++i < ctx->argc)
 	{
+		str = ctx->argv[i];
 		var.k = ft_strtok_r(str, "=", &sptr);
 		if (sptr != NULL)
 			var.v = ft_strdup(sptr);
 		var.attrs = ATT_EXPORTED;
-		str = *(ctx->argv);
 		ft_sh_env_map_bind_var(var, ctx);
 	}
 	return (0);

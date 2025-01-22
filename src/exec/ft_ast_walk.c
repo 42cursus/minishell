@@ -1,7 +1,7 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   command.c                                          :+:      :+:    :+:   */
+/*   ft_ast_walk.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: abelov <abelov@student.42london.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
@@ -12,7 +12,6 @@
 
 #include <sys/wait.h>
 #include "minishell.h"
-#include "utils.h"
 
 static int ft_run_on_pipe(t_ast_node *left, t_ast_node *right, int level,
 						  t_ast_node *father)
@@ -37,7 +36,7 @@ static int ft_run_on_pipe(t_ast_node *left, t_ast_node *right, int level,
 		close(fd[0]);
 		close(fd[1]);
 
-		int status_code = traverse_and_exec_the_ast(left, level + 1, father);
+		int status_code = ft_sh_execute(left, level + 1, father);
 		exit(status_code);
 	}
 
@@ -51,7 +50,7 @@ static int ft_run_on_pipe(t_ast_node *left, t_ast_node *right, int level,
 		close(fd[1]);
 
 
-		int status_code = traverse_and_exec_the_ast(right, level + 1, father);
+		int status_code = ft_sh_execute(right, level + 1, father);
 		exit(status_code);
 	}
 
@@ -64,14 +63,16 @@ static int ft_run_on_pipe(t_ast_node *left, t_ast_node *right, int level,
 	return status_cmd2;
 }
 
-static int ft_parse_simple(t_cmd_node *cmd, int level, t_ast_node *father)
+static int ft_parse_simple(t_cmd_node *cmd)
 {
-	int status;
-	t_shell_op *op;
-	t_ctx *ctx = cmd->ctx;
+	int			status;
+	t_shell_op	*op;
+	t_ctx		*ctx = cmd->ctx;
+	int 		i;
 
-	// if (cmd == NULL || cmd->args == NULL || cmd->args->value == NULL)
-	// 	return (SHELL_EXIT);
+	//TODO: do the redirects and return zero
+	if (cmd == NULL || cmd->args == NULL || cmd->args->value == NULL)
+	 	return (SHELL_EXIT);
 
 	char cwd[1024];
 	status = 0;
@@ -80,52 +81,45 @@ static int ft_parse_simple(t_cmd_node *cmd, int level, t_ast_node *father)
 
 	if (!cmd->args) return (status);
 
-	if (strcmp(cmd->args->value, "exit") == 0 || strcmp(cmd->args->value, "quit") == 0)
+	if (ft_strcmp(cmd->args->value, "exit") == 0 || ft_strcmp(cmd->args->value, "quit") == 0)
 		return (SHELL_EXIT);
 
 	ctx->argv = ft_get_argv(cmd, &ctx->argc, ctx);
-
 	op = ft_bsearch_obj(&(t_shell_op) {.instruction = ctx->argv[0]}, ctx->ops);
 	if (op != NULL)
 		status = op->fun(ctx);
 	else
 		status = ft_sh_launch(cmd, ctx);
-//	while (--(ctx->argc))
-//		free(ctx->argv[ctx->argc]);
+	while (ctx->argc--)
+		free(ctx->argv[ctx->argc]);
 	free(ctx->argv);
 	ctx->argv = NULL;
 	return (status);
 }
 
-int traverse_and_exec_the_ast(t_ast_node *cmd, int level, t_ast_node *father)
+int ft_sh_execute(t_ast_node *cmd, int level, t_ast_node *father)
 {
 	int exit_status;
 
 	if (cmd == NULL)
 		return (SHELL_EXIT);
 
+	exit_status = SHELL_EXIT;
 	if (cmd->type == NODE_COMMAND)
 	{
-		if (!cmd->cmd)
-			return (SHELL_EXIT);
-		cmd->cmd->ctx = cmd->ctx;
-		return ft_parse_simple(cmd->cmd, level, father);
+		if (cmd->cmd != NULL)
+		{
+			cmd->cmd->ctx = cmd->ctx;
+			exit_status = ft_parse_simple(cmd->cmd);
+		}
 	}
-
-	cmd->left->ctx = cmd->ctx;
-	cmd->right->ctx = cmd->ctx;
-
-	switch (cmd->type)
+	else if (cmd->type == NODE_PIPE)
 	{
-		case NODE_PIPE:
-			exit_status = ft_run_on_pipe(cmd->left, cmd->right, level, cmd);
-			break;
-
-		default:
-			return (SHELL_EXIT);
+		cmd->left->ctx = cmd->ctx;
+		cmd->right->ctx = cmd->ctx;
+		exit_status = ft_run_on_pipe(cmd->left, cmd->right, level, cmd);
 	}
-
-	return exit_status;
+	return (exit_status);
+	(void)father;
 }
-
 

@@ -20,22 +20,21 @@ void	collect_heredocs(t_ctx *ctx)
 	int				i;
 	char			*line;
 	const mode_t	mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
-	t_hd_entry	*en;
+	t_hd_entry		*en;
 
 	i = -1;
-	//disable_ctrl_c_printing();
 	global_hd = 1;
-	while(++i < ctx->hd.size && global_hd == 1)
+	while (++i < ctx->hd.size && global_hd == 1)
 	{
 		en = &ctx->hd.entries[i];
 		fd = open(en->filename, O_WRONLY | O_CREAT, mode);
-		if (fd < 0) break;
+		if (fd < 0)
+			break ;
 		line = ft_sh_read_line(ctx, "> ");
 		while (line && ft_strcmp(line, en->delimiter) && global_hd == 1)
 		{
-			herefile_lexing(fd, line, en->quotes);
+			herefile_lexing(fd, line, en->quotes, ctx);
 			line = ft_sh_read_line(ctx, "> ");
-
 			if (global_hd == 0)
 				break ;
 		}
@@ -45,8 +44,7 @@ void	collect_heredocs(t_ctx *ctx)
 	{
 		close (fd);
 		unlink_herefiles(ctx);
-	}	
-	//restore_ctrl_c_printing();
+	}
 	global_hd = 0;
 }
 
@@ -80,7 +78,7 @@ void	sig_handler(int sig, siginfo_t *info, void *ctx)
 	(void)sipid;
 	if (global_hd == 1)
 	{
-        if (sig == SIGINT)
+		if (sig == SIGINT)
 		{
 			global_hd = 0;
 			printf("\n");
@@ -89,8 +87,8 @@ void	sig_handler(int sig, siginfo_t *info, void *ctx)
 			rl_redisplay();
 			rl_done = 1;
 		}
-        return;
-    }
+		return ;
+	}
 	if (sig == SIGINT)
 	{
 		printf("\n");
@@ -109,7 +107,6 @@ void	ft_sh_set_signal(t_ctx *const *ctx)
 	sigemptyset(&act.sa_mask);
 	sigaddset(&act.sa_mask, SIGINT);
 	//sigaddset(&act.sa_mask, SIGQUIT);
-
 	signal(SIGQUIT, SIG_IGN);
 	if (sigaction(SIGINT, &act, NULL))
 	{
@@ -146,11 +143,7 @@ void	ft_sh_init_welcome(void)
 {
 	char	*username;
 
-//	printf("\033[H\033[J");
-	printf("\n******************************************");
-	printf("\n\n\t***** 42 MINISHELL *****");
-	printf("\n\t* USE AT YOUR OWN RISK *");
-	printf("\n\n******************************************");
+	printf(BANNER);
 	username = getenv("USER");
 	printf("\n\n\nUSER is: @%s", username);
 	printf("\n");

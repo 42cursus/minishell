@@ -40,36 +40,6 @@ typedef struct word_t
 	struct word_t	*next_word;
 }	word_t;
 
-/*
- * Describes a simple command
-
- * aux can be used to point to additional information you might need;
- * freeing the memory aux points to is your responsibility. aux will
- * be initialized to NULL. Do not modify these structures, please use
- * aux.
-
- * verb points to a single string literal (possibly made up of parts)
- * that is the executable name or the internal command name.
-
- * params points to a list of parameters (possibly none) in the order
- * they were entered in the command line.
-
- * in out and err point to the names of the redirections for the command;
- * they can point to a single literal, no literal (the command does not
- * have that redirection) or multiple literals (the user entered multiple
- * redirections for a command; e.g. cat >out1 >out2). You can handle the
- * latter as you wish (e.g. only consider the first redirection). Within
- * any of these lists, the literals are in the original order.
-
- * io_flags is used to specify special modes for redirection (e.g. appending)
-
- * Some string literals can be found in both the out list and the err list
- * (those entered as "command &> out").
-
- * up points to the command_t structure that points to this simple_command_t
- * (up != NULL)
- */
-
 # define IO_REGULAR	0x00
 # define IO_OUT_APPEND	0x01
 # define IO_ERR_APPEND	0x02
@@ -80,13 +50,13 @@ typedef struct word_t
 typedef enum e_errcodes
 {
 	OK = 0,
-	COULDNT_OPEN_URANDOM ,
-	UNCLOSED_QUOTE ,
-	TOKEN_ALLOC_FAILURE ,
-	PID_ALLOC_FAILURE ,
-	ALLOC_FAILURE ,
-	NO_REDIR_TARGET ,
-	HD_CAT_FAILURE ,
+	COULDNT_OPEN_URANDOM,
+	UNCLOSED_QUOTE,
+	TOKEN_ALLOC_FAILURE,
+	PID_ALLOC_FAILURE,
+	ALLOC_FAILURE,
+	NO_REDIR_TARGET,
+	HD_CAT_FAILURE,
 }	t_errcodes;
 
 typedef struct s_hd_entry
@@ -111,6 +81,7 @@ typedef struct s_exec_ctx
 	char		pathname[PATH_MAX];
 	t_obj_arr	*ops;
 	t_here_arr	hd;
+	int 		status_code;
 }	t_ctx;
 
 /*

@@ -20,7 +20,7 @@ typedef struct
 
 lt_entry lt[] = {
 	{ .token_id = TOKEN_COMMAND,		.str = "TOKEN_COMMAND" },
-	{ .token_id = T_WORD,			.str = "TOKEN_WORD" },
+	{ .token_id = T_WORD,				.str = "TOKEN_WORD" },
 	{ .token_id = TOKEN_PIPE,			.str = "TOKEN_PIPE" },
 	{ .token_id = T_REDIRECT_STDOUT,	.str = "TOKEN_REDIRECT_OUT" },
 	{ .token_id = TOKEN_REDIRECT_STDIN,	.str = "TOKEN_REDIRECT_IN" },
@@ -28,9 +28,9 @@ lt_entry lt[] = {
 	{ .token_id = TOKEN_APPEND,			.str = "TOKEN_APPEND" },
 	{ .token_id = TOKEN_STRING,			.str = "TOKEN_STRING" },
 	{ .token_id = TOKEN_BLANK,			.str = "TOKEN_BLANK" },
-	{ .token_id = T_VAR,			.str = "TOKEN_VAR" },
+	{ .token_id = T_VAR,				.str = "TOKEN_VAR" },
 	{ .token_id = TOKEN_END,			.str = "TOKEN_END" },
-	{ .token_id = TOKEN_REDIRECT_STDERR,			.str = "TOKEN_REDIRECT_OUT_2" },
+	{ .token_id = TOKEN_REDIRECT_STDERR,		.str = "TOKEN_REDIRECT_OUT_2" },
 	{ .token_id = TOKEN_REDIRECT_IN_2,			.str = "TOKEN_REDIRECT_IN_2" },
 	{ .token_id = TOKEN_HERE_DOC_2,				.str = "TOKEN_HERE_DOC_2" },
 	{ .token_id = TOKEN_APPEND_2,				.str = "TOKEN_APPEND_2" }
