@@ -10,8 +10,8 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <history.h>
-#include <readline.h>
+#include <readline/history.h>
+#include <readline/readline.h>
 #include "minishell.h"
 
 int	herefile_varname(int i, char *var, char *line)
@@ -20,11 +20,15 @@ int	herefile_varname(int i, char *var, char *line)
 	char	c;
 
 	bi = 0;
-	//TODO: check for buffersize
-	while (line[++i] != '\0')
+	while (line[++i] != '\0' && bi < ARG_MAX)
 	{
 		c = line[i];
-		if ((bi == 0 && (ft_isalpha(c) || c == '_'))
+		if (bi == 0 && (c == '?' || c == '$'))
+		{
+			var[bi++] = c;
+			break ;
+		}
+		else if ((bi == 0 && (ft_isalpha(c) || c == '_'))
 			|| ((bi > 0) && (ft_isalnum(c) || c == '_')))
 			var[bi++] = c;
 		else if (bi == 0 && !ft_isalpha(c))
@@ -60,10 +64,16 @@ void	herefile_expansion(int fd, const char *varname, t_ctx *ctx)
 {
 	const char	*value;
 
-	//TODO: expand $$ and $?
-	value = ft_sh_env_map_get_val(varname, ctx);
-	if (value != NULL)
-		ft_dprintf(fd, "%s", value);
+	if (ft_strcmp(varname, "$") == 0)
+		ft_putnbr_fd(ft_getpid(), fd);
+	else if (ft_strcmp(varname, "?") == 0)
+		ft_putnbr_fd(ctx->status_code, fd);
+	else
+	{
+		value = ft_sh_env_map_get_val(varname, ctx);
+		if (value != NULL)
+			ft_dprintf(fd, "%s", value);
+	}
 }
 
 
@@ -140,7 +150,7 @@ int	ft_sh_loop(t_ctx *ctx)
 					ctx->status_code = ft_sh_execute(ast, 0, NULL);
 				}
 				free_ast(ast);
-				unlink_herefiles(ctx);
+				//unlink_herefiles(ctx);
 			}
 			free(line);
 		}

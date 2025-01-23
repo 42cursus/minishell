@@ -18,7 +18,7 @@ int	ft_do_parse(const char *line, t_ast_node **root, t_ctx *ctx)
 	int			errcode;
 
 	errcode = 0;
-	errcode = scan_the_line(line, &lexer);
+	errcode = scan_the_line(line, &lexer, ctx);
 	if (errcode != 0)
 		errcode = handle_parser_err(errcode, &lexer);
 	if (errcode == 0)

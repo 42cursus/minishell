@@ -81,7 +81,7 @@ typedef struct s_exec_ctx
 	char		pathname[PATH_MAX];
 	t_obj_arr	*ops;
 	t_here_arr	hd;
-	int 		status_code;
+	int			status_code;
 }	t_ctx;
 
 /*
