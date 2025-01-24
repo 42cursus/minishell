@@ -73,7 +73,7 @@ void	herefile_expansion(int fd, const char *varname, t_ctx *ctx)
 	{
 		value = ft_sh_env_map_get_val(varname, ctx);
 		if (value != NULL)
-			ft_dprintf(fd, "%s", value);
+			ft_putstr_fd(value, fd);
 	}
 }
 
@@ -133,7 +133,7 @@ static int	ft_sh_loop(t_ctx *ctx)
 	ctx->argv = NULL;
 	ctx->argc = 0;
 	ft_using_history();
-	while (!ctx->status_code)
+	while (ctx->status_code != SHELL_EXIT)
 	{
 		line = ft_sh_read_line(ctx, NULL);
 		if (line)
@@ -146,14 +146,16 @@ static int	ft_sh_loop(t_ctx *ctx)
 				errcode = ft_do_parse(line, &ast, ctx);
 				if (!ast)
 					ft_printf("Error: Failed to parse the command."
-							  "code: %d\n", errcode);
+								"code: %d\n", errcode);
 				else
 				{
-					collect_heredocs(ctx);
-					ft_printf("\n\nAbstract Syntax Tree:\n");
-					print_ast(ast, 0);
-					ast->ctx = ctx;
-					ctx->status_code = ft_sh_execute(ast, 0, NULL);
+					if (collect_heredocs(ctx))
+					{
+						ft_printf("\n\nAbstract Syntax Tree:\n");
+						print_ast(ast, 0);
+						ast->ctx = ctx;
+						ctx->status_code = ft_sh_execute(ast, 0, NULL);
+					}
 				}
 				free_ast(ast);
 				unlink_herefiles(ctx);

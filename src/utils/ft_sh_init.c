@@ -14,7 +14,7 @@
 
 volatile sig_atomic_t	global_hd = 0;
 
-void	collect_heredocs(t_ctx *ctx)
+int	collect_heredocs(t_ctx *ctx)
 {
 	int				fd;
 	int				i;
@@ -43,8 +43,13 @@ void	collect_heredocs(t_ctx *ctx)
 		close(fd);
 	}
 	if (global_hd == 0)
+	{
+		ctx->status_code = (-1);
 		unlink_herefiles(ctx);
+		return (0);
+	}
 	global_hd = 0;
+	return (1);
 }
 
 static int	do_init_ops(t_obj_arr **ops)
@@ -85,8 +90,8 @@ static void	sig_handler(int sig, siginfo_t *info, void *ctx)
 		if (sig == SIGINT)
 		{
 			global_hd = 0;
-			printf("\n");
-			rl_on_new_line();
+//			printf("\n");
+//			rl_on_new_line();
 			rl_replace_line("", 0);
 			rl_redisplay();
 			rl_done = 1;

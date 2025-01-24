@@ -15,14 +15,14 @@
 
 void	ft_handle_redirects(t_cmd_node *cmd)
 {
-	if (cmd->redirects_in)
-		ft_shell_redirect_stdin(cmd);
-	if (cmd->redirects_out)
-		ft_shell_redirect_stdout(cmd);
-	if (cmd->redirects_err_in)
-		ft_shell_redirect_stderr_in(cmd);
-	if (cmd->redirects_err)
-		ft_shell_redirect_stderr(cmd);
+	if (cmd && cmd->redirects_in)
+		ft_shell_handle_redirect(cmd->redirects_in, STDIN_FILENO, cmd->ctx, IN);
+	if (cmd && cmd->redirects_out)
+		ft_shell_handle_redirect(cmd->redirects_out, STDOUT_FILENO, cmd->ctx, OUT);
+	if (cmd && cmd->redirects_err_in)
+		ft_shell_handle_redirect(cmd->redirects_err_in, STDERR_FILENO, cmd->ctx, IN);
+	if (cmd && cmd->redirects_err)
+		ft_shell_handle_redirect(cmd->redirects_err, STDERR_FILENO, cmd->ctx, OUT);
 }
 
 int	ft_sh_launch(t_cmd_node *cmd, t_ctx *ctx)

@@ -114,6 +114,33 @@ typedef struct s_lexer
 	t_toks	tok;
 }	t_lexer;
 
+typedef struct s_error
+{
+	int			assertion;
+	int 		errnum;
+	int 		fd;
+	const char	*description;
+	int			line;
+	const char	*func;
+	const char	*file;
+}	t_error;
+/*
+ * S_IRUSR: Read permission for the owner (0400 in octal).
+ * S_IWUSR: Write permission for the owner (0200 in octal).
+ * S_IRGRP: Read permission for the group (0040 in octal).
+ * S_IROTH: Read permission for others (0004 in octal).
+ */
+# define DEFAULT_MODE S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH
+
+typedef enum
+{
+	IN = 0,
+	OUT
+}	t_dir;
+
+void		ft_shell_handle_redirect(t_wrd *wrd, int fd_redir,
+				t_ctx *ctx, t_dir d);
+int			ft_handle_err(t_error err);
 void		remove_non_compliant_chars(char *buf, int buf_size);
 void		ft_chdir_update_env_vars(t_ctx *ctx, char *oldpwd,
 				const char *path, char *cwd);
@@ -158,7 +185,7 @@ t_state		create_pid_token(t_lexer *lexer, t_ctx *ctx);
 int			ft_getpid(void);
 int			here_doc_cat(t_wrd *here, t_lexer *l);
 char		*hd_cat_loop(t_wrd *here, size_t len, t_lexer *l);
-void		collect_heredocs(t_ctx *ctx);
+int			collect_heredocs(t_ctx *ctx);
 t_state		handle_1(t_lexer *lexer);
 t_state		handle_2(t_lexer *lexer, t_ctx *ctx);
 t_state		scan_loop(t_lexer *l, t_ctx *ctx);

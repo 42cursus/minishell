@@ -58,7 +58,7 @@ static int ft_parse_simple(t_cmd_node *cmd)
 
 	//TODO: do the redirects and return zero
 	if (cmd == NULL || cmd->args == NULL || cmd->args->value == NULL)
-	 	return (SHELL_EXIT);
+	 	return (0);
 
 	char cwd[1024];
 	status = 0;
