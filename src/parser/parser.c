@@ -109,7 +109,7 @@ void	remove_non_compliant_chars(char *buf, int buf_size)
 	char	*dst;
 
 	dst = buf;
-	while (*buf && buf_size--)
+	while (buf_size--)
 	{
 		if (ft_isalnum((unsigned char) *buf))
 			*dst++ = *buf;
@@ -146,16 +146,15 @@ static int	add_random_numbers_to_str(char *str_buf, int rand_count)
 */
 		while (rand_count > len)
 		{
+			bytes_read = read(fd, buf + len, OPTIMISTIC - len);
 			if (bytes_read < 0)
 				break;
 			buf[bytes_read] = '\0';
-			remove_non_compliant_chars(buf, OPTIMISTIC);
-			len = (int) ft_strlen(buf);
-			bytes_read = read(fd, buf + len, OPTIMISTIC - len);
+			remove_non_compliant_chars(buf + len, OPTIMISTIC  - len);
+			len = (int) ft_strnlen(buf, OPTIMISTIC);
 		}
 		close(fd);
-
-		ft_strlcat(str_buf, buf, rand_count + 1);
+		ft_strlcat(str_buf, buf, rand_count);
 	}
 	else
 	{
@@ -287,11 +286,10 @@ void	create_wrd(t_wrd *word, t_token *token, t_token_type rt)
 		word->value = ft_strdup(token->value);
 		if (token->type == T_VAR)
 			word->expand = true;
-		else
-			word->expand = false;
 	}
+	word->redir_flag = O_TRUNC;
 	if (rt == TOKEN_APPEND || rt == TOKEN_APPEND_2)
-		word->append = true;
+		word->redir_flag = O_APPEND;
 }
 
 void	skip_blanks(t_token **ts, int *tp, t_wrd *last, t_lexer *l)
@@ -473,7 +471,7 @@ void	print_redirections(t_wrd *redir, int depth, t_token_type rt)
 		while (++i < depth)
 			ft_printf("  ");
 		printf("Redirection Type: %s", type);
-		if (redir->append == true)
+		if (redir->redir_flag == O_APPEND)
 			printf(">");
 		printf(", Target: %s", redir->value);
 		if (redir->expand == true)

@@ -35,8 +35,10 @@ set(FT_CFLAGS
         -Wall -Wextra -Werror
         -Wwrite-strings
         -Wimplicit
+        -Wformat -Werror=format-security
         -Wstrict-prototypes
         -Wmissing-prototypes
+        -fstack-protector-strong
         -Wno-error=unused-parameter
         -Wno-error=unused-variable
         -O0
