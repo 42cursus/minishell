@@ -32,7 +32,7 @@ t_ast_node	*create_node(t_node_type type, t_token *t, t_ast_node *parent)
 	return (node);
 }
 
-void	list_append(t_wrd **list, t_wrd *redir)
+static void	list_append(t_wrd **list, t_wrd *redir)
 {
 	t_wrd	*curr;
 
@@ -118,7 +118,7 @@ void	remove_non_compliant_chars(char *buf, int buf_size)
 	*dst = '\0';
 }
 
-int	add_random_numbers_to_str(char *str_buf, int rand_count)
+static int	add_random_numbers_to_str(char *str_buf, int rand_count)
 {
 	char	buf[OPTIMISTIC + 1];
 	int		fd;
@@ -165,7 +165,8 @@ int	add_random_numbers_to_str(char *str_buf, int rand_count)
 	return (ret_val);
 }
 
-int	ft_getpid_c(void)
+__attribute__((unused))
+static int	ft_getpid_c(void)
 {
 	int		fd;
 	char	buf[20];
@@ -187,10 +188,7 @@ int	ft_getpid_c(void)
 	return (ft_atoi(buf));
 }
 
-#define HEREFILE_BUF_LEN 80
-#include <sys/random.h>
-
-int	create_here_file(t_wrd *here, t_hd_entry *entry, bool expand)
+static int	create_here_file(t_wrd *here, t_hd_entry *entry, bool expand)
 {
 	ssize_t	error_code;
 	char	buf[HEREFILE_BUF_LEN + 1];
@@ -217,14 +215,14 @@ void	parse_redirection(int *tp, t_ast_node *p, t_ctx *ctx, t_lexer *l)
 	bool			hereexpand;
 	t_hd_entry		*entry;
 
-	rt = l->t[*tp]->type;
-	hereexpand = l->t[*tp]->hereexpand;
-	skip_blanks(l->t, tp, NULL, l);
-	if (l->t[*tp] && (l->t[*tp]->type == T_WORD || l->t[*tp]->type == T_VAR))
+	rt = l->tok.t[*tp]->type;
+	hereexpand = l->tok.t[*tp]->hereexpand;
+	skip_blanks(l->tok.t, tp, NULL, l);
+	if (l->tok.t[*tp] && (l->tok.t[*tp]->type == T_WORD || l->tok.t[*tp]->type == T_VAR))
 	{
 		redir = ft_calloc(sizeof(t_wrd), 1);
-		create_wrd(redir, l->t[*tp], rt);
-		skip_blanks(l->t, tp, redir, l);
+		create_wrd(redir, l->tok.t[*tp], rt);
+		skip_blanks(l->tok.t, tp, redir, l);
 		if (rt == TOKEN_HERE_DOC || rt == TOKEN_HERE_DOC_2)
 		{
 			l->err = here_doc_cat(redir, l);
@@ -244,20 +242,20 @@ void	parse_command_loop(int *tp, t_ctx *ctx, t_ast_node *cn, t_lexer *l)
 	t_wrd	*la;
 
 	la = cn->cmd->args;
-	while (l->t[*tp] != NULL && l->err == 0)
+	while (l->tok.t[*tp] != NULL && l->err == 0)
 	{
-		if (l->t[*tp]->type == T_WORD || l->t[*tp]->type == T_VAR)
+		if (l->tok.t[*tp]->type == T_WORD || l->tok.t[*tp]->type == T_VAR)
 		{
 			arg = ft_calloc(sizeof(t_wrd), 1);
-			create_wrd(arg, l->t[*tp], l->t[*tp]->type);
+			create_wrd(arg, l->tok.t[*tp], l->tok.t[*tp]->type);
 			if (cn->cmd->args == NULL)
 				cn->cmd->args = arg;
 			else if (la != NULL)
 				la->next_word = arg;
 			la = arg;
-			skip_blanks(l->t, tp, arg, l);
+			skip_blanks(l->tok.t, tp, arg, l);
 		}
-		else if (l->t[*tp]->type >= T_REDIRECT_STDOUT && l->t[*tp]->type < 16)
+		else if (l->tok.t[*tp]->type >= T_REDIRECT_STDOUT && l->tok.t[*tp]->type < 16)
 			parse_redirection(tp, cn, ctx, l);
 		else
 			break ;
@@ -321,16 +319,16 @@ void	skip_blanks(t_token **ts, int *tp, t_wrd *last, t_lexer *l)
 	}
 }
 
-int	has_right(t_lexer *l, t_ast_node **right, t_ctx *ctx)
+static int	has_right(t_lexer *l, t_ast_node **right, t_ctx *ctx)
 {
 	t_token_type	type;
 
-	if (l->t[l->token_iter])
-		type = l->t[l->token_iter]->type;
-	if (l->t[l->token_iter] && type == TOKEN_PIPE)
+	if (l->tok.t[l->tok.token_iter])
+		type = l->tok.t[l->tok.token_iter]->type;
+	if (l->tok.t[l->tok.token_iter] && type == TOKEN_PIPE)
 	{
-		skip_blanks(l->t, &l->token_iter, NULL, l);
-		*right = parse_command(l->t, &l->token_iter, ctx, l);
+		skip_blanks(l->tok.t, &l->tok.token_iter, NULL, l);
+		*right = parse_command(l->tok.t, &l->tok.token_iter, ctx, l);
 		return (true);
 	}
 	*right = NULL;
@@ -343,7 +341,7 @@ t_ast_node	*pipeline_loop(t_lexer *lexer, t_ctx *ctx)
 	t_ast_node	*nn;
 	t_ast_node	*pipe_node;
 
-	cn = parse_command(lexer->t, &lexer->token_iter, ctx, lexer);
+	cn = parse_command(lexer->tok.t, &lexer->tok.token_iter, ctx, lexer);
 	if (cn != NULL)
 	{
 		while (has_right(lexer, &nn, ctx) && lexer->err == 0)

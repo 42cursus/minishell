@@ -33,22 +33,21 @@ void	collect_heredocs(t_ctx *ctx)
 		line = ft_sh_read_line(ctx, "> ");
 		while (line && ft_strcmp(line, en->delimiter) && global_hd == 1)
 		{
+			add_history(line);
 			herefile_lexing(fd, line, en->quotes, ctx);
-			line = ft_sh_read_line(ctx, "> ");
+			line = (free(line), ft_sh_read_line(ctx, "> "));
 			if (global_hd == 0)
-				break ;
+				break;
 		}
+		free(line);
 		close(fd);
 	}
 	if (global_hd == 0)
-	{
-		close (fd);
 		unlink_herefiles(ctx);
-	}
 	global_hd = 0;
 }
 
-int	do_init_ops(t_obj_arr **ops)
+static int	do_init_ops(t_obj_arr **ops)
 {
 	static t_obj_arr	obj;
 	static t_shell_op	builtins[] = {
@@ -69,7 +68,12 @@ int	do_init_ops(t_obj_arr **ops)
 	return (0);
 }
 
-void	sig_handler(int sig, siginfo_t *info, void *ctx)
+/**
+ * Readline C: force return of certain text in readline()
+ *
+ * https://stackoverflow.com/questions/53165704/
+ */
+static void	sig_handler(int sig, siginfo_t *info, void *ctx)
 {
 	int					sipid;
 
@@ -98,7 +102,7 @@ void	sig_handler(int sig, siginfo_t *info, void *ctx)
 	}
 }
 
-void	ft_sh_set_signal(t_ctx *const *ctx)
+static void	ft_sh_set_signal(t_ctx *const *ctx)
 {
 	t_sigaction	act;
 
@@ -107,7 +111,8 @@ void	ft_sh_set_signal(t_ctx *const *ctx)
 	sigemptyset(&act.sa_mask);
 	sigaddset(&act.sa_mask, SIGINT);
 	//sigaddset(&act.sa_mask, SIGQUIT);
-	signal(SIGQUIT, SIG_IGN);
+	sighandler_t old_handler = signal(SIGQUIT, SIG_ERR);
+
 	if (sigaction(SIGINT, &act, NULL))
 	{
 		ft_sh_destroy_ctx(*ctx);

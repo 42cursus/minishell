@@ -18,20 +18,18 @@ char *ft_get_word(t_wrd *wrd, t_ctx *ctx)
 	char		*string = NULL;
 	int			string_length = 0;
 	const char	*substring = "";
+	int			substring_length;
 
 	while (wrd != NULL)
 	{
+		substring = wrd->value;
 		if (wrd->expand == true)
 		{
 			var = ft_sh_env_map_get_entry(wrd->value, ctx);
 			if (var && var->v)
 				substring = var->v;
 		}
-		else
-			substring = wrd->value;
-
-		int substring_length = ft_strlen(substring);
-
+		substring_length = (int)ft_strlen(substring);
 		string = ft_reallocarray(string, string_length,
 								 string_length + substring_length + 1,
 								 sizeof(char));

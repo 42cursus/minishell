@@ -26,40 +26,26 @@ static int ft_run_on_pipe(t_ast_node *left, t_ast_node *right, int level,
 		perror("pipe failed");
 		exit(EXIT_FAILURE);
 	}
-
 	pid_t pid_cmd1 = fork();
-
 	if (pid_cmd1 == 0)
 	{
 		dup2(fd[1], STDOUT_FILENO);
-
 		close(fd[0]);
 		close(fd[1]);
-
-		int status_code = ft_sh_execute(left, level + 1, father);
-		exit(status_code);
+		exit(ft_sh_execute(left, level + 1, father));
 	}
-
 	pid_t pid_cmd2 = fork();
-
 	if (pid_cmd2 == 0)
 	{
 		dup2(fd[0], STDIN_FILENO);
-
 		close(fd[0]);
 		close(fd[1]);
-
-
-		int status_code = ft_sh_execute(right, level + 1, father);
-		exit(status_code);
+		exit(ft_sh_execute(right, level + 1, father));
 	}
-
 	close(fd[0]);
 	close(fd[1]);
-
 	waitpid(pid_cmd1, &status_cmd1, 0);
 	waitpid(pid_cmd2, &status_cmd2, 0);
-
 	return status_cmd2;
 }
 

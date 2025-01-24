@@ -12,7 +12,7 @@
 
 #include "minishell.h"
 
-int	ft_sh_env_map_free_entry(t_sh_var *var)
+static int	ft_sh_env_map_free_entry(t_sh_var *var)
 {
 	if (var)
 		(free((void *)var->v), free((void *)var->k));

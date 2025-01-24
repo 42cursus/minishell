@@ -13,6 +13,8 @@
 #ifndef MINISHELL_H
 # define MINISHELL_H
 
+#define _GNU_SOURCE
+
 # include <stdbool.h>
 # include <error.h>
 # include <errno.h>
@@ -28,12 +30,15 @@
 # include <sys/stat.h>
 # include <fcntl.h>
 
-# include <signal.h>
+# include <sys/random.h>
 # include <readline/readline.h>
-
+# include <readline/history.h>
 # include <stdlib.h>
 # include <string.h>
 # include <ctype.h>
+
+
+# define HEREFILE_BUF_LEN 80
 
 # define BANNER "\
 \n****************************************** \
@@ -78,6 +83,13 @@ typedef struct s_token
 	char			*value;
 }	t_token;
 
+typedef struct s_toks
+{
+	t_token	*t[MAX_TOKENS];
+	int		tokens_size;
+	int		token_iter;
+}	t_toks;
+
 typedef enum e_state
 {
 	INITIAL,
@@ -99,11 +111,14 @@ typedef struct s_lexer
 	bool	here_eof;
 	int		err;
 	int		heredoc_index;
-	t_token	*t[MAX_TOKENS];
-	int		tokens_size;
-	int		token_iter;
+	t_toks	tok;
 }	t_lexer;
 
+void		remove_non_compliant_chars(char *buf, int buf_size);
+void		ft_chdir_update_env_vars(t_ctx *ctx, char *oldpwd,
+				const char *path, char *cwd);
+void		ft_handle_redirects(t_cmd_node *cmd);
+int			ft_sh_is_legal_identifier(const char *name);
 int			unlink_herefiles(t_ctx *ctx);
 int			handle_parser_err(int errcode, t_lexer *lexer);
 int			scan_the_line(const char *line, t_lexer *lexer, t_ctx *ctx);
@@ -144,6 +159,7 @@ int			ft_getpid(void);
 int			here_doc_cat(t_wrd *here, t_lexer *l);
 char		*hd_cat_loop(t_wrd *here, size_t len, t_lexer *l);
 void		collect_heredocs(t_ctx *ctx);
+t_state		handle_1(t_lexer *lexer);
 t_state		handle_2(t_lexer *lexer, t_ctx *ctx);
 t_state		scan_loop(t_lexer *l, t_ctx *ctx);
 
@@ -159,10 +175,6 @@ void		ft_sh_init_welcome(void);
 char		*ft_get_word(t_wrd *wrd, t_ctx *ctx);
 char		**ft_get_argv(t_cmd_node *cmd, int *size, t_ctx *ctx);
 int			ft_sh_lookup_pathname(t_ctx *ctx);
-enum
-{
-	VAR_MAX = 256
-};
 
 enum
 {

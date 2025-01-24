@@ -12,7 +12,6 @@
 
 minishell
 mini_minishell
-**/minishell_sub
 resources/
 gdb.txt
 scratch/
@@ -20,13 +19,14 @@ replace-git-emails.sh
 infile
 outfile
 cmake_build
-memcheck.log
 
 #for test
 !tester/minitest.sh
 tester
 args.txt
 input_tmp
+memcheck.log
+readline.supp
 
 # From https://stackoverflow.com/questions/15606955/:
 # If you want to list all the files currently being tracked:

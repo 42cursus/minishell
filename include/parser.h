@@ -71,6 +71,7 @@ typedef struct s_here_array
 	t_hd_entry	entries[HEREDOC_ARRAY_SIZE];
 	int			size;
 	int			ss;
+	int 		already_unlinked;
 }	t_here_arr;
 
 typedef struct s_exec_ctx

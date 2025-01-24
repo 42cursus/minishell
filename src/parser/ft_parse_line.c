@@ -23,8 +23,8 @@ int	ft_do_parse(const char *line, t_ast_node **root, t_ctx *ctx)
 		errcode = handle_parser_err(errcode, &lexer);
 	if (errcode == 0)
 	{
-		if (lexer.t[lexer.token_iter]->type == TOKEN_BLANK)
-			skip_blanks(lexer.t, &lexer.token_iter, NULL, &lexer);
+		if (lexer.tok.t[lexer.tok.token_iter]->type == TOKEN_BLANK)
+			skip_blanks(lexer.tok.t, &lexer.tok.token_iter, NULL, &lexer);
 		*root = pipeline_loop(&lexer, ctx);
 		ctx->hd.size = ctx->hd.ss;
 		ctx->hd.ss = 0;

@@ -12,7 +12,7 @@
 
 #include "minishell.h"
 
-void	ft_sh_env_map_do_parse(char *const *env_tab, size_t map_size,
+static void	ft_sh_env_map_do_parse(char *const *env_tab, size_t map_size,
 							t_sh_var *env_map)
 {
 	size_t	i;

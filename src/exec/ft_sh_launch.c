@@ -25,26 +25,26 @@ void	ft_handle_redirects(t_cmd_node *cmd)
 		ft_shell_redirect_stderr(cmd);
 }
 
-int ft_sh_launch(t_cmd_node *cmd, t_ctx *ctx)
+int	ft_sh_launch(t_cmd_node *cmd, t_ctx *ctx)
 {
 	pid_t	pid;
-	int		status = -1;
+	int		status;
 
+	status = -1;
 	if (!ft_sh_lookup_pathname(ctx) && cmd)
 	{
 		pid = fork();
 		if (pid == 0)
 		{
 			ft_handle_redirects(cmd);
-			if (execve(ctx->pathname, ctx->argv,
-					   ft_sh_render_envp(ctx)))
+			if (execve(ctx->pathname, ctx->argv, ft_sh_render_envp(ctx)))
 				return (perror("ft_sh: error in execve"), SHELL_EXIT);
 		}
 		else if (pid < 0)
 			return (perror("ft_sh: error forking"), SHELL_EXIT);
 		else
 		{
-			waitpid(pid, &status, WUNTRACED);        // Parent process
+			waitpid(pid, &status, WUNTRACED);
 			while (!WIFEXITED(status) && !WIFSIGNALED(status))
 				waitpid(pid, &status, WUNTRACED);
 		}

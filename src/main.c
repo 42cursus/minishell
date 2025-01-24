@@ -10,8 +10,6 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <readline/history.h>
-#include <readline/readline.h>
 #include "minishell.h"
 
 int	herefile_varname(int i, char *var, char *line)
@@ -48,14 +46,17 @@ int		unlink_herefiles(t_ctx *ctx)
 	int			i;
 	int			err;
 
-	i = -1;
-	err = 0;
-	while(++i < ctx->hd.size)
+	if (ctx && !ctx->hd.already_unlinked)
 	{
-		filename = ctx->hd.entries[i].filename;
-		err = unlink(filename);
-		if (err != 0)
-			return (1);
+		i = -1;
+		while(++i < ctx->hd.size)
+		{
+			filename = ctx->hd.entries[i].filename;
+			err = unlink(filename);
+			if (err != 0)
+				return (1);
+		}
+		ctx->hd.already_unlinked = 1;
 	}
 	return (0);
 }
@@ -108,12 +109,19 @@ void	herefile_lexing(int fd, char *line, bool quotes, t_ctx *ctx)
 	ft_dprintf(fd, "\n");
 }
 
-int	event(void)
+static int	event(void)
 {
 	return (0);
 }
 
-int	ft_sh_loop(t_ctx *ctx)
+/* Begin a session in which the history functions might be used.  This
+   initializes interactive variables. */
+static void	ft_using_history(void)
+{
+	history_offset = history_length;
+}
+
+static int	ft_sh_loop(t_ctx *ctx)
 {
 	char		*line;
 	t_ast_node	*ast;
@@ -124,7 +132,7 @@ int	ft_sh_loop(t_ctx *ctx)
 	ft_sh_init_welcome();
 	ctx->argv = NULL;
 	ctx->argc = 0;
-	using_history();
+	ft_using_history();
 	while (!ctx->status_code)
 	{
 		line = ft_sh_read_line(ctx, NULL);
@@ -133,10 +141,8 @@ int	ft_sh_loop(t_ctx *ctx)
 			if (*line != 0)
 			{
 				add_history(line);
-				ctx->hd.ss = 0;
-				ctx->hd.size = 1024;
-				ft_memset(ctx->hd.entries, 0,
-					sizeof(t_hd_entry) * HEREDOC_ARRAY_SIZE);
+				ft_memset(&ctx->hd, 0, sizeof(t_here_arr));
+				ctx->hd.size = HEREDOC_ARRAY_SIZE;
 				errcode = ft_do_parse(line, &ast, ctx);
 				if (!ast)
 					ft_printf("Error: Failed to parse the command."
@@ -150,13 +156,14 @@ int	ft_sh_loop(t_ctx *ctx)
 					ctx->status_code = ft_sh_execute(ast, 0, NULL);
 				}
 				free_ast(ast);
-				//unlink_herefiles(ctx);
+				unlink_herefiles(ctx);
 			}
 			free(line);
 		}
 		else
 			ctx->status_code = SHELL_EXIT;
 	}
+	rl_clear_history();
 	return (ctx->status_code);
 }
 
