@@ -40,7 +40,7 @@ int	herefile_varname(int i, char *var, char *line)
 	return (1);
 }
 
-int		unlink_herefiles(t_ctx *ctx)
+int	unlink_herefiles(t_ctx *ctx)
 {
 	const char	*filename;
 	int			i;
@@ -49,7 +49,7 @@ int		unlink_herefiles(t_ctx *ctx)
 	if (ctx && !ctx->hd.already_unlinked)
 	{
 		i = -1;
-		while(++i < ctx->hd.size)
+		while (++i < ctx->hd.size)
 		{
 			filename = ctx->hd.entries[i].filename;
 			err = unlink(filename);
@@ -76,7 +76,6 @@ void	herefile_expansion(int fd, const char *varname, t_ctx *ctx)
 			ft_putstr_fd(value, fd);
 	}
 }
-
 
 /**
  * What is the maximum size of a Linux environment variable value?

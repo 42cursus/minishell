@@ -12,43 +12,49 @@
 
 #include "minishell.h"
 
-volatile sig_atomic_t	global_hd = 0;
+volatile sig_atomic_t	g_global_hd = 0;
 
-int	collect_heredocs(t_ctx *ctx)
+void	collect_heredocs_loop(int i, t_ctx *ctx)
 {
-	int				fd;
-	int				i;
-	char			*line;
 	const mode_t	mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
+	int				fd;
+	char			*line;
 	t_hd_entry		*en;
 
-	i = -1;
-	global_hd = 1;
-	while (++i < ctx->hd.size && global_hd == 1)
+	while (++i < ctx->hd.size && g_global_hd == 1)
 	{
 		en = &ctx->hd.entries[i];
 		fd = open(en->filename, O_WRONLY | O_CREAT, mode);
 		if (fd < 0)
 			break ;
 		line = ft_sh_read_line(ctx, "> ");
-		while (line && ft_strcmp(line, en->delimiter) && global_hd == 1)
+		while (line && ft_strcmp(line, en->delimiter) && g_global_hd == 1)
 		{
 			add_history(line);
 			herefile_lexing(fd, line, en->quotes, ctx);
 			line = (free(line), ft_sh_read_line(ctx, "> "));
-			if (global_hd == 0)
-				break;
+			if (g_global_hd == 0)
+				break ;
 		}
 		free(line);
 		close(fd);
 	}
-	if (global_hd == 0)
+}
+
+int	collect_heredocs(t_ctx *ctx)
+{
+	int				i;
+
+	i = -1;
+	g_global_hd = 1;
+	collect_heredocs_loop(i, ctx);
+	if (g_global_hd == 0)
 	{
 		ctx->status_code = (-1);
 		unlink_herefiles(ctx);
 		return (0);
 	}
-	global_hd = 0;
+	g_global_hd = 0;
 	return (1);
 }
 
@@ -87,15 +93,12 @@ static void	sig_handler(int sig, siginfo_t *info, void *ctx)
 	sipid = info->si_pid;
 	(void)ctx;
 	(void)sipid;
-	if (global_hd == 1)
+	if (g_global_hd == 1)
 	{
 		if (sig == SIGINT)
 		{
-			global_hd = 0;
-//			printf("\n");
-//			rl_on_new_line();
+			g_global_hd = 0;
 			rl_replace_line("", 0);
-			rl_redisplay();
 			rl_done = 1;
 		}
 		return ;
