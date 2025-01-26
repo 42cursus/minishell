@@ -15,16 +15,35 @@ CC				:= cc
 INC_DIR			=  ./include
 INCLUDE_FLAGS	:= -I. -I$(INC_DIR) -I/usr/include
 OPTIMIZE_FLAGS	:= -O0
-DEBUG_FLAGS		:= -g3 -gdwarf-3 -fsanitize=address -fsanitize=undefined
+DEBUG_FLAGS		:= -g3 -gdwarf-3 # -fsanitize=address -fsanitize=undefined
 MANDATORY_FLAGS	:= -Wall -Wextra -Werror -Wimplicit
 CFLAGS			= $(MANDATORY_FLAGS) $(DEBUG_FLAGS) $(OPTIMIZE_FLAGS) $(INCLUDE_FLAGS)
 
 LIBFT_DIR		=  ./lib/ft
 LIBFT_LIB		=  $(LIBFT_DIR)/libft.a
 LIBS			:= $(LIBFT)
-LINK_FLAGS		:= -L $(LIBFT_DIR) -lft
+LINK_FLAGS		:= -L $(LIBFT_DIR) -lft -L/usr/lib/x86_64-linux-gnu -lreadline
 
-SRCS			= src/main.c
+SRC_DIR			= src
+
+SH_DIRS			= builtins error exec parser utils
+SH_SRCS	 		:=
+
+include $(SH_DIRS:%=$(SRC_DIR)/%/Makefile.mk)
+
+SRCS			:= src/main.c
+SRCS			+= $(SH_SRCS)
+
+$(info =================)
+$(info )
+$(info $(SH_DIRS))
+$(info )
+$(info =================)
+$(info =================)
+$(info )
+$(info $(SH_SRCS))
+$(info )
+$(info =================)
 
 BUILD_DIR		= build
 OBJS			= $(SRCS:%.c=$(BUILD_DIR)/%.o)
@@ -32,7 +51,7 @@ OBJS			= $(SRCS:%.c=$(BUILD_DIR)/%.o)
 all: $(NAME)
 
 $(NAME): $(LIBFT_LIB) $(OBJS)
-		$(CC) -L$(LIBFT_DIR) $(OBJS) $(DEBUG_FLAGS) -fsanitize=address -fsanitize=undefined -o $@ -lft
+		$(CC) $(OBJS) $(DEBUG_FLAGS) -fsanitize=address -fsanitize=undefined -o $@ $(LINK_FLAGS)
 
 $(LIBFT_LIB):
 		@$(MAKE) -C $(LIBFT_DIR) -j8

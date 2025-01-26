@@ -39,8 +39,8 @@ set(FT_CFLAGS
         -Wstrict-prototypes
         -Wmissing-prototypes
         -fstack-protector-strong
-        -Wno-error=unused-parameter
-        -Wno-error=unused-variable
+#        -Wno-error=unused-parameter
+#        -Wno-error=unused-variable
         -O0
         -masm=att
         -g3 -gdwarf-3

@@ -21,4 +21,5 @@ int	ft_pwd(t_ctx *ctx)
 	else
 		return (perror("getcwd error"), 1);
 	return (0);
+	(void)ctx;
 }

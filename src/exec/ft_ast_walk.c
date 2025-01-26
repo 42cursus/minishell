@@ -54,7 +54,6 @@ static int ft_parse_simple(t_cmd_node *cmd)
 	int			status;
 	t_shell_op	*op;
 	t_ctx		*ctx = cmd->ctx;
-	int 		i;
 
 	//TODO: do the redirects and return zero
 	if (cmd == NULL || cmd->args == NULL || cmd->args->value == NULL)
