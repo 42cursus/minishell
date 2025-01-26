@@ -33,13 +33,11 @@ char *ft_get_word(t_wrd *wrd, t_ctx *ctx)
 		string = ft_reallocarray(string, string_length,
 								 string_length + substring_length + 1,
 								 sizeof(char));
-		if (string == NULL)
-		{
-			ft_dprintf(STDERR_FILENO, "on %s at %s:%d", __FILE__, __LINE__, __func__);
-			errno = ENOMEM;
-			perror("Error allocating word string.");
-			exit(EXIT_FAILURE);
-		}
+		if (ft_handle_err((t_error) {
+			.assertion = (string == NULL), .description = "Error allocating word string.",
+			.func = __func__, .line = __LINE__, .file = __FILE__,
+			.errnum = ENOMEM}))
+			return (NULL);
 		string[string_length] = '\0';
 		ft_strcat(string, substring);
 		string_length += substring_length;

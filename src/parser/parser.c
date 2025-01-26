@@ -362,7 +362,7 @@ int	handle_parser_err(int errcode, t_lexer *lexer)
 		ft_putstr_fd("Error: Input contained an un-closed quote.\n", STDERR_FILENO);
 	else if (errcode == TOKEN_ALLOC_FAILURE)
 		ft_dprintf(STDERR_FILENO,
-				   "Error: Token allocation failure near line[%s].\n",
+				   "Error: Token allocation failure near position[%d].\n",
 				   lexer->line_iter);
 	else if (errcode == PID_ALLOC_FAILURE)
 		ft_putstr_fd("Error: PID allocation failure.\n", STDERR_FILENO);

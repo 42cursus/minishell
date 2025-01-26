@@ -302,8 +302,9 @@ t_state	exit_variable(t_lexer *l, t_ctx *ctx)
 {
 	char	*sc;
 
-	if (l->line[(l->line_iter)++] == '?' && l->buf_index == 0)
+	if (l->line[(l->line_iter)] == '?' && l->buf_index == 0)
 	{
+		(l->line_iter)++;
 		sc = ft_itoa(ctx->status_code);
 		create_token(T_WORD, sc, l);
 		free(sc);

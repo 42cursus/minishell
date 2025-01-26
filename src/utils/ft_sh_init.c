@@ -73,6 +73,8 @@ static int	do_init_ops(t_obj_arr **ops)
 	return (0);
 }
 
+
+
 /**
  * Readline C: force return of certain text in readline()
  *
@@ -115,8 +117,7 @@ static void	ft_sh_set_signal(t_ctx *const *ctx)
 	act.sa_sigaction = &sig_handler;
 	sigemptyset(&act.sa_mask);
 	sigaddset(&act.sa_mask, SIGINT);
-	//sigaddset(&act.sa_mask, SIGQUIT);
-	sighandler_t old_handler = signal(SIGQUIT, SIG_ERR);
+	signal(SIGQUIT, SIG_ERR);
 
 	if (sigaction(SIGINT, &act, NULL))
 	{
