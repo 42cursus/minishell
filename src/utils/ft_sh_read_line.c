@@ -27,7 +27,10 @@ char	*ft_sh_read_line(t_ctx *ctx, const char *fmt)
 	p = ft_sh_env_map_get_val("USER", ctx);
 	pwd = ft_sh_env_map_get_val("PWD", ctx);
 	if (fmt == NULL)
-		fmt = "[%d] "FT_GREEN"%s"FT_RESET"@"FT_BLUE"%s"FT_RESET"-> ";
+	{
+//		fmt = "[%d] "FT_GREEN"%s"FT_RESET"@"FT_BLUE"%s"FT_RESET"-> ";
+		fmt = "-> ";
+	}
 	ft_sprintf(ps, fmt, count, p, pwd);
 	line = readline(ps);
 	if (line && *line)

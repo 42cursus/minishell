@@ -110,10 +110,10 @@ pkg_check_modules(RL REQUIRED IMPORTED_TARGET readline)
 set(TARGET_LIBRARIES
         ${FT_LIB_NAME}
         Threads::Threads
-        # -ltinfo
-        # /home/andrei_belov/staging/readline-8.0/build/libhistory.a
-        # /home/andrei_belov/staging/readline-8.0/build/libreadline.a
-       PkgConfig::RL
+         -ltinfo
+         /home/andrei_belov/staging/readline-8.0/build/libhistory.a
+         /home/andrei_belov/staging/readline-8.0/build/libreadline.a
+#       PkgConfig::RL
 )
 
 MESSAGE(STATUS "${RL_INCLUDE_DIRS}")

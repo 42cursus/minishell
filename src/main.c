@@ -108,8 +108,12 @@ void	herefile_lexing(int fd, char *line, bool quotes, t_ctx *ctx)
 	ft_dprintf(fd, "\n");
 }
 
+//extern int volatile _rl_caught_signal;
+
 static int	event(void)
 {
+	if (rl_pending_signal())
+		printf("=================================");
 	return (0);
 }
 

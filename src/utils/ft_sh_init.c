@@ -6,55 +6,127 @@
 /*   By: abelov <abelov@student.42london.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/04 23:04:03 by abelov            #+#    #+#             */
-/*   Updated: 2024/07/18 14:18:21 by abelov           ###   ########.fr       */
+/*   Updated: 2025/01/26 17:47:46 by abelov           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-volatile sig_atomic_t	g_global_hd = 0;
+volatile sig_atomic_t	g_received_signal_num = 0;
 
-void	collect_heredocs_loop(int i, t_ctx *ctx)
+static void	sig_handler(int sig, siginfo_t *info, void *ctx)
+{
+	int					sipid;
+
+	sipid = info->si_pid;
+	(void)ctx;
+	(void)sipid;
+	if (g_received_signal_num == 0)
+	{
+		if (sig == SIGINT)
+		{
+			g_global_hd = 0;
+			rl_replace_line("", 0);
+			rl_done = 1;
+		}
+		return ;
+	}
+	if (sig == SIGINT)
+	{
+		printf("\n");
+		rl_on_new_line();
+		rl_replace_line("", 0);
+		rl_redisplay();
+	}
+}
+
+/**
+ * Readline C: force return of certain text in readline()
+ *
+ * https://stackoverflow.com/questions/53165704/
+ */
+static void	hd_sig_handler(int sig, siginfo_t *info, void *ctx)
+{
+	int	sipid;
+
+	if (sig == SIGINT)
+	{
+		g_received_signal_num = SIGINT;
+		rl_replace_line("", 0);
+		rl_done = 1;
+	}
+	return ;
+	sipid = info->si_pid;
+	(void)ctx;
+	(void)sipid;
+}
+
+int	collect_heredocs_loop(t_ctx *ctx)
 {
 	const mode_t	mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
 	int				fd;
 	char			*line;
 	t_hd_entry		*en;
+	int	i;
+	int retcode;
 
-	while (++i < ctx->hd.size && g_global_hd == 1)
+	retcode = 1;
+	i = -1;
+	while (++i < ctx->hd.size && g_received_signal_num != SIGINT)
 	{
 		en = &ctx->hd.entries[i];
 		fd = open(en->filename, O_WRONLY | O_CREAT, mode);
 		if (fd < 0)
 			break ;
+		t_sigaction	act;
+		t_sigaction	oldact;
+
+		act.sa_flags = SA_SIGINFO | SA_RESTART;
+		act.sa_sigaction = &hd_sig_handler;
+		sigemptyset(&act.sa_mask);
+		sigaddset(&act.sa_mask, SIGINT);
+
+		g_received_signal_num = 0;
+
+		if (sigaction(SIGINT, &act, &oldact))
+		{
+			ft_sh_destroy_ctx(ctx);
+			exit(EXIT_FAILURE);
+		}
+
 		line = ft_sh_read_line(ctx, "> ");
-		while (line && ft_strcmp(line, en->delimiter) && g_global_hd == 1)
+		while (line && ft_strcmp(line, en->delimiter))
 		{
 			add_history(line);
 			herefile_lexing(fd, line, en->quotes, ctx);
 			line = (free(line), ft_sh_read_line(ctx, "> "));
-			if (g_global_hd == 0)
-				break ;
+			if (g_received_signal_num == SIGINT)
+			{
+				retcode = 0;
+				break;
+			}
+		}
+		if (sigaction(SIGINT, &oldact, &act))
+		{
+			ft_sh_destroy_ctx(ctx);
+			exit(EXIT_FAILURE);
 		}
 		free(line);
 		close(fd);
 	}
+
+	return (retcode);
 }
 
 int	collect_heredocs(t_ctx *ctx)
 {
-	int				i;
-
-	i = -1;
-	g_global_hd = 1;
-	collect_heredocs_loop(i, ctx);
-	if (g_global_hd == 0)
+	if (!collect_heredocs_loop(ctx))
 	{
 		ctx->status_code = (-1);
 		unlink_herefiles(ctx);
+		g_received_signal_num = 0;
 		return (0);
 	}
-	g_global_hd = 0;
 	return (1);
 }
 
@@ -79,39 +151,6 @@ static int	do_init_ops(t_obj_arr **ops)
 	return (0);
 }
 
-
-
-/**
- * Readline C: force return of certain text in readline()
- *
- * https://stackoverflow.com/questions/53165704/
- */
-static void	sig_handler(int sig, siginfo_t *info, void *ctx)
-{
-	int					sipid;
-
-	sipid = info->si_pid;
-	(void)ctx;
-	(void)sipid;
-	if (g_global_hd == 1)
-	{
-		if (sig == SIGINT)
-		{
-			g_global_hd = 0;
-			rl_replace_line("", 0);
-			rl_done = 1;
-		}
-		return ;
-	}
-	if (sig == SIGINT)
-	{
-		printf("\n");
-		rl_on_new_line();
-		rl_replace_line("", 0);
-		rl_redisplay();
-	}
-}
-
 static void	ft_sh_set_signal(t_ctx *const *ctx)
 {
 	t_sigaction	act;
@@ -120,13 +159,16 @@ static void	ft_sh_set_signal(t_ctx *const *ctx)
 	act.sa_sigaction = &sig_handler;
 	sigemptyset(&act.sa_mask);
 	sigaddset(&act.sa_mask, SIGINT);
-	signal(SIGQUIT, SIG_ERR);
+
 
 	if (sigaction(SIGINT, &act, NULL))
 	{
 		ft_sh_destroy_ctx(*ctx);
 		exit(EXIT_FAILURE);
 	}
+	signal(SIGQUIT, SIG_ERR);
+	return ;
+	(void )ctx;
 }
 
 /**

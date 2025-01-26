@@ -37,6 +37,7 @@
 # include <string.h>
 # include <ctype.h>
 
+extern volatile sig_atomic_t	g_received_signal;
 
 # define HEREFILE_BUF_LEN 80
 
@@ -189,7 +190,7 @@ int			collect_heredocs(t_ctx *ctx);
 t_state		handle_1(t_lexer *lexer);
 t_state		handle_2(t_lexer *lexer, t_ctx *ctx);
 t_state		scan_loop(t_lexer *l, t_ctx *ctx);
-void		collect_heredocs_loop(int i, t_ctx *ctx);
+int			collect_heredocs_loop(t_ctx *ctx);
 
 int			ft_sh_execute(t_ast_node *cmd, int level, t_ast_node *father);
 void		ft_shell_redirect_stdin(t_cmd_node *cmd);
