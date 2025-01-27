@@ -17,6 +17,7 @@
 # include <stdbool.h>
 # include <linux/limits.h>
 # include "ft/ft_stdlib.h"
+# include <signal.h>
 
 # define SHELL_EXIT -100
 # define IO_REGULAR	0x00
@@ -75,6 +76,8 @@ typedef struct s_here_array
 	int 		already_unlinked;
 }	t_here_arr;
 
+typedef struct sigaction	t_sigaction;
+
 typedef struct s_exec_ctx
 {
 	char		**argv;
@@ -84,6 +87,8 @@ typedef struct s_exec_ctx
 	t_obj_arr	*ops;
 	t_here_arr	hd;
 	int			status_code;
+	t_sigaction	hd_act;
+	t_sigaction	act;
 }	t_ctx;
 
 /*

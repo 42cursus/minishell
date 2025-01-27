@@ -18,21 +18,25 @@
 char	*ft_sh_read_line(t_ctx *ctx, const char *fmt)
 {
 	char		ps[MAXC];
-	char		*pwd;
-	char		*p;
 	char		*line;
 	static int	count = 1;
+	t_sigaction	oldact;
+	t_sigaction	*act;
 
 	line = NULL;
-	p = ft_sh_env_map_get_val("USER", ctx);
-	pwd = ft_sh_env_map_get_val("PWD", ctx);
+	act = &ctx->hd_act;
 	if (fmt == NULL)
 	{
-//		fmt = "[%d] "FT_GREEN"%s"FT_RESET"@"FT_BLUE"%s"FT_RESET"-> ";
-		fmt = "-> ";
+		fmt = "[%d] "FT_GREEN"%s"FT_RESET"@"FT_BLUE"%s"FT_RESET"-> ";
+		act = &ctx->act;
 	}
-	ft_sprintf(ps, fmt, count, p, pwd);
+	ft_sprintf(ps, fmt, count, ft_sh_env_map_get_val("USER", ctx),
+		ft_sh_env_map_get_val("PWD", ctx));
+	if (sigaction(SIGINT, act, &oldact))
+		exit(((void)ft_sh_destroy_ctx(ctx), EXIT_FAILURE));
 	line = readline(ps);
+	if (sigaction(SIGINT, &oldact, NULL))
+		exit(((void)ft_sh_destroy_ctx(ctx), EXIT_FAILURE));
 	if (line && *line)
 		count++;
 	return (line);

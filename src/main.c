@@ -78,42 +78,16 @@ void	herefile_expansion(int fd, const char *varname, t_ctx *ctx)
 }
 
 /**
- * What is the maximum size of a Linux environment variable value?
- * 	https://stackoverflow.com/questions/1078031/1078125#1078125
- * 	https://man7.org/linux/man-pages/man2/execve.2.html
+ * https://www.unix.com/programming/112624-readline-problems.html
+ *
+ * @return
  */
-void	herefile_lexing(int fd, char *line, bool quotes, t_ctx *ctx)
-{
-	int		i;
-	int		e;
-	char	var[ARG_MAX + 1];
-
-	i = -1;
-	while (line[++i] != '\0' && quotes == false)
-	{
-		if (line[i] == '$')
-		{
-			e = herefile_varname(i, var, line);
-			i += (int)ft_strlen(var);
-			if (e == 1)
-				ft_dprintf(fd, "$");
-			else
-				herefile_expansion(fd, var, ctx);
-		}
-		else
-			write(fd, &line[i], 1);
-	}
-	if (quotes == true)
-		ft_dprintf(fd, "%s", line);
-	ft_dprintf(fd, "\n");
-}
-
-//extern int volatile _rl_caught_signal;
-
 static int	event(void)
 {
 	if (rl_pending_signal())
-		printf("=================================");
+	{
+		(void)NULL;
+	}
 	return (0);
 }
 
@@ -122,6 +96,19 @@ static int	event(void)
 static void	ft_using_history(void)
 {
 	history_offset = history_length;
+}
+
+/**
+ * Greeting shell during startup
+ */
+void	ft_sh_init_welcome(void)
+{
+	char	*username;
+
+	printf(BANNER);
+	username = getenv("USER");
+	printf("\n\n\nUSER is: @%s", username);
+	printf("\n");
 }
 
 static int	ft_sh_loop(t_ctx *ctx)
@@ -148,11 +135,11 @@ static int	ft_sh_loop(t_ctx *ctx)
 				ctx->hd.size = HEREDOC_ARRAY_SIZE;
 				errcode = ft_do_parse(line, &ast, ctx);
 				if (!ast)
-					ft_printf("Error: Failed to parse the command."
-								"code: %d\n", errcode);
+					ft_printf("Failed to parse the command."
+						" errorcode: %d\n", errcode);
 				else
 				{
-					if (collect_heredocs(ctx))
+					if (ft_sh_collect_heredocs(ctx))
 					{
 						ft_printf("\n\nAbstract Syntax Tree:\n");
 						print_ast(ast, 0);

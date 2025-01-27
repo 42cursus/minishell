@@ -37,7 +37,7 @@
 # include <string.h>
 # include <ctype.h>
 
-extern volatile sig_atomic_t	g_received_signal;
+extern volatile sig_atomic_t	g_received_signal_num;
 
 # define HEREFILE_BUF_LEN 80
 
@@ -179,14 +179,14 @@ t_ast_node	*pipeline_loop(t_lexer *lexer, t_ctx *ctx);
 void		parse_command_loop(int *tp, t_ctx *ctx, t_ast_node *cn, t_lexer *l);
 void		print_tokens(t_lexer *lexer);
 void		end_of_heredoc_check(t_lexer *lexer);
-void		herefile_lexing(int fd, char *line, bool quotes, t_ctx *ctx);
+void		ft_heredoc_file_lexing(int fd, char *line, bool quotes, t_ctx *ctx);
 int			herefile_varname(int i, char *var, char *line);
 void		herefile_expansion(int fd, const char *varname, t_ctx *ctx);
 t_state		create_pid_token(t_lexer *lexer, t_ctx *ctx);
 int			ft_getpid(void);
 int			here_doc_cat(t_wrd *here, t_lexer *l);
 char		*hd_cat_loop(t_wrd *here, size_t len, t_lexer *l);
-int			collect_heredocs(t_ctx *ctx);
+int			ft_sh_collect_heredocs(t_ctx *ctx);
 t_state		handle_1(t_lexer *lexer);
 t_state		handle_2(t_lexer *lexer, t_ctx *ctx);
 t_state		scan_loop(t_lexer *l, t_ctx *ctx);
@@ -209,8 +209,6 @@ enum
 {
 	MAXC = 128
 };
-
-typedef struct sigaction	t_sigaction;
 
 /**
  * k => key
