@@ -110,7 +110,6 @@ static int	ft_sh_loop(t_ctx *ctx)
 	t_ast_node	*ast;
 	int			errcode;
 
-	ast = NULL;
 	rl_event_hook = event;
 	ft_sh_init_welcome();
 	ctx->argv = NULL;
@@ -118,6 +117,7 @@ static int	ft_sh_loop(t_ctx *ctx)
 	history_offset = history_length;
 	while (ctx->status_code != SHELL_EXIT)
 	{
+		ast = NULL;
 		line = ft_sh_read_line(ctx, PS_REGULAR);
 		if (line)
 		{
@@ -127,10 +127,7 @@ static int	ft_sh_loop(t_ctx *ctx)
 				ft_memset(&ctx->hd, 0, sizeof(t_here_arr));
 				ctx->hd.size = HEREDOC_ARRAY_SIZE;
 				errcode = ft_do_parse(line, &ast, ctx);
-				if (!ast)
-					ft_printf("Failed to parse the command."
-						" errorcode: %d\n", errcode);
-				else
+				if (errcode == 0)
 				{
 					if (ft_sh_collect_heredocs(ctx))
 					{
@@ -140,7 +137,8 @@ static int	ft_sh_loop(t_ctx *ctx)
 						ctx->status_code = ft_sh_execute_command(ast, 0, NULL);
 					}
 				}
-				free_ast(ast);
+				if (ast != NULL)
+					free_ast(ast);
 				unlink_herefiles(ctx);
 			}
 			free(line);

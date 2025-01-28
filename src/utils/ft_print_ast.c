@@ -25,6 +25,10 @@ void	print_ast(t_ast_node *node, int depth)
 		printf("COMMAND: ");
 	else if (node->type == NODE_PIPE)
 		printf("PIPE: ");
+	else if (node->type == NODE_OR)
+		printf("OR ||: ");
+	else if (node->type == NODE_AND)
+		printf("AND &&: ");
 	if (node->type == NODE_COMMAND && node->cmd->args)
 	{
 		printf("%s", node->cmd->args->value);
@@ -84,7 +88,7 @@ void	print_ast(t_ast_node *node, int depth)
 			print_redirections(node->cmd->redirects_err, depth + 2, TOKEN_REDIRECT_STDERR);
 		}
 	}
-	else if (node->type == NODE_PIPE)
+	else if (node->type == NODE_PIPE || node->type == NODE_OR || node->type == NODE_AND)
 	{
 		if (node->left)
 		{
@@ -104,4 +108,3 @@ void	print_ast(t_ast_node *node, int depth)
 		}
 	}
 }
-

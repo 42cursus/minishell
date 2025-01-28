@@ -19,6 +19,8 @@ typedef struct
 } lt_entry;
 
 lt_entry lt[] = {
+	{ .token_id = TOKEN_AND,		.str = "TOKEN_AND" },
+	{ .token_id = TOKEN_OR,		.str = "TOKEN_OR" },
 	{ .token_id = TOKEN_COMMAND,		.str = "TOKEN_COMMAND" },
 	{ .token_id = T_WORD,				.str = "TOKEN_WORD" },
 	{ .token_id = TOKEN_PIPE,			.str = "TOKEN_PIPE" },
@@ -164,15 +166,30 @@ t_state	handle_2(t_lexer *lexer, t_ctx *ctx)
 	return (INITIAL);
 }
 
-t_state	handle_symbol(t_lexer *lexer, t_state state)
+t_state	handle_symbol(t_lexer *l, t_state state, t_ctx *ctx)
 {
-	flush_buffer(lexer, T_WORD);
-	if (state == INITIAL)
+	char	c;
+
+	flush_buffer(l, T_WORD);
+	if (state != END)
+		return (state);
+	end_of_heredoc_check(l);
+	c = l->line[l->line_iter];
+	if ((c == '|' || c == '&') && l->line_iter == 0)
+		l->err = OP_AT_BEGINNING;
+	l->line_iter++;
+	if (l->line[l->line_iter] == '|' && c == '|')
+		l->tok.t[l->tok.token_iter] = create_token(TOKEN_OR, "||", l);
+	else if (l->line[l->line_iter] != '|' && c == '|')
 	{
-		end_of_heredoc_check(lexer);
-		lexer->tok.t[lexer->tok.token_iter] = create_token(TOKEN_PIPE, "|", lexer);
+		l->tok.t[l->tok.token_iter] = create_token(TOKEN_PIPE, "|", l);
+		return (handle_initial(l, ctx));
 	}
-	return (state);
+	else if (l->line[l->line_iter] == '&' && c == '&')
+		l->tok.t[l->tok.token_iter] = create_token(TOKEN_AND, "&&", l);
+	else if (l->line[l->line_iter] != '&' && c == '&')
+		l->err = SINGLE_AMPERSAND;
+	return (INITIAL);
 }
 
 t_state	handle_initial(t_lexer *l, t_ctx *ctx)
@@ -186,15 +203,17 @@ t_state	handle_initial(t_lexer *l, t_ctx *ctx)
 	else if (l->line[l->line_iter] == '2')
 		return (handle_2(l, ctx));
 	else if (l->line[l->line_iter] == '\'')
-		return (handle_symbol(l, IN_SINGLE_QUOTE));
+		return (handle_symbol(l, IN_SINGLE_QUOTE, ctx));
 	else if (l->line[l->line_iter] == '"')
-		return (handle_symbol(l, IN_DOUBLE_QUOTE));
+		return (handle_symbol(l, IN_DOUBLE_QUOTE, ctx));
 	else if (l->line[l->line_iter] == '>')
-		return (handle_symbol(l, CHECK_APPEND));
+		return (handle_symbol(l, CHECK_APPEND, ctx));
 	else if (l->line[l->line_iter] == '<')
-		return (handle_symbol(l, CHECK_HERE_DOC));
+		return (handle_symbol(l, CHECK_HERE_DOC, ctx));
 	else if (l->line[l->line_iter] == '|')
-		return (handle_symbol(l, INITIAL));
+		return (handle_symbol(l, END, ctx));
+	else if (l->line[l->line_iter] == '&')
+		return (handle_symbol(l, END, ctx));
 	else if (l->here_eof == true && l->first_blank == false)
 		l->first_blank = true;
 	l->buffer[l->buf_index++] = l->line[l->line_iter];
@@ -399,7 +418,6 @@ int	scan_the_line(const char *line, t_lexer *lexer, t_ctx *ctx)
 	else if (state == IN_DOUBLE_QUOTE || state == IN_SINGLE_QUOTE)
 		lexer->err = UNCLOSED_QUOTE;
 	lexer->tok.t[lexer->tok.token_iter] = NULL;
-	print_tokens(lexer);
 	lexer->tok.tokens_size = lexer->tok.token_iter;
 	lexer->tok.token_iter = 0;
 	return (lexer->err);

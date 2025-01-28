@@ -59,9 +59,11 @@ extern volatile sig_atomic_t	g_received_signal_num;
 
 typedef enum e_token_type
 {
+	TOKEN_OR,
+	TOKEN_AND,
+	TOKEN_PIPE,
 	TOKEN_COMMAND,
 	T_WORD,
-	TOKEN_PIPE,
 	TOKEN_STRING,
 	TOKEN_BLANK,
 	TOKEN_END,
@@ -153,7 +155,7 @@ int			scan_the_line(const char *line, t_lexer *lexer, t_ctx *ctx);
 t_token		*create_token(t_token_type type, const char *value, t_lexer *lexer);
 void		flush_buffer(t_lexer *lexer, t_token_type type);
 t_state		handle_initial(t_lexer *l, t_ctx *ctx);
-t_state		handle_symbol(t_lexer *lexer, t_state state);
+t_state		handle_symbol(t_lexer *lexer, t_state state, t_ctx *ctx);
 t_state		handle_in_single_quote(t_lexer *lexer);
 t_state		exit_variable(t_lexer *l, t_ctx *ctx);
 t_state		handle_variable(t_lexer *lexer, t_ctx *ctx);

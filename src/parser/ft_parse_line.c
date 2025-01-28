@@ -18,7 +18,8 @@ int	ft_do_parse(const char *line, t_ast_node **root, t_ctx *ctx)
 	int			errcode;
 
 	errcode = 0;
-	errcode = scan_the_line(line, &lexer, ctx);
+	scan_the_line(line, &lexer, ctx);
+	errcode = lexer.err;
 	if (errcode != 0)
 		errcode = handle_parser_err(errcode, &lexer);
 	if (errcode == 0)
@@ -32,6 +33,8 @@ int	ft_do_parse(const char *line, t_ast_node **root, t_ctx *ctx)
 		if (errcode != 0)
 			errcode = handle_parser_err(errcode, &lexer);
 	}
+	if (lexer.err == 0)
+		print_tokens(&lexer);
 	free_tokens(&lexer);
 	return (errcode);
 }

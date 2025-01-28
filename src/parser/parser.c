@@ -32,6 +32,7 @@ t_ast_node	*create_node(t_node_type type, t_token *t, t_ast_node *parent)
 	return (node);
 }
 
+
 static void	list_append(t_wrd **list, t_wrd *redir)
 {
 	t_wrd	*curr;
@@ -317,19 +318,25 @@ void	skip_blanks(t_token **ts, int *tp, t_wrd *last, t_lexer *l)
 	}
 }
 
-static int	has_right(t_lexer *l, t_ast_node **right, t_ctx *ctx)
+static int	has_right(t_lexer *l, t_ast_node **r, t_ctx *ctx, t_node_type *type)
 {
-	t_token_type	type;
+	t_token_type	t;
 
 	if (l->tok.t[l->tok.token_iter])
-		type = l->tok.t[l->tok.token_iter]->type;
-	if (l->tok.t[l->tok.token_iter] && type == TOKEN_PIPE)
+		t = l->tok.t[l->tok.token_iter]->type;
+	if (l->tok.t[l->tok.token_iter] && (t >= TOKEN_OR && t <= TOKEN_PIPE))
 	{
+		if (t == TOKEN_OR)
+			*type = NODE_OR;
+		else if (t == TOKEN_AND)
+			*type = NODE_AND;
+		else if (t == TOKEN_PIPE)
+			*type = NODE_PIPE;
 		skip_blanks(l->tok.t, &l->tok.token_iter, NULL, l);
-		*right = parse_command(l->tok.t, &l->tok.token_iter, ctx, l);
+		*r = parse_command(l->tok.t, &l->tok.token_iter, ctx, l);
 		return (true);
 	}
-	*right = NULL;
+	*r = NULL;
 	return (false);
 }
 
@@ -337,20 +344,22 @@ t_ast_node	*pipeline_loop(t_lexer *lexer, t_ctx *ctx)
 {
 	t_ast_node	*cn;
 	t_ast_node	*nn;
-	t_ast_node	*pipe_node;
+	t_ast_node	*op_node;
+	t_node_type type;
 
 	cn = parse_command(lexer->tok.t, &lexer->tok.token_iter, ctx, lexer);
 	if (cn != NULL)
 	{
-		while (has_right(lexer, &nn, ctx) && lexer->err == 0)
+		while (has_right(lexer, &nn, ctx, &type) && lexer->err == 0)
 		{
-			pipe_node = create_node(NODE_PIPE, NULL, NULL);
-			pipe_node->cmd = (free(pipe_node->cmd), NULL);
-			pipe_node->left = cn;
-			pipe_node->right = nn;
-			cn->parent = pipe_node;
-			nn->parent = pipe_node;
-			cn = pipe_node;
+			op_node = create_node(type, NULL, NULL);
+			free(op_node->cmd);
+			op_node->cmd = NULL;
+			op_node->left = cn;
+			op_node->right = nn;
+			cn->parent = op_node;
+			nn->parent = op_node;
+			cn = op_node;
 		}
 	}
 	return (cn);
@@ -374,6 +383,10 @@ int	handle_parser_err(int errcode, t_lexer *lexer)
 		ft_putstr_fd("Error: Reidirection without a target.\n", STDERR_FILENO);
 	else if (errcode == HD_CAT_FAILURE)
 		ft_putstr_fd("Error: Failed to concatenate HERE DOC delimiter.\n", STDERR_FILENO);
+	else if (errcode == SINGLE_AMPERSAND)
+		ft_putstr_fd("Syntax Error: Unsupported '&' operator.\n", STDERR_FILENO);
+	else if (errcode == OP_AT_BEGINNING)
+		ft_putstr_fd("Syntax Error: Operator at line beginning.\n", STDERR_FILENO);
 	return (1);
 }
 
@@ -409,7 +422,8 @@ void	free_ast(t_ast_node *node)
 		free_ast(node->left);
 	if (node->right)
 		free_ast(node->right);
-	free(node->cmd);
+	if (node->cmd)
+		free(node->cmd);
 	free(node);
 }
 
