@@ -5,7 +5,7 @@ set confirm off
 #set trace-commands on
 #set print inferior-events on
 
-set sysroot /
+
 
 directory ~/staging/glibc-2.31
 directory ~/staging/glibc-2.31/elf
@@ -21,16 +21,32 @@ directory ~/staging/readline-8.0
 directory ~/staging/gcc-9-9.4.0/src/libsanitizer/sanitizer_common
 directory ~/staging/gcc-9-9.4.0/src/libsanitizer/asan
 directory ~/staging/gcc-9-9.4.0/src/libsanitizer/ubsan
+directory ~/staging/bash-5.0
 
-br main
+file /bin/bash
+
+set sysroot /
 
 set breakpoint pending on
+
+br main
+br gather_here_documents
+br parse.y: 2807
+br eval.c:347
+br make_here_document
+
 set mem inaccessible-by-default off
 #set follow-fork-mode parent
 set follow-fork-mode child
 set follow-exec-mode new
 #set follow-exec-mode same
 set detach-on-fork off
+
+
+
+handle SIGWINCH nostop pass
+handle SIGQUIT nostop pass
+
 
 #catch fork
 

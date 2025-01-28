@@ -210,6 +210,12 @@ enum
 	MAXC = 128
 };
 
+typedef enum e_prompt
+{
+	PS_REGULAR = 0,
+	PS_HERE
+}	t_prompt_type;
+
 /**
  * k => key
  * v => value
@@ -222,25 +228,13 @@ typedef struct s_shell_var
 	int			attrs;
 }	t_sh_var;
 
-/** Basic text colors
- * character 27 = 033 = 0x1b = ^[ = \e
- * CSI (Control Sequence Introducer) or CSI, the ESC [
- * 	(written as \e[ or \033[) is followed by any number (including none)
- * 	of "parameter bytes" in the range 0x30–0x3F (ASCII 0–9:;<=>?),
- * 	then by any number of "intermediate bytes" in the range 0x20–0x2F
- * 	(ASCII space and !"#$%&'()*+,-./),
- * 	then finally by a single "final byte" in the range 0x40–0x7E
- * 	(ASCII @A–Z[\]^_`a–z{|}~).
- */
-# define FT_BLACK "\033[0;30m"
-# define FT_RED "\e[0;31m"
-# define FT_GREEN "\e[0;32m"
-# define FT_YELLOW "\e[0;33m"
-# define FT_BLUE "\e[:;34m"
-# define FT_PURPLE "\e[0;35m"
-# define FT_CYAN "\e[0;36m"
-# define FT_WHITE "\e[0;37m"
-# define FT_RESET "\e[0;m"
+# define RL_GREEN "\001\e[0;32m\002"
+# define RL_BLUE "\001\e[:;34m\002"
+# define RL_RESET "\001\e[0;m\002"
+
+# define PS0 RL_RESET""
+# define PS1 RL_RESET"[%d]"RL_GREEN"%s"RL_RESET"@"RL_BLUE"%s"RL_RESET"-> "
+# define PS2 RL_RESET"> "
 
 /* ---------- TESTS -------------------- */
 
@@ -264,8 +258,9 @@ int			ft_unset(t_ctx *ctx);
 
 /* ---------- UTILS -------------------- */
 
-char		*ft_sh_read_line(t_ctx *ctx, const char *fmt);
-int			ft_sh_do_init(t_ctx	**ctx, char **envp, t_obj_arr **ops);
+char		*ft_sh_read_line(t_ctx *ctx, t_prompt_type type);
+int			ft_sh_init_interactive(t_ctx **ctx, char **envp);
+int			ft_sh_init_noninteractive(t_ctx **ctx, char **envp);
 int			ft_sh_op_cmp(const void *a, const void *b);
 int			ft_sh_var_cmp(const void *a, const void *b);
 int			ft_sh_parse_env_map(t_obj_arr *map, char **env_tab);

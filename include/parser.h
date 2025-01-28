@@ -81,6 +81,7 @@ typedef struct sigaction	t_sigaction;
 typedef struct s_exec_ctx
 {
 	char		**argv;
+	char		**envp;
 	int			argc;
 	t_obj_arr	env_map;
 	char		pathname[PATH_MAX];
@@ -89,6 +90,9 @@ typedef struct s_exec_ctx
 	int			status_code;
 	t_sigaction	hd_act;
 	t_sigaction	act;
+	const char	*ps0;
+	const char	*ps1;
+	const char	*ps2;
 }	t_ctx;
 
 /*

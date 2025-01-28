@@ -47,7 +47,7 @@ static void	ft_hd_sig_handler(int sig, siginfo_t *info, void *ctx)
 	(void)sipid;
 }
 
-static int	do_init_ops(t_obj_arr **ops)
+static t_obj_arr *ft_sh_init_builtin_ops(t_obj_arr **ops)
 {
 	static t_obj_arr	obj;
 	static t_shell_op	builtins[] = {
@@ -83,7 +83,15 @@ static void	ft_sh_set_signal(t_ctx *const ctx)
 		ft_sh_destroy_ctx(ctx);
 		exit(EXIT_FAILURE);
 	}
-	signal(SIGQUIT, SIG_ERR);
+	signal(SIGQUIT, SIG_IGN);
+	signal(SIGWINCH, SIG_IGN);
+}
+
+int	ft_sh_init_noninteractive(t_ctx **ctx, char **envp)
+{
+	return (0);
+	(void)ctx;
+	(void)envp;
 }
 
 /**
@@ -91,17 +99,21 @@ static void	ft_sh_set_signal(t_ctx *const ctx)
  * https://docs.rtems.org/
  * 	releases/4.5.1-pre3/toolsdoc/gdb-5.0-docs/readline/readline00030.html
  */
-int	ft_sh_do_init(t_ctx **ctx, char **envp, t_obj_arr **ops)
+int	ft_sh_init_interactive(t_ctx **ctx, char **envp)
 {
 	t_ctx	*new;
 
-	do_init_ops(ops);
 	new = (t_ctx *) malloc(sizeof(t_ctx));
 	if (!new)
+	{
+		errno = ENOMEM;
 		return (-1);
+	}
+	new->ps0 = PS0;
+	new->ps1 = PS1;
+	new->ps2 = PS2;
+	ft_sh_init_builtin_ops(&new->ops);
 	ft_sh_parse_env_map(&new->env_map, envp);
-	new->env_map.cmp_fun = ft_sh_var_cmp;
-	ft_qsort_obj(&new->env_map);
 	*ctx = new;
 	ft_sh_set_signal(*ctx);
 	return (0);

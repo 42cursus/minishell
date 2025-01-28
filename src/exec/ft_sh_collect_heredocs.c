@@ -29,13 +29,13 @@ int	collect_heredocs_loop(t_ctx *ctx)
 		if (fd < 0)
 			break ;
 		g_received_signal_num = 0;
-		line = ft_sh_read_line(ctx, "> ");
+		line = ft_sh_read_line(ctx, PS_HERE);
 		while (line && ft_strcmp(line, en->delimiter)
 			&& g_received_signal_num != SIGINT)
 		{
 			add_history(line);
 			ft_heredoc_file_lexing(fd, line, en->quotes, ctx);
-			line = (free(line), ft_sh_read_line(ctx, "> "));
+			line = (free(line), ft_sh_read_line(ctx, PS_HERE));
 		}
 		(free(line), close(fd));
 	}

@@ -91,13 +91,6 @@ static int	event(void)
 	return (0);
 }
 
-/* Begin a session in which the history functions might be used.  This
-   initializes interactive variables. */
-static void	ft_using_history(void)
-{
-	history_offset = history_length;
-}
-
 /**
  * Greeting shell during startup
  */
@@ -122,10 +115,10 @@ static int	ft_sh_loop(t_ctx *ctx)
 	ft_sh_init_welcome();
 	ctx->argv = NULL;
 	ctx->argc = 0;
-	ft_using_history();
+	history_offset = history_length;
 	while (ctx->status_code != SHELL_EXIT)
 	{
-		line = ft_sh_read_line(ctx, NULL);
+		line = ft_sh_read_line(ctx, PS_REGULAR);
 		if (line)
 		{
 			if (*line != 0)
@@ -167,18 +160,21 @@ int	main(int argc, char **argv, char **envp)
 {
 	int			exitcode;
 	t_ctx		*global;
-	t_obj_arr	*ops;
 
-	if (ft_sh_do_init(&global, envp, &ops) != -1)
+	exitcode = 0;
+	if (isatty(STDIN_FILENO) && isatty(STDERR_FILENO))
 	{
+		if (ft_sh_init_interactive(&global, envp) == -1)
+			exit(EXIT_FAILURE);
 		global->argv = argv;
 		global->argc = argc;
-		global->ops = ops;
+		global->envp = envp;
 		exitcode = ft_sh_loop(global);
+		ft_sh_destroy_ctx(global);
+
 	}
 	else
-		exitcode = EXIT_FAILURE;
-	ft_sh_destroy_ctx(global);
+		ft_sh_init_noninteractive(&global, envp);
 	global = NULL;
 	return (exitcode);
 }
