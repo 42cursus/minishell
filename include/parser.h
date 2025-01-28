@@ -58,7 +58,9 @@ typedef enum e_errcodes
 	PID_ALLOC_FAILURE,
 	ALLOC_FAILURE,
 	NO_REDIR_TARGET,
+	OP_AT_BEGINNING, 
 	HD_CAT_FAILURE,
+	SINGLE_AMPERSAND,
 }	t_errcodes;
 
 typedef struct s_hd_entry
@@ -113,6 +115,8 @@ typedef enum e_node_type
 {
 	NODE_COMMAND,
 	NODE_PIPE,
+	NODE_OR,
+	NODE_AND,
 }	t_node_type;
 
 typedef struct s_cmd_node	t_cmd_node;
