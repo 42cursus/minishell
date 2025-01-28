@@ -104,6 +104,39 @@ void	ft_sh_init_welcome(void)
 	printf("\n");
 }
 
+static int ft_sh_split_and_parse(const char *line, t_ast_node **node, t_ctx *ctx)
+{
+	int errcode;
+	char *substr1;
+	char *substr2;
+	char *start;
+	char *end;
+
+	t_ast_node *root;
+	t_ast_node *root2;
+
+	line = "(echo 123) && ls";
+//	line = "() && ls";
+
+	start = ft_strchr(line, '(') + 1;
+	end = ft_strrchr(line, ')');
+
+	substr1 = ft_strndup(start, end - start);
+	int substr_len = ft_snprintf(NULL, 0, "()%s", end);
+	substr2 = (char *) malloc(sizeof(char) * (substr_len + 1));
+	ft_snprintf(substr2, substr_len, "ls%s", end + 1);
+
+	ft_do_parse(substr1, &root2, ctx);
+	errcode = ft_do_parse(substr2, &root, ctx);
+
+	free(root->left);
+	root->left = root2;
+
+	*node = root;
+
+	return (errcode);
+}
+
 static int	ft_sh_loop(t_ctx *ctx)
 {
 	char		*line;
@@ -126,7 +159,9 @@ static int	ft_sh_loop(t_ctx *ctx)
 				add_history(line);
 				ft_memset(&ctx->hd, 0, sizeof(t_here_arr));
 				ctx->hd.size = HEREDOC_ARRAY_SIZE;
-				errcode = ft_do_parse(line, &ast, ctx);
+
+				errcode = ft_sh_split_and_parse(line, &ast, ctx);
+
 				if (errcode == 0)
 				{
 					if (ft_sh_collect_heredocs(ctx))
@@ -169,7 +204,6 @@ int	main(int argc, char **argv, char **envp)
 		global->envp = envp;
 		exitcode = ft_sh_loop(global);
 		ft_sh_destroy_ctx(global);
-
 	}
 	else
 		ft_sh_init_noninteractive(&global, envp);
