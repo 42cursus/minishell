@@ -14,39 +14,36 @@
 
 char	**ft_get_argv(t_cmd_node *cmd, int *size, t_ctx *ctx)
 {
-	char **argv;
-	int argc;
+	char	**argv;
+	int		argc;
+	t_wrd	*param;
+	char	*word;
 
-	t_wrd *param;
-	argc = 1;
-
-	param = cmd->args->next_word;
+	argc = 0;
+	param = cmd->args;
 	while (param != NULL)
 	{
 		argc++;
 		param = param->next_word;
 	}
-
 	argv = ft_calloc(argc + 1, sizeof(char *));
-	if (argv == NULL)
-	{
-		ft_dprintf(STDERR_FILENO, "on %s at %s:%d", __FILE__, __LINE__, __func__);
-		perror("Error allocating argv.");
-		exit(1);
-	}
 
-	char *word;
-
+	if (ft_handle_err((t_error){ .assertion = (argv == NULL),
+		.description = "Error allocating argv.",
+		.func = __func__, .line = __LINE__, .file = __FILE__, .errnum = errno}))
+		exit((ft_sh_destroy_ctx(ctx), SHELL_EXIT));
 	param = cmd->args;
 	argc = 0;
 	while (param != NULL)
 	{
 		word = ft_get_word(param, ctx);
-		if (word == NULL)
+		if (ft_handle_err((t_error){ .assertion = (word == NULL),
+			.description = "Error retrieving word.",
+			.func = __func__, .line = __LINE__, .file = __FILE__, .errnum = errno}))
 		{
-			ft_dprintf(STDERR_FILENO, "on %s at %s:%d", __FILE__, __LINE__, __func__);
-			perror("Error retrieving word.");
-			exit(1);
+			while (ctx->argc--)
+				free(ctx->argv[ctx->argc]);
+			exit((free(ctx->argv), ft_sh_destroy_ctx(ctx), SHELL_EXIT));
 		}
 		argv[argc++] = word;
 		param = param->next_word;

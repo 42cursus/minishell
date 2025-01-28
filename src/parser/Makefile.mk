@@ -12,6 +12,7 @@
 
 FILES   = ft_parse_line.c \
 			lexer.c \
-			parser.c
+			parser.c \
+            ft_heredoc_file_lexing.c
 
 SH_SRCS    += $(FILES:%.c=$(dir $(lastword $(MAKEFILE_LIST)))%.c)

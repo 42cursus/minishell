@@ -13,7 +13,6 @@
 FILES   = ft_ast_walk.c \
 			ft_sh_launch.c \
 			ft_shell_redirect.c \
-			ft_sh_collect_heredocs.c \
-			ft_heredoc_file_lexing.c
+			ft_sh_collect_heredocs.c
 
 SH_SRCS    += $(FILES:%.c=$(dir $(lastword $(MAKEFILE_LIST)))%.c)

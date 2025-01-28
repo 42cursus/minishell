@@ -192,7 +192,7 @@ t_state		handle_2(t_lexer *lexer, t_ctx *ctx);
 t_state		scan_loop(t_lexer *l, t_ctx *ctx);
 int			collect_heredocs_loop(t_ctx *ctx);
 
-int			ft_sh_execute(t_ast_node *cmd, int level, t_ast_node *father);
+int			ft_sh_execute_command(t_ast_node *cmd, int level, t_ast_node *father);
 void		ft_shell_redirect_stdin(t_cmd_node *cmd);
 void		ft_shell_redirect_stdout(t_cmd_node *cmd);
 void		ft_shell_redirect_stderr(t_cmd_node *cmd);

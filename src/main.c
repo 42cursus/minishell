@@ -137,7 +137,7 @@ static int	ft_sh_loop(t_ctx *ctx)
 						ft_printf("\n\nAbstract Syntax Tree:\n");
 						print_ast(ast, 0);
 						ast->ctx = ctx;
-						ctx->status_code = ft_sh_execute(ast, 0, NULL);
+						ctx->status_code = ft_sh_execute_command(ast, 0, NULL);
 					}
 				}
 				free_ast(ast);

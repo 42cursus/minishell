@@ -32,7 +32,7 @@ static int ft_run_on_pipe(t_ast_node *left, t_ast_node *right, int level,
 		dup2(fd[1], STDOUT_FILENO);
 		close(fd[0]);
 		close(fd[1]);
-		exit(ft_sh_execute(left, level + 1, father));
+		exit(ft_sh_execute_command(left, level + 1, father));
 	}
 	pid_t pid_cmd2 = fork();
 	if (pid_cmd2 == 0)
@@ -40,7 +40,7 @@ static int ft_run_on_pipe(t_ast_node *left, t_ast_node *right, int level,
 		dup2(fd[0], STDIN_FILENO);
 		close(fd[0]);
 		close(fd[1]);
-		exit(ft_sh_execute(right, level + 1, father));
+		exit(ft_sh_execute_command(right, level + 1, father));
 	}
 	close(fd[0]);
 	close(fd[1]);
@@ -49,30 +49,38 @@ static int ft_run_on_pipe(t_ast_node *left, t_ast_node *right, int level,
 	return status_cmd2;
 }
 
-static int ft_parse_simple(t_cmd_node *cmd)
+static int ft_run_simple(t_cmd_node *cmd)
 {
 	int			status;
 	t_shell_op	*op;
 	t_ctx		*ctx = cmd->ctx;
+	int 		fd[3];
 
-	//TODO: do the redirects and return zero
-	if (cmd == NULL || cmd->args == NULL || cmd->args->value == NULL)
+
+
+	if (cmd == NULL)
 	 	return (0);
 
-	char cwd[1024];
 	status = 0;
-	if (getcwd(cwd, sizeof(cwd)) == NULL)
-		return (SHELL_EXIT);
-
-	if (!cmd->args) return (status);
-
-	if (ft_strcmp(cmd->args->value, "exit") == 0 || ft_strcmp(cmd->args->value, "quit") == 0)
-		return (SHELL_EXIT);
+	if (!cmd->args)
+		return (status);
 
 	ctx->argv = ft_get_argv(cmd, &ctx->argc, ctx);
 	op = ft_bsearch_obj(&(t_shell_op) {.instruction = ctx->argv[0]}, ctx->ops);
 	if (op != NULL)
+	{
+		fd[STDIN_FILENO] = dup(STDIN_FILENO);
+		fd[STDOUT_FILENO] = dup(STDOUT_FILENO);
+		fd[STDERR_FILENO] = dup(STDERR_FILENO);
+		ft_handle_redirects(cmd);
 		status = op->fun(ctx);
+		dup2(fd[STDIN_FILENO], STDIN_FILENO);
+		dup2(fd[STDOUT_FILENO], STDOUT_FILENO);
+		dup2(fd[STDERR_FILENO], STDERR_FILENO);
+		close(fd[STDIN_FILENO]);
+		close(fd[STDOUT_FILENO]);
+		close(fd[STDERR_FILENO]);
+	}
 	else
 		status = ft_sh_launch(cmd, ctx);
 	while (ctx->argc--)
@@ -82,7 +90,7 @@ static int ft_parse_simple(t_cmd_node *cmd)
 	return (status);
 }
 
-int ft_sh_execute(t_ast_node *cmd, int level, t_ast_node *father)
+int ft_sh_execute_command(t_ast_node *cmd, int level, t_ast_node *father)
 {
 	int exit_status;
 
@@ -95,7 +103,7 @@ int ft_sh_execute(t_ast_node *cmd, int level, t_ast_node *father)
 		if (cmd->cmd != NULL)
 		{
 			cmd->cmd->ctx = cmd->ctx;
-			exit_status = ft_parse_simple(cmd->cmd);
+			exit_status = ft_run_simple(cmd->cmd);
 		}
 	}
 	else if (cmd->type == NODE_PIPE)
