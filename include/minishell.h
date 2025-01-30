@@ -59,6 +59,7 @@ extern volatile sig_atomic_t	g_received_signal_num;
 
 typedef enum e_token_type
 {
+	TOKEN_DUMMY,
 	TOKEN_OR,
 	TOKEN_AND,
 	TOKEN_PIPE,

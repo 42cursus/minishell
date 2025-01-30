@@ -19,6 +19,7 @@ typedef struct
 } lt_entry;
 
 lt_entry lt[] = {
+	{ .token_id = TOKEN_DUMMY,		.str = "TOKEN_DUMMY" },
 	{ .token_id = TOKEN_AND,		.str = "TOKEN_AND" },
 	{ .token_id = TOKEN_OR,		.str = "TOKEN_OR" },
 	{ .token_id = TOKEN_COMMAND,		.str = "TOKEN_COMMAND" },
@@ -187,6 +188,8 @@ t_state	handle_symbol(t_lexer *l, t_state state, t_ctx *ctx)
 	}
 	else if (l->line[l->line_iter] == '&' && c == '&')
 		l->tok.t[l->tok.token_iter] = create_token(TOKEN_AND, "&&", l);
+	else if (l->line[l->line_iter] == ')' && c == '(')
+		l->tok.t[l->tok.token_iter] = create_token(TOKEN_DUMMY, "()", l);
 	else if (l->line[l->line_iter] != '&' && c == '&')
 		l->err = SINGLE_AMPERSAND;
 	return (INITIAL);
@@ -210,9 +213,9 @@ t_state	handle_initial(t_lexer *l, t_ctx *ctx)
 		return (handle_symbol(l, CHECK_APPEND, ctx));
 	else if (l->line[l->line_iter] == '<')
 		return (handle_symbol(l, CHECK_HERE_DOC, ctx));
-	else if (l->line[l->line_iter] == '|')
+	else if (l->line[l->line_iter] == '|' || l->line[l->line_iter] == '&')
 		return (handle_symbol(l, END, ctx));
-	else if (l->line[l->line_iter] == '&')
+	else if (l->line[l->line_iter] == '(')
 		return (handle_symbol(l, END, ctx));
 	else if (l->here_eof == true && l->first_blank == false)
 		l->first_blank = true;
