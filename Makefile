@@ -35,16 +35,21 @@ include $(SH_DIRS:%=$(SRC_DIR)/%/Makefile.mk)
 SRCS			:= src/main.c
 SRCS			+= $(SH_SRCS)
 
-$(info =================)
-$(info )
-$(info $(SH_DIRS))
-$(info )
-$(info =================)
-$(info =================)
-$(info )
-$(info $(SH_SRCS))
-$(info )
-$(info =================)
+# $(NULL) is empty string
+NULL  :=
+# $(SPACE) is one space
+SPACE := $(NULL) $(NULL)
+# $(\n) is new line
+define \n
+
+
+endef
+
+$(info =================$(\n))
+$(info $(\n)SH_SRCS: $(subst $(SPACE),$(\n)    ,$(SH_SRCS))$(\n))
+$(info you can compare this output with )
+$(info $(\n)    find src -name '*.c' | sort $(\n))
+$(info =================$(\n))
 
 BUILD_DIR		= build
 OBJS			= $(SRCS:%.c=$(BUILD_DIR)/%.o)
@@ -52,7 +57,7 @@ OBJS			= $(SRCS:%.c=$(BUILD_DIR)/%.o)
 all: $(NAME)
 
 $(NAME): $(LIBFT_LIB) $(OBJS)
-		$(CC) $(OBJS) $(DEBUG_FLAGS) -fsanitize=address -fsanitize=undefined -o $@ $(LINK_FLAGS)
+		$(CC) $(OBJS) $(DEBUG_FLAGS) -o $@ $(LINK_FLAGS)
 
 $(LIBFT_LIB):
 		@$(MAKE) -C $(LIBFT_DIR) -j8
