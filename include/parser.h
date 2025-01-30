@@ -52,6 +52,7 @@ typedef struct word_t
 typedef enum e_errcodes
 {
 	OK = 0,
+	UNEXPECTED_DUMMY,
 	COULDNT_OPEN_URANDOM,
 	UNCLOSED_QUOTE,
 	TOKEN_ALLOC_FAILURE,
@@ -117,6 +118,7 @@ typedef enum e_op
 
 typedef enum e_node_type
 {
+	NODE_DUMMY,
 	NODE_COMMAND,
 	NODE_PIPE,
 	NODE_OR,

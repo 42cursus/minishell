@@ -257,6 +257,8 @@ void	parse_command_loop(int *tp, t_ctx *ctx, t_ast_node *cn, t_lexer *l)
 		}
 		else if (l->tok.t[*tp]->type >= T_REDIRECT_STDOUT && l->tok.t[*tp]->type < 16)
 			parse_redirection(tp, cn, ctx, l);
+		else if (l->tok.t[*tp]->type == TOKEN_DUMMY)
+			l->err == UNEXPECTED_DUMMY;
 		else
 			break ;
 	}
@@ -270,6 +272,12 @@ t_ast_node	*parse_command(t_token **t, int *tp, t_ctx *ctx, t_lexer *l)
 	{
 		command_node = create_node(NODE_COMMAND, t[*tp], NULL);
 		skip_blanks(t, tp, command_node->cmd->args, l);
+	}
+	else if (t[*tp]->type == TOKEN_DUMMY)
+	{
+		command_node = create_node(NODE_DUMMY, t[*tp], NULL);
+		free(command_node->cmd);
+		return (command_node);
 	}
 	else
 		command_node = create_node(NODE_COMMAND, NULL, NULL);
@@ -336,6 +344,8 @@ static int	has_right(t_lexer *l, t_ast_node **r, t_ctx *ctx, t_node_type *type)
 		*r = parse_command(l->tok.t, &l->tok.token_iter, ctx, l);
 		return (true);
 	}
+	else if (t < TOKEN_OR || t > TOKEN_PIPE)
+		l->err == UNEXPECTED_DUMMY;
 	*r = NULL;
 	return (false);
 }
@@ -387,6 +397,8 @@ int	handle_parser_err(int errcode, t_lexer *lexer)
 		ft_putstr_fd("Syntax Error: Unsupported '&' operator.\n", STDERR_FILENO);
 	else if (errcode == OP_AT_BEGINNING)
 		ft_putstr_fd("Syntax Error: Operator at line beginning.\n", STDERR_FILENO);
+	else if (errcode == UNEXPECTED_DUMMY)
+		ft_putstr_fd("Syntax Error: Unexpected () in input.\n", STDERR_FILENO);
 	return (1);
 }
 
