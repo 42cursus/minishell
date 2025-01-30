@@ -19,22 +19,18 @@ int	ft_do_parse(const char *line, t_ast_node **root, t_ctx *ctx)
 
 	errcode = 0;
 	scan_the_line(line, &lexer, ctx);
-	errcode = lexer.err;
-	if (errcode != 0)
-		errcode = handle_parser_err(errcode, &lexer);
-	if (errcode == 0)
+	if (lexer.err == 0)
 	{
 		if (lexer.tok.t[lexer.tok.token_iter]->type == TOKEN_BLANK)
 			skip_blanks(lexer.tok.t, &lexer.tok.token_iter, NULL, &lexer);
 		*root = pipeline_loop(&lexer, ctx);
 		ctx->hd.size = ctx->hd.ss;
 		ctx->hd.ss = 0;
-		errcode = lexer.err;
-		if (errcode != 0)
-			errcode = handle_parser_err(errcode, &lexer);
-	}
-	if (lexer.err == 0)
 		print_tokens(&lexer);
+	}
+	else
+		errcode = handle_parser_err(errcode, &lexer);
+	errcode = lexer.err;
 	free_tokens(&lexer);
 	return (errcode);
 }

@@ -19,17 +19,6 @@ project(minishell C)
 set(CMAKE_VERBOSE_MAKEFILE ON)
 set(CMAKE_C_STANDARD 99)
 include_directories(include)
-#set(FT_CFLAGS
-#        -Wall -Wextra -Werror
-#        -Wwrite-strings -Wimplicit
-#        -Wno-error=unused-parameter
-#        -Wno-error=unused-function
-#        -Wno-error=unused-variable
-#        -O0 -g3 -gdwarf-3
-#        -masm=att -MMD
-#        -fdata-sections
-#        -fno-dwarf2-cfi-asm
-#        -fno-asynchronous-unwind-tables)
 
 set(FT_CFLAGS
         -Wall -Wextra -Werror
@@ -110,10 +99,10 @@ pkg_check_modules(RL REQUIRED IMPORTED_TARGET readline)
 set(TARGET_LIBRARIES
         ${FT_LIB_NAME}
         Threads::Threads
-         -ltinfo
-         /home/andrei_belov/staging/readline-8.0/build/libhistory.a
-         /home/andrei_belov/staging/readline-8.0/build/libreadline.a
-#       PkgConfig::RL
+#         -ltinfo
+#         /home/andrei_belov/staging/readline-8.0/build/libhistory.a
+#         /home/andrei_belov/staging/readline-8.0/build/libreadline.a
+       PkgConfig::RL
 )
 
 MESSAGE(STATUS "${RL_INCLUDE_DIRS}")

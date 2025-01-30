@@ -104,6 +104,7 @@ void	ft_sh_init_welcome(void)
 	printf("\n");
 }
 
+__attribute__((unused))
 static int ft_sh_split_and_parse(const char *line, t_ast_node **node, t_ctx *ctx)
 {
 	int errcode;
@@ -160,7 +161,7 @@ static int	ft_sh_loop(t_ctx *ctx)
 				ft_memset(&ctx->hd, 0, sizeof(t_here_arr));
 				ctx->hd.size = HEREDOC_ARRAY_SIZE;
 
-				errcode = ft_sh_split_and_parse(line, &ast, ctx);
+				errcode = ft_do_parse(line, &ast, ctx);
 
 				if (errcode == 0)
 				{

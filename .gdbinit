@@ -5,7 +5,7 @@ set confirm off
 #set trace-commands on
 #set print inferior-events on
 
-
+#file /bin/bash
 
 directory ~/staging/glibc-2.31
 directory ~/staging/glibc-2.31/elf
@@ -22,8 +22,6 @@ directory ~/staging/gcc-9-9.4.0/src/libsanitizer/sanitizer_common
 directory ~/staging/gcc-9-9.4.0/src/libsanitizer/asan
 directory ~/staging/gcc-9-9.4.0/src/libsanitizer/ubsan
 directory ~/staging/bash-5.0
-
-file /bin/bash
 
 set sysroot /
 
@@ -44,8 +42,9 @@ set detach-on-fork off
 
 
 
-handle SIGWINCH nostop pass
-handle SIGQUIT nostop pass
+#handle SIGWINCH nostop pass
+#handle SIGQUIT nostop pass
+#handle SIGINT stop nopass
 
 
 #catch fork

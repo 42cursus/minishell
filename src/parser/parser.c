@@ -258,7 +258,7 @@ void	parse_command_loop(int *tp, t_ctx *ctx, t_ast_node *cn, t_lexer *l)
 		else if (l->tok.t[*tp]->type >= T_REDIRECT_STDOUT && l->tok.t[*tp]->type < 16)
 			parse_redirection(tp, cn, ctx, l);
 		else if (l->tok.t[*tp]->type == TOKEN_DUMMY)
-			l->err == UNEXPECTED_DUMMY;
+			l->err = UNEXPECTED_DUMMY;
 		else
 			break ;
 	}
@@ -345,7 +345,7 @@ static int	has_right(t_lexer *l, t_ast_node **r, t_ctx *ctx, t_node_type *type)
 		return (true);
 	}
 	else if (t < TOKEN_OR || t > TOKEN_PIPE)
-		l->err == UNEXPECTED_DUMMY;
+		l->err = UNEXPECTED_DUMMY;
 	*r = NULL;
 	return (false);
 }

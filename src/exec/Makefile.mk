@@ -10,9 +10,9 @@
 #                                                                              #
 # **************************************************************************** #
 
-FILES   = ft_ast_walk.c \
+FILES   = ft_sh_collect_heredocs.c \
+			ft_sh_exec_cmd.c \
 			ft_sh_launch.c \
-			ft_shell_redirect.c \
-			ft_sh_collect_heredocs.c
+			ft_shell_redirect.c
 
 SH_SRCS    += $(FILES:%.c=$(dir $(lastword $(MAKEFILE_LIST)))%.c)
