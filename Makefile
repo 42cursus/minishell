@@ -30,10 +30,16 @@ SRC_DIR			= src
 SH_DIRS			= builtins error exec parser utils
 SH_SRCS	 		:=
 
+ifndef VERBOSE
+MAKEFLAGS += --no-print-directory
+endif
+
 include $(SH_DIRS:%=$(SRC_DIR)/%/Makefile.mk)
 
 SRCS			:= src/main.c
 SRCS			+= $(SH_SRCS)
+
+ifdef PRINT_SOURCES
 
 # $(NULL) is empty string
 NULL  :=
@@ -46,32 +52,40 @@ define \n
 endef
 
 $(info =================$(\n))
-$(info $(\n)SH_SRCS: $(subst $(SPACE),$(\n)    ,$(SH_SRCS))$(\n))
+$(info $SH_SRCS: $(subst $(SPACE),$(\n)    ,$(SH_SRCS))$(\n))
 $(info you can compare this output with )
 $(info $(\n)    find src -name '*.c' | sort $(\n))
 $(info =================$(\n))
 
+endif
+
 BUILD_DIR		= build
 OBJS			= $(SRCS:%.c=$(BUILD_DIR)/%.o)
 
+## all
 all: $(NAME)
 
+## minishell
 $(NAME): $(LIBFT_LIB) $(OBJS)
-		$(CC) $(OBJS) $(DEBUG_FLAGS) -o $@ $(LINK_FLAGS)
+		@$(CC) $(OBJS) $(DEBUG_FLAGS) -o $@ $(LINK_FLAGS)
+		@echo "MINISHELL BUILD COMPLETE!"
 
+## libft
 $(LIBFT_LIB):
-		@$(MAKE) -C $(LIBFT_DIR) -j8
+		@$(MAKE) -C $(LIBFT_DIR) --no-print-directory -j8
 
 $(BUILD_DIR)/%.o: %.c
-		@if [ ! -d $(@D) ]; then mkdir -pv $(@D); fi
-		$(CC) $(CFLAGS) $(INCLUDE) -c $^ -o $@
+		@if [ ! -d $(@D) ]; then mkdir -p $(@D); fi
+		@$(CC) $(CFLAGS) $(INCLUDE) -c $^ -o $@
 
+## clean
 clean:
-		$(RM) -rf $(BUILD_DIR)
+		@$(RM) -rf $(BUILD_DIR)
 		@$(MAKE) -C $(LIBFT_DIR) clean
 
+## fclean
 fclean: clean
-		$(RM) $(RMFLAGS) $(NAME)
+		@$(RM) $(RMFLAGS) $(NAME)
 		@$(MAKE) -C $(LIBFT_DIR) fclean
 
 re: fclean all
@@ -80,4 +94,18 @@ norm:
 		@norminette $(SRCS)
 		@$(MAKE) -C $(LIBFT_DIR) norm
 
-.PHONY: all clean fclean re bonus norm
+# Magic help adapted: from https://gitlab.com/depressiveRobot/make-help/blob/master/help.mk (MIT License)
+help:
+	@printf "Available targets:\n\n"
+	@awk -F: '/^[a-zA-Z\-_0-9%\\ ]+:/ { \
+			helpMessage = match(lastLine, /^## (.*)/); \
+			if (helpMessage) { \
+					helpCommand = $$1; \
+					helpMessage = substr(lastLine, RSTART + 3, RLENGTH); \
+					printf "  \x1b[32;01m%-35s\x1b[0m %s\n", helpCommand, helpMessage; \
+			} \
+	} \
+	{ lastLine = $$0 }' $(MAKEFILE_LIST) | sort -u
+	@printf "\n"
+
+.PHONY: all clean fclean re bonus norm help
