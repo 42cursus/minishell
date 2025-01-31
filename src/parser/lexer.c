@@ -278,7 +278,10 @@ t_state	handle_check_append(t_lexer *lexer, int i, t_ctx *ctx)
 	else if (i == 2)
 		lexer->tok.t[lexer->tok.token_iter]
 			= create_token(TOKEN_REDIRECT_STDERR, "2>", lexer);
-	return (handle_initial(lexer, ctx));
+	if (lexer->line[lexer->line_iter])
+		return (handle_initial(lexer, ctx));
+	else
+		return (INITIAL);
 }
 
 t_state	handle_check_here_doc(t_lexer *lexer, int i, t_ctx *ctx)
@@ -300,7 +303,10 @@ t_state	handle_check_here_doc(t_lexer *lexer, int i, t_ctx *ctx)
 	else if (i == 2)
 		lexer->tok.t[lexer->tok.token_iter]
 			= create_token(TOKEN_REDIRECT_IN_2, "2<", lexer);
-	return (handle_initial(lexer, ctx));
+	if (lexer->line[lexer->line_iter])
+		return (handle_initial(lexer, ctx));
+	else
+		return (INITIAL);
 }
 
 t_state	handle_reading_whitespace(t_lexer *lexer, t_ctx *ctx)
@@ -420,6 +426,8 @@ int	scan_the_line(const char *line, t_lexer *lexer, t_ctx *ctx)
 		flush_buffer(lexer, T_WORD);
 	else if (state == IN_DOUBLE_QUOTE || state == IN_SINGLE_QUOTE)
 		lexer->err = UNCLOSED_QUOTE;
+	else if (state == CHECK_APPEND || state == CHECK_HERE_DOC)
+		lexer->err = NO_REDIR_TARGET;
 	lexer->tok.t[lexer->tok.token_iter] = NULL;
 	lexer->tok.tokens_size = lexer->tok.token_iter;
 	lexer->tok.token_iter = 0;
