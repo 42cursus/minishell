@@ -28,9 +28,8 @@ int	ft_do_parse(const char *line, t_ast_node **root, t_ctx *ctx)
 		ctx->hd.ss = 0;
 		print_tokens(&lexer);
 	}
-	else
-		errcode = handle_parser_err(errcode, &lexer);
-	errcode = lexer.err;
+	if (lexer.err != 0)
+		errcode = handle_parser_err(lexer.err, &lexer);
 	free_tokens(&lexer);
 	return (errcode);
 }

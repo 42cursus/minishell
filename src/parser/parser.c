@@ -277,6 +277,8 @@ t_ast_node	*parse_command(t_token **t, int *tp, t_ctx *ctx, t_lexer *l)
 	{
 		command_node = create_node(NODE_DUMMY, t[*tp], NULL);
 		free(command_node->cmd);
+		command_node->cmd = NULL;
+		skip_blanks(t, tp, NULL, l);
 		return (command_node);
 	}
 	else
@@ -330,7 +332,8 @@ static int	has_right(t_lexer *l, t_ast_node **r, t_ctx *ctx, t_node_type *type)
 {
 	t_token_type	t;
 
-	if (l->tok.t[l->tok.token_iter])
+	t = TOKEN_END;
+	if (l->tok.t[l->tok.token_iter] != NULL)
 		t = l->tok.t[l->tok.token_iter]->type;
 	if (l->tok.t[l->tok.token_iter] && (t >= TOKEN_OR && t <= TOKEN_PIPE))
 	{
@@ -344,7 +347,7 @@ static int	has_right(t_lexer *l, t_ast_node **r, t_ctx *ctx, t_node_type *type)
 		*r = parse_command(l->tok.t, &l->tok.token_iter, ctx, l);
 		return (true);
 	}
-	else if (t < TOKEN_OR || t > TOKEN_PIPE)
+	else if (t != TOKEN_END)
 		l->err = UNEXPECTED_DUMMY;
 	*r = NULL;
 	return (false);
