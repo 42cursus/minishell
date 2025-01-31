@@ -29,6 +29,8 @@ void	print_ast(t_ast_node *node, int depth)
 		printf("OR ||: ");
 	else if (node->type == NODE_AND)
 		printf("AND &&: ");
+	else if (node->type == NODE_DUMMY)
+		printf("DUMMY (): ");
 	if (node->type == NODE_COMMAND && node->cmd->args)
 	{
 		printf("%s", node->cmd->args->value);
