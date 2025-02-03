@@ -12,6 +12,7 @@
 
 FILES   = ft_get_argv.c \
 			ft_get_word.c \
+			ft_give_terminal_to.c \
 			ft_print_ast.c \
 			ft_sh_cmp.c \
 			ft_sh_env_map.c \
@@ -21,6 +22,8 @@ FILES   = ft_get_argv.c \
 			ft_sh_init.c \
 			ft_sh_lookup_pathname.c \
 			ft_sh_read_line.c \
-			ft_sh_render_envp.c
+			ft_sh_render_envp.c \
+			ft_tcgetpgrp.c \
+			ft_tcsetpgrp.c
 
 SH_SRCS    += $(FILES:%.c=$(dir $(lastword $(MAKEFILE_LIST)))%.c)

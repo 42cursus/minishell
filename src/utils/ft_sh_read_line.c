@@ -20,26 +20,23 @@ char	*ft_sh_read_line(t_ctx *ctx, t_prompt_type type)
 	char		ps[MAXC];
 	char		*line;
 	static int	count = 1;
-	t_sigaction	oldact;
-	t_sigaction	*act;
 
 	line = NULL;
 
-	act = &ctx->act;
 	if (type == PS_REGULAR)
+	{
+		ctx->prompt_type = PS_REGULAR;
+
 		ft_sprintf(ps, ctx->ps1, count,
 				   ft_sh_env_map_get_val("USER", ctx),
 				   ft_sh_env_map_get_val("PWD", ctx));
+	}
 	else
 	{
-		act = &ctx->hd_act;
+		ctx->prompt_type = PS_HERE;
 		ft_sprintf(ps, ctx->ps2);
 	}
-	if (sigaction(SIGINT, act, &oldact))
-		exit(((void) ft_sh_destroy_ctx(ctx), EXIT_FAILURE));
 	line = readline(ps);
-	if (sigaction(SIGINT, &oldact, NULL))
-		exit(((void)ft_sh_destroy_ctx(ctx), EXIT_FAILURE));
 	if (line && *line)
 		count++;
 	return (line);

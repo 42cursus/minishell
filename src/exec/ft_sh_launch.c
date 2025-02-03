@@ -30,15 +30,26 @@ int	ft_sh_launch(t_cmd_node *cmd, t_ctx *ctx)
 	pid_t	pid;
 	int		status;
 
-	status = -1;
+	status = 127;
 	if (!ft_sh_lookup_pathname(ctx) && cmd)
 	{
 		pid = fork();
 		if (pid == 0)
 		{
+//			reset_signals();
+			signal(SIGTERM, SIG_DFL);
+			signal(SIGQUIT, SIG_DFL);
+			signal(SIGINT, SIG_DFL);
+			signal(SIGWINCH, SIG_DFL);
 			ft_handle_redirects(cmd);
 			if (execve(ctx->pathname, ctx->argv, ft_sh_render_envp(ctx)))
-				return (perror("ft_sh: error in execve"), SHELL_EXIT);
+			{
+				perror("ft_sh: error in execve");
+				if (errno == EACCES)
+					status = 129;
+				ft_sh_destroy_ctx(ctx);
+				exit(status);
+			}
 		}
 		else if (pid < 0)
 			return (perror("ft_sh: error forking"), SHELL_EXIT);
@@ -50,6 +61,6 @@ int	ft_sh_launch(t_cmd_node *cmd, t_ctx *ctx)
 		}
 	}
 	else
-		printf("%s: command not found\n", ctx->argv[0]);
+		ft_dprintf(STDERR_FILENO, "%s: command not found\n", ctx->argv[0]);
 	return (status);
 }

@@ -81,21 +81,30 @@ typedef struct s_here_array
 
 typedef struct sigaction	t_sigaction;
 
+typedef enum e_prompt
+{
+	PS_REGULAR = 0,
+	PS_HERE
+}	t_prompt_type;
+
 typedef struct s_exec_ctx
 {
-	char		**argv;
-	char		**envp;
-	int			argc;
-	t_obj_arr	env_map;
-	char		pathname[PATH_MAX];
-	t_obj_arr	*ops;
-	t_here_arr	hd;
-	int			status_code;
-	t_sigaction	hd_act;
-	t_sigaction	act;
-	const char	*ps0;
-	const char	*ps1;
-	const char	*ps2;
+	char			**argv;
+	char			**envp;
+	int				argc;
+	t_obj_arr		env_map;
+	char			pathname[PATH_MAX];
+	t_obj_arr		*ops;
+	t_here_arr		hd;
+	int				status_code;
+	pid_t			parent_tpgrp;
+	int				g_received_signal_num;
+	t_sigaction		act;
+	t_sigaction		inherited_act;
+	const char		*ps0;
+	const char		*ps1;
+	const char		*ps2;
+	t_prompt_type	prompt_type;
 }	t_ctx;
 
 /*

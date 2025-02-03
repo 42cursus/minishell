@@ -27,6 +27,7 @@ set(FT_CFLAGS
         -Wformat -Werror=format-security
         -Wstrict-prototypes
         -Wmissing-prototypes
+        -include include/minishell.h
         -fstack-protector-strong
 #        -Wno-error=unused-parameter
 #        -Wno-error=unused-variable
@@ -44,8 +45,8 @@ set(FT_CFLAGS
 
 set(COMMON_LDFLAGS
         -fsanitize=address
-        -fsanitize=undefined
-#        -fsanitize=leak
+#        -fsanitize=undefined
+        -fsanitize=leak
         -fno-sanitize-recover=all
         -fsanitize=float-divide-by-zero
         -fsanitize=float-cast-overflow)
@@ -62,7 +63,7 @@ file(GLOB_RECURSE FT_LIB_HEADERS "${FT_LIB_DIR}/*.h")
 file(GLOB_RECURSE FT_LIB_SOURCES "${FT_LIB_DIR}/ft_*.c")
 
 add_custom_target(${FT_LIB_NAME}_target ALL
-        COMMAND make -C ${FT_LIB_DIR} BUILD_WITH_ASAN=1
+        COMMAND make -C ${FT_LIB_DIR} #BUILD_WITH_ASAN=1
         BYPRODUCTS "${FT_LIB_DIR}/${FT_LIB_FILENAME}"
         SOURCES "${FT_LIB_HEADERS};${FT_LIB_SOURCES}"
         COMMENT "Building FT_LIB")

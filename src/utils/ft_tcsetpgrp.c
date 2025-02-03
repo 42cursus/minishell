@@ -1,16 +1,21 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   utils.h                                            :+:      :+:    :+:   */
+/*   ft_tcsetpgrp.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: abelov <abelov@student.42london.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/01/21 00:23:19 by abelov            #+#    #+#             */
-/*   Updated: 2025/01/21 00:23:19 by abelov           ###   ########.fr       */
+/*   Created: 2025/02/01 16:33:07 by abelov            #+#    #+#             */
+/*   Updated: 2025/02/01 16:33:07 by abelov           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef UTILS_H
-# define UTILS_H
+#include <sys/ioctl.h>
+#include <unistd.h>
 
-#endif //UTILS_H
+/* Set the foreground process group ID of FD set PGRP_ID.  */
+int	ft_tcsetpgrp(int fd, pid_t pgrp_id)
+{
+	return ioctl(fd, TIOCSPGRP, &pgrp_id);
+}
+

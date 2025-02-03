@@ -108,6 +108,7 @@ int	here_doc_cat(t_wrd *here, t_lexer *l)
 void	remove_non_compliant_chars(char *buf, int buf_size)
 {
 	char	*dst;
+	char	*odst = buf;
 
 	dst = buf;
 	while (buf_size--)
@@ -117,6 +118,8 @@ void	remove_non_compliant_chars(char *buf, int buf_size)
 		buf++;
 	}
 	*dst = '\0';
+	return ;
+	(void)odst;
 }
 
 static int	add_random_numbers_to_str(char *str_buf, int rand_count)
@@ -133,18 +136,6 @@ static int	add_random_numbers_to_str(char *str_buf, int rand_count)
 	{
 		len = 0;
 		bytes_read = 1;
-/*
-		//TODO: could have been just a ft_getrandom syscall
-		while (rand_count > len)
-		{
-			if (bytes_read < 0)
-				break;
-			buf[bytes_read] = '\0';
-			remove_non_compliant_chars(buf, OPTIMISTIC);
-			len = (int) ft_strlen(buf);
-			bytes_read = ft_getrandom(buf + len, OPTIMISTIC - len, 0);
-		}
-*/
 		while (rand_count > len)
 		{
 			bytes_read = read(fd, buf + len, OPTIMISTIC - len);
@@ -155,7 +146,7 @@ static int	add_random_numbers_to_str(char *str_buf, int rand_count)
 			len = (int) ft_strnlen(buf, OPTIMISTIC);
 		}
 		close(fd);
-		ft_strlcat(str_buf, buf, rand_count);
+		ft_strncpy(str_buf, buf, rand_count);
 	}
 	else
 	{

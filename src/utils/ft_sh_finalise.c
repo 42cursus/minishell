@@ -25,6 +25,8 @@ int	ft_sh_destroy_ctx(t_ctx *ctx)
 	i = -1;
 	rl_clear_history();
 	printf("exit\n");
+	ft_give_terminal_to(ctx->parent_tpgrp);
+	close(SHELL_TTY_FILENO);
 	while (++i < (int)ctx->env_map.total_elems)
 	{
 		var = &((t_sh_var *) ctx->env_map.base)[i];

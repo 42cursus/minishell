@@ -11,70 +11,17 @@
 /* ************************************************************************** */
 
 #include "minishell.h"
+#include <readline/history.h>
 
-int	herefile_varname(int i, char *var, char *line)
+volatile sig_atomic_t	g_received_signal_num = 0;
+
+void	*global_ctx(void *val, t_get_or_set flag)
 {
-	int		bi;
-	char	c;
+	static void	*ptr = NULL;
 
-	bi = 0;
-	while (line[++i] != '\0' && bi < ARG_MAX)
-	{
-		c = line[i];
-		if (bi == 0 && (c == '?' || c == '$'))
-		{
-			var[bi++] = c;
-			break ;
-		}
-		else if ((bi == 0 && (ft_isalpha(c) || c == '_'))
-			|| ((bi > 0) && (ft_isalnum(c) || c == '_')))
-			var[bi++] = c;
-		else if (bi == 0 && !ft_isalpha(c))
-			return (1);
-		else
-			break ;
-	}
-	var[bi] = '\0';
-	if (bi > 0)
-		return (0);
-	return (1);
-}
-
-int	unlink_herefiles(t_ctx *ctx)
-{
-	const char	*filename;
-	int			i;
-	int			err;
-
-	if (ctx && !ctx->hd.already_unlinked)
-	{
-		i = -1;
-		while (++i < ctx->hd.size)
-		{
-			filename = ctx->hd.entries[i].filename;
-			err = unlink(filename);
-			if (err != 0)
-				return (1);
-		}
-		ctx->hd.already_unlinked = 1;
-	}
-	return (0);
-}
-
-void	herefile_expansion(int fd, const char *varname, t_ctx *ctx)
-{
-	const char	*value;
-
-	if (ft_strcmp(varname, "$") == 0)
-		ft_putnbr_fd(ft_getpid(), fd);
-	else if (ft_strcmp(varname, "?") == 0)
-		ft_putnbr_fd(ctx->status_code, fd);
-	else
-	{
-		value = ft_sh_env_map_get_val(varname, ctx);
-		if (value != NULL)
-			ft_putstr_fd(value, fd);
-	}
+	if (flag == SET_VAL)
+		ptr = val;
+	return (ptr);
 }
 
 /**
@@ -82,11 +29,26 @@ void	herefile_expansion(int fd, const char *varname, t_ctx *ctx)
  *
  * @return
  */
-static int	event(void)
+static int	ft_readline_event_hook(void)
 {
-	if (rl_pending_signal())
+	t_ctx *const	ctx = global_ctx(NULL, GET_VAL);
+
+	if (g_received_signal_num == SIGINT)
 	{
-		(void)NULL;
+		g_received_signal_num = 0;
+		if (ctx && ctx->prompt_type == PS_HERE)
+		{
+			ctx->g_received_signal_num = SIGINT;
+			rl_replace_line("", 0);
+			rl_done = 1;
+		}
+		else if (ctx && ctx->prompt_type == PS_REGULAR)
+		{
+			printf("\n");
+			rl_on_new_line();
+			rl_replace_line("", 0);
+			rl_redisplay();
+		}
 	}
 	return (0);
 }
@@ -105,46 +67,40 @@ void	ft_sh_init_welcome(void)
 }
 
 __attribute__((unused))
-static int ft_sh_split_and_parse(const char *line, t_ast_node **node, t_ctx *ctx)
+static int	ft_sh_split_and_parse(const char *line,
+									t_ast_node **node, t_ctx *ctx)
 {
-	int errcode;
-	char *substr1;
-	char *substr2;
-	char *start;
-	char *end;
-
-	t_ast_node *root;
-	t_ast_node *root2;
+	int			errcode;
+	char		*substr1;
+	char		*substr2;
+	char		*start;
+	char		*end;
+	t_ast_node	*root;
+	t_ast_node	*root2;
+	int			substr_len;
 
 	line = "(echo 123) && ls";
-//	line = "() && ls";
-
 	start = ft_strchr(line, '(') + 1;
 	end = ft_strrchr(line, ')');
-
 	substr1 = ft_strndup(start, end - start);
-	int substr_len = ft_snprintf(NULL, 0, "()%s", end);
+	substr_len = ft_snprintf(NULL, 0, "()%s", end);
 	substr2 = (char *) malloc(sizeof(char) * (substr_len + 1));
 	ft_snprintf(substr2, substr_len, "ls%s", end + 1);
-
 	ft_do_parse(substr1, &root2, ctx);
 	errcode = ft_do_parse(substr2, &root, ctx);
-
 	free(root->left);
 	root->left = root2;
-
 	*node = root;
-
 	return (errcode);
 }
 
 static int	ft_sh_loop(t_ctx *ctx)
 {
-	char		*line;
-	t_ast_node	*ast;
-	int			errcode;
+	char			*line;
+	t_ast_node		*ast;
+	int				errcode;
 
-	rl_event_hook = event;
+	rl_event_hook = ft_readline_event_hook;
 	ft_sh_init_welcome();
 	ctx->argv = NULL;
 	ctx->argc = 0;
@@ -160,9 +116,7 @@ static int	ft_sh_loop(t_ctx *ctx)
 				add_history(line);
 				ft_memset(&ctx->hd, 0, sizeof(t_here_arr));
 				ctx->hd.size = HEREDOC_ARRAY_SIZE;
-
 				errcode = ft_do_parse(line, &ast, ctx);
-
 				if (errcode == 0)
 				{
 					if (ft_sh_collect_heredocs(ctx))
@@ -170,7 +124,8 @@ static int	ft_sh_loop(t_ctx *ctx)
 						ft_printf("\n\nAbstract Syntax Tree:\n");
 						print_ast(ast, 0);
 						ast->ctx = ctx;
-						ctx->status_code = ft_sh_execute_command(ast, 0, NULL);
+						//TODO: int attr on SHLVL
+						ctx->status_code = ft_sh_execute_command(ast, 0);
 					}
 				}
 				if (ast != NULL)
@@ -195,7 +150,7 @@ int	main(int argc, char **argv, char **envp)
 	int			exitcode;
 	t_ctx		*global;
 
-	exitcode = 0;
+	exitcode = EX_OK;
 	if (isatty(STDIN_FILENO) && isatty(STDERR_FILENO))
 	{
 		if (ft_sh_init_interactive(&global, envp) == -1)

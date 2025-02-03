@@ -10,41 +10,22 @@
 /*                                                                            */
 /* ************************************************************************** */
 
+#include <fcntl.h>
 #include "minishell.h"
-
-static void	ft_sh_sig_handler(int sig, siginfo_t *info, void *ctx)
-{
-	if (sig == SIGINT)
-	{
-		printf("\n");
-		rl_on_new_line();
-		rl_replace_line("", 0);
-		rl_redisplay();
-	}
-	return ;
-	(void)ctx;
-	(void)info;
-}
 
 /**
  * Readline C: force return of certain text in readline()
  *
  * https://stackoverflow.com/questions/53165704/
  */
-static void	ft_hd_sig_handler(int sig, siginfo_t *info, void *ctx)
+static void	ft_sh_sigint_handler(int sig, siginfo_t *info, void *ctx)
 {
-	int	sipid;
-
 	if (sig == SIGINT)
-	{
 		g_received_signal_num = SIGINT;
-		rl_replace_line("", 0);
-		rl_done = 1;
-	}
 	return ;
-	sipid = info->si_pid;
+	(void)sig;
 	(void)ctx;
-	(void)sipid;
+	(void)info;
 }
 
 static t_obj_arr *ft_sh_init_builtin_ops(t_obj_arr **ops)
@@ -70,15 +51,12 @@ static t_obj_arr *ft_sh_init_builtin_ops(t_obj_arr **ops)
 
 static void	ft_sh_set_signal(t_ctx *const ctx)
 {
-	ctx->hd_act.sa_flags = SA_SIGINFO | SA_RESTART;
-	ctx->hd_act.sa_sigaction = &ft_hd_sig_handler;
-	sigemptyset(&ctx->hd_act.sa_mask);
-	sigaddset(&ctx->hd_act.sa_mask, SIGINT);
 	ctx->act.sa_flags = SA_SIGINFO | SA_RESTART;
-	ctx->act.sa_sigaction = &ft_sh_sig_handler;
+	ctx->act.sa_sigaction = &ft_sh_sigint_handler;
 	sigemptyset(&ctx->act.sa_mask);
 	sigaddset(&ctx->act.sa_mask, SIGINT);
-	if (sigaction(SIGINT, &ctx->act, NULL))
+
+	if (sigaction(SIGINT, &ctx->act, &ctx->inherited_act))
 	{
 		ft_sh_destroy_ctx(ctx);
 		exit(EXIT_FAILURE);
@@ -92,6 +70,18 @@ int	ft_sh_init_noninteractive(t_ctx **ctx, char **envp)
 	return (0);
 	(void)ctx;
 	(void)envp;
+}
+
+void ft_init_term(t_ctx *ctx)
+{
+	const pid_t	mypid = ft_getpid();
+
+	if (ft_setpgid (0, mypid) < 0)
+		ft_dprintf(STDERR_FILENO,
+				   "child setpgid (%ld to %ld)", (long)mypid, (long)0);
+	ctx->parent_tpgrp = ft_tcgetpgrp(STDIN_FILENO);
+	dup2(STDIN_FILENO, SHELL_TTY_FILENO);
+	ft_give_terminal_to(mypid);
 }
 
 /**
@@ -112,9 +102,11 @@ int	ft_sh_init_interactive(t_ctx **ctx, char **envp)
 	new->ps0 = PS0;
 	new->ps1 = PS1;
 	new->ps2 = PS2;
+	new->status_code = 0;
 	ft_sh_init_builtin_ops(&new->ops);
 	ft_sh_parse_env_map(&new->env_map, envp);
-	*ctx = new;
+	*ctx = global_ctx(new, SET_VAL);
+	ft_init_term(*ctx);
 	ft_sh_set_signal(*ctx);
 	return (0);
 }

@@ -13,7 +13,7 @@
 #ifndef MINISHELL_H
 # define MINISHELL_H
 
-#define _GNU_SOURCE
+# define _GNU_SOURCE
 
 # include <stdbool.h>
 # include <error.h>
@@ -135,6 +135,7 @@ typedef struct s_error
  * S_IROTH: Read permission for others (0004 in octal).
  */
 # define DEFAULT_MODE S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH
+# define SHELL_TTY_FILENO 255
 
 typedef enum
 {
@@ -142,6 +143,14 @@ typedef enum
 	OUT
 }	t_dir;
 
+typedef enum e_lombok
+{
+	GET_VAL = 0,
+	SET_VAL
+}	t_get_or_set;
+
+void		ft_init_term(t_ctx *ctx);
+void		*global_ctx(void *val, t_get_or_set flag);
 void		ft_shell_handle_redirect(t_wrd *wrd, int fd_redir,
 				t_ctx *ctx, t_dir d);
 int			ft_handle_err(t_error err);
@@ -186,7 +195,9 @@ void		ft_heredoc_file_lexing(int fd, char *line, bool quotes, t_ctx *ctx);
 int			herefile_varname(int i, char *var, char *line);
 void		herefile_expansion(int fd, const char *varname, t_ctx *ctx);
 t_state		create_pid_token(t_lexer *lexer, t_ctx *ctx);
-int			ft_getpid(void);
+int			ft_give_terminal_to(pid_t pgrp);
+pid_t		ft_tcgetpgrp(int fd);
+int			ft_tcsetpgrp(int fd, pid_t pgrp);
 int			here_doc_cat(t_wrd *here, t_lexer *l);
 char		*hd_cat_loop(t_wrd *here, size_t len, t_lexer *l);
 int			ft_sh_collect_heredocs(t_ctx *ctx);
@@ -195,7 +206,7 @@ t_state		handle_2(t_lexer *lexer, t_ctx *ctx);
 t_state		scan_loop(t_lexer *l, t_ctx *ctx);
 int			collect_heredocs_loop(t_ctx *ctx);
 
-int			ft_sh_execute_command(t_ast_node *cmd, int level, t_ast_node *father);
+int			ft_sh_execute_command(t_ast_node *cmd, int level);
 void		ft_shell_redirect_stdin(t_cmd_node *cmd);
 void		ft_shell_redirect_stdout(t_cmd_node *cmd);
 void		ft_shell_redirect_stderr(t_cmd_node *cmd);
@@ -212,12 +223,6 @@ enum
 {
 	MAXC = 128
 };
-
-typedef enum e_prompt
-{
-	PS_REGULAR = 0,
-	PS_HERE
-}	t_prompt_type;
 
 /**
  * k => key

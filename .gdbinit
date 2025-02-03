@@ -1,6 +1,7 @@
 set height unlimited
 set pagination off
 set confirm off
+set max-value-size unlimited
 
 #set trace-commands on
 #set print inferior-events on
@@ -17,6 +18,7 @@ directory ~/staging/glibc-2.31/ctype
 directory ~/staging/glibc-2.31/stdlib
 directory ~/staging/glibc-2.31/sysdeps
 directory ~/staging/glibc-2.31/support
+directory ~/staging/glibc-2.31/signal
 directory ~/staging/readline-8.0
 directory ~/staging/gcc-9-9.4.0/src/libsanitizer/sanitizer_common
 directory ~/staging/gcc-9-9.4.0/src/libsanitizer/asan
@@ -32,22 +34,20 @@ br gather_here_documents
 br parse.y: 2807
 br eval.c:347
 br make_here_document
+br wait_sigint_handler
 
+catch fork
 set mem inaccessible-by-default off
-#set follow-fork-mode parent
-set follow-fork-mode child
-set follow-exec-mode new
-#set follow-exec-mode same
-set detach-on-fork off
-
+set detach-on-fork on
+set follow-fork-mode parent
+#set follow-fork-mode child
+#set follow-exec-mode new
+set follow-exec-mode same
 
 
 #handle SIGWINCH nostop pass
-#handle SIGQUIT nostop pass
-#handle SIGINT stop nopass
-
-
-#catch fork
+handle SIGQUIT nostop pass
+handle SIGINT stop pass
 
 define info signal-dispositions
   __isd_print_tbl_hdr
@@ -284,3 +284,4 @@ end
 #Links:
 #  - https://sourceware.org/gdb/onlinedocs/gdb/Forks.html
 #  - https://sourceware.org/gdb/onlinedocs/gdb/Inferiors-and-Programs.html
+#  - https://www.qnx.com/developers/docs/8.0/com.qnx.doc.ide.userguide/topic/debugging_child.html
