@@ -122,6 +122,12 @@ void	remove_non_compliant_chars(char *buf, int buf_size)
 	(void)odst;
 }
 
+/**
+ *
+ * @param str_buf
+ * @param rand_count
+ * @return
+ */
 static int	add_random_numbers_to_str(char *str_buf, int rand_count)
 {
 	char	buf[OPTIMISTIC + 1];
@@ -146,7 +152,7 @@ static int	add_random_numbers_to_str(char *str_buf, int rand_count)
 			len = (int) ft_strnlen(buf, OPTIMISTIC);
 		}
 		close(fd);
-		ft_strncpy(str_buf, buf, rand_count);
+		ft_strncat(str_buf, buf, rand_count);
 	}
 	else
 	{
@@ -181,21 +187,24 @@ static int	ft_getpid_c(void)
 
 static int	create_here_file(t_wrd *here, t_hd_entry *entry, bool expand)
 {
+	int		olderrno;
 	ssize_t	error_code;
-	char	buf[HEREFILE_BUF_LEN + 1];
 
-	add_random_numbers_to_str(buf, 20);
-	error_code = errno;
-	if (!error_code && here)
+	olderrno = errno;
+	error_code = 0;
+	if (here)
 	{
 		entry->quotes = expand;
 		ft_snprintf(entry->filename, FILENAME_BUF_SIZE,
-					"/tmp/heredoc_%d_%s", ft_getpid(), buf);
+					"/tmp/heredoc_%d_", ft_getpid());
+		add_random_numbers_to_str(entry->filename, 20);
+		error_code = errno;
 		ft_strcpy(entry->delimiter, here->value);
 		free((void *)here->value);
 		here->value = NULL;
 		here->value = ft_strdup(entry->filename);
 	}
+	errno = olderrno;
 	return ((int)error_code);
 }
 
