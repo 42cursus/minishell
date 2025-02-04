@@ -69,7 +69,7 @@ void	herefile_expansion(int fd, const char *varname, t_ctx *ctx)
 	if (ft_strcmp(varname, "$") == 0)
 		ft_putnbr_fd(ft_getpid(), fd);
 	else if (ft_strcmp(varname, "?") == 0)
-		ft_putnbr_fd(ctx->status_code, fd);
+		ft_putnbr_fd(ctx->last_status_code, fd);
 	else
 	{
 		value = ft_sh_env_map_get_val(varname, ctx);
@@ -86,16 +86,16 @@ int	collect_heredocs_loop(t_ctx *ctx)
 	int				i;
 
 	i = -1;
-	while (++i < ctx->hd.size && ctx->g_received_signal_num != SIGINT)
+	while (++i < ctx->hd.size && ctx->received_signal_num != SIGINT)
 	{
 		en = &ctx->hd.entries[i];
 		fd = open(en->filename, O_WRONLY | O_CREAT, DEFAULT_MODE);
 		if (fd < 0)
 			break ;
-		ctx->g_received_signal_num = 0;
+		ctx->received_signal_num = 0;
 		line = ft_sh_read_line(ctx, PS_HERE);
 		while (line && ft_strcmp(line, en->delimiter)
-			&& ctx->g_received_signal_num != SIGINT)
+			&& ctx->received_signal_num != SIGINT)
 		{
 			add_history(line);
 			ft_heredoc_file_lexing(fd, line, en->quotes, ctx);
@@ -108,10 +108,10 @@ int	collect_heredocs_loop(t_ctx *ctx)
 
 int	ft_sh_collect_heredocs(t_ctx *ctx)
 {
-	if (!collect_heredocs_loop(ctx) && ctx->g_received_signal_num == SIGINT)
+	if (!collect_heredocs_loop(ctx) && ctx->received_signal_num == SIGINT)
 	{
-		ctx->g_received_signal_num = 0;
-		ctx->status_code = (-1);
+		ctx->received_signal_num = 0;
+		ctx->last_status_code = (-1);
 		unlink_herefiles(ctx);
 		return (0);
 	}

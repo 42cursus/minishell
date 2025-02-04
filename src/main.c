@@ -38,7 +38,7 @@ static int	ft_readline_event_hook(void)
 		g_received_signal_num = 0;
 		if (ctx && ctx->prompt_type == PS_HERE)
 		{
-			ctx->g_received_signal_num = SIGINT;
+			ctx->received_signal_num = SIGINT;
 			rl_replace_line("", 0);
 			rl_done = 1;
 		}
@@ -105,40 +105,36 @@ static int	ft_sh_loop(t_ctx *ctx)
 	ctx->argv = NULL;
 	ctx->argc = 0;
 	history_offset = history_length;
-	while (ctx->status_code != SHELL_EXIT)
+	while (ctx->last_status_code != SHELL_EXIT)
 	{
 		ast = NULL;
 		line = ft_sh_read_line(ctx, PS_REGULAR);
-		if (line)
+		if (line && *line != 0)
 		{
-			if (*line != 0)
+			add_history(line);
+			ft_memset(&ctx->hd, 0, sizeof(t_here_arr));
+			ctx->hd.size = HEREDOC_ARRAY_SIZE;
+			errcode = ft_do_parse(line, &ast, ctx);
+			if (!errcode && ft_sh_collect_heredocs(ctx))
 			{
-				add_history(line);
-				ft_memset(&ctx->hd, 0, sizeof(t_here_arr));
-				ctx->hd.size = HEREDOC_ARRAY_SIZE;
-				errcode = ft_do_parse(line, &ast, ctx);
-				if (errcode == 0)
 				{
-					if (ft_sh_collect_heredocs(ctx))
-					{
-						ft_printf("\n\nAbstract Syntax Tree:\n");
-						print_ast(ast, 0);
-						ast->ctx = ctx;
-						//TODO: int attr on SHLVL
-						ctx->status_code = ft_sh_execute_command(ast, 0);
-					}
+					ft_printf("\n\nAbstract Syntax Tree:\n");
+					print_ast(ast, 0);
+					ast->ctx = ctx;
+					//TODO: int attr on SHLVL
+					ctx->last_status_code = ft_sh_execute_command(ast, 0);
 				}
-				if (ast != NULL)
-					free_ast(ast);
-				unlink_herefiles(ctx);
 			}
+			if (ast != NULL)
+				free_ast(ast);
+			unlink_herefiles(ctx);
 			free(line);
 		}
 		else
-			ctx->status_code = SHELL_EXIT;
+			ctx->last_status_code = SHELL_EXIT;
 	}
 	rl_clear_history();
-	return (ctx->status_code);
+	return (ctx->last_status_code);
 }
 
 /**

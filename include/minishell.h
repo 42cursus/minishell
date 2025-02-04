@@ -149,6 +149,9 @@ typedef enum e_lombok
 	SET_VAL
 }	t_get_or_set;
 
+int			ft_is_builtin(t_cmd_node *cmd, t_ctx *ctx);
+void		ft_reset_sighandlers(t_ctx *ctx);
+void		ft_set_signal_handlers(t_ctx *ctx);
 void		ft_init_term(t_ctx *ctx);
 void		*global_ctx(void *val, t_get_or_set flag);
 void		ft_shell_handle_redirect(t_wrd *wrd, int fd_redir,
@@ -217,7 +220,7 @@ void		ft_sh_init_welcome(void);
 /* Utils */
 char		*ft_get_word(t_wrd *wrd, t_ctx *ctx);
 char		**ft_get_argv(t_cmd_node *cmd, int *size, t_ctx *ctx);
-int			ft_sh_lookup_pathname(t_ctx *ctx);
+int ft_sh_lookup_pathname(t_ctx *ctx, t_cmd_node *cmd);
 
 enum
 {
@@ -252,7 +255,7 @@ void		ft_print_title(char *title);
 typedef int					(*t_shell_fun)(t_ctx *);
 typedef struct s_shell_op
 {
-	const char	*instruction;
+	const char	*inst;
 	t_shell_fun	fun;
 }	t_shell_op;
 
@@ -273,7 +276,7 @@ int			ft_sh_op_cmp(const void *a, const void *b);
 int			ft_sh_var_cmp(const void *a, const void *b);
 int			ft_sh_parse_env_map(t_obj_arr *map, char **env_tab);
 char		**ft_sh_render_envp(t_ctx *ctx);
-int			ft_sh_launch(t_cmd_node *cmd, t_ctx *ctx);
+int			ft_run_disc_command(t_cmd_node *cmd, t_ctx *ctx);
 int			ft_sh_env_map_del_entry(t_sh_var var, t_ctx *ctx);
 int			ft_sh_env_map_add_entry(t_sh_var var, t_ctx *ctx);
 t_sh_var	*ft_sh_env_map_get_entry(const char *key, t_ctx *ctx);

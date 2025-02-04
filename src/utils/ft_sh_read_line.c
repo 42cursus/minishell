@@ -26,7 +26,6 @@ char	*ft_sh_read_line(t_ctx *ctx, t_prompt_type type)
 	if (type == PS_REGULAR)
 	{
 		ctx->prompt_type = PS_REGULAR;
-
 		ft_sprintf(ps, ctx->ps1, count,
 				   ft_sh_env_map_get_val("USER", ctx),
 				   ft_sh_env_map_get_val("PWD", ctx));

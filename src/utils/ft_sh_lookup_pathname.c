@@ -12,34 +12,31 @@
 
 #include "minishell.h"
 
-int	ft_sh_lookup_pathname(t_ctx *ctx)
+int ft_sh_lookup_pathname(t_ctx *ctx, t_cmd_node *cmd)
 {
 	char	*str;
-	char	*dup;
 	char	*sptr;
+	char	*pathdup;
+	char	*argv_zero;
 	int 	errcode;
-	char	*pathname;
 
-	pathname = ctx->pathname;
-	errcode = ENOENT;
-	pathname[0] = '\0';
-	if (*(ctx->argv[0]) == '/' || *(ctx->argv[0]) == '.')
-		errcode = access(ft_strncpy(pathname, ctx->argv[0], PATH_MAX), F_OK);
-	else
+	errno = ENOENT;
+	errcode = -1;
+	argv_zero = ft_get_word(cmd->args, ctx);
+	if (*argv_zero == '/' || *argv_zero == '.')
+		errcode = access(ft_strncpy(ctx->pathname, argv_zero, PATH_MAX), F_OK);
+	else if (ft_sh_env_map_get_val("PATH", ctx))
 	{
-		dup = ft_strdup(ft_sh_env_map_get_val("PATH", ctx));
-		if (dup)
+		pathdup = ft_strdup(ft_sh_env_map_get_val("PATH", ctx));
+		str = ft_strtok_r(pathdup, ":", &sptr);
+		while ((errcode == -1 && errno == ENOENT) && str)
 		{
-			str = ft_strtok_r(dup, ":", &sptr);
-			while ((errcode == ENOENT) && str)
-			{
-				ft_snprintf(pathname, PATH_MAX, "%s/%s", str, ctx->argv[0]);
-				//TODO: early break
-				errcode = access(pathname, X_OK);
-				str = ft_strtok_r(NULL, ":", &sptr);
-			}
-			free(dup);
+			ft_snprintf(ctx->pathname, PATH_MAX, "%s/%s", str, argv_zero);
+			errcode = access(ctx->pathname, F_OK);
+			str = ft_strtok_r(NULL, ":", &sptr);
 		}
+		free(pathdup);
 	}
+	free(argv_zero);
 	return (errcode);
 }

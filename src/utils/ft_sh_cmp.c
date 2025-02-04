@@ -17,7 +17,7 @@ int	ft_sh_op_cmp(const void *a, const void *b)
 	const t_shell_op	*op1 = a;
 	const t_shell_op	*op2 = b;
 
-	return (ft_strcmp(op1->instruction, op2->instruction));
+	return (ft_strcmp(op1->inst, op2->inst));
 }
 
 int	ft_sh_var_cmp(const void *a, const void *b)
