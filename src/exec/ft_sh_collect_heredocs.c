@@ -27,7 +27,7 @@ int	herefile_varname(int i, char *var, char *line)
 			break ;
 		}
 		else if ((bi == 0 && (ft_isalpha(c) || c == '_'))
-				 || ((bi > 0) && (ft_isalnum(c) || c == '_')))
+			|| ((bi > 0) && (ft_isalnum(c) || c == '_')))
 			var[bi++] = c;
 		else if (bi == 0 && !ft_isalpha(c))
 			return (1);
@@ -78,10 +78,22 @@ void	herefile_expansion(int fd, const char *varname, t_ctx *ctx)
 	}
 }
 
+char	*heredoc_line_loop(char *l, t_hd_entry *en, t_ctx *ctx, int fd)
+{
+	while (l && ft_strcmp(l, en->delimiter)
+		&& ctx->received_signal_num != SIGINT)
+	{
+		add_history(l);
+		ft_heredoc_file_lexing(fd, l, en->quotes, ctx);
+		l = (free(l), ft_sh_read_line(ctx, PS_HERE));
+	}
+	return (l);
+}
+
 int	collect_heredocs_loop(t_ctx *ctx)
 {
 	int				fd;
-	char			*line;
+	char			*l;
 	t_hd_entry		*en;
 	int				i;
 
@@ -91,17 +103,18 @@ int	collect_heredocs_loop(t_ctx *ctx)
 		en = &ctx->hd.entries[i];
 		fd = open(en->filename, O_WRONLY | O_CREAT, DEFAULT_MODE);
 		if (fd < 0)
-			break ;
+			return (1);
 		ctx->received_signal_num = 0;
-		line = ft_sh_read_line(ctx, PS_HERE);
-		while (line && ft_strcmp(line, en->delimiter)
-			&& ctx->received_signal_num != SIGINT)
+		l = ft_sh_read_line(ctx, PS_HERE);
+		l = heredoc_line_loop(l, en, ctx, fd);
+		if (l == NULL)
 		{
-			add_history(line);
-			ft_heredoc_file_lexing(fd, line, en->quotes, ctx);
-			line = (free(line), ft_sh_read_line(ctx, PS_HERE));
+			ft_dprintf(2, "Minishell: warning: here-document delimited ");
+			ft_dprintf(2, "by end-of-file (wanted '%s')\n", en->delimiter);
 		}
-		(free(line), close(fd));
+		else
+			free(l);
+		close(fd);
 	}
 	return (0);
 }

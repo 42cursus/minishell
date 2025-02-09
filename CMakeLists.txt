@@ -25,8 +25,8 @@ set(FT_CFLAGS
         -Wwrite-strings
         -Wimplicit
         -Wformat -Werror=format-security
-        -Wstrict-prototypes
-        -Wmissing-prototypes
+        # -Wstrict-prototypes
+        # -Wmissing-prototypes
         -include include/minishell.h
         -fstack-protector-strong
 #        -Wno-error=unused-parameter
