@@ -314,7 +314,7 @@ void	skip_blanks(t_token **ts, int *tp, t_wrd *last, t_lexer *l)
 	if (ts[*tp])
 	{
 		t = ts[*tp];
-		while ((*tp < 1024) && t && t->type == TOKEN_BLANK)
+		while ((*tp < MAX_TOKENS) && t && t->type == TOKEN_BLANK)
 			t = ts[++(*tp)];
 	}
 }
@@ -435,8 +435,6 @@ void	free_ast(t_ast_node *node)
 	free(node);
 }
 
-#define BUFF_SIZE 1024
-
 static void	ft_print_arg_node(t_wrd *arguments, char *buf)
 {
 	t_wrd	*cont_node;
@@ -448,11 +446,11 @@ static void	ft_print_arg_node(t_wrd *arguments, char *buf)
 		*buf = '\0';
 		node = cont_node->next_part;
 		if (node->value && node->expand)
-			ft_snprintf(buf, BUFF_SIZE, "expand(%s)", node->value);
+			ft_snprintf(buf, PRINT_ARG_BUFF_SIZE, "expand(%s)", node->value);
 		else if (node->value && ft_strlen(node->value) == 0)
-			ft_snprintf(buf, BUFF_SIZE, "(empty string)");
+			ft_snprintf(buf, PRINT_ARG_BUFF_SIZE, "(empty string)");
 		else
-			ft_snprintf(buf, BUFF_SIZE, "%s", node->value);
+			ft_snprintf(buf, PRINT_ARG_BUFF_SIZE, "%s", node->value);
 		ft_printf("; %s", buf);
 		cont_node = cont_node->next_part;
 	}
@@ -461,7 +459,7 @@ static void	ft_print_arg_node(t_wrd *arguments, char *buf)
 
 void	print_arguments(t_wrd *arguments, int depth)
 {
-	char	buf[BUFF_SIZE];
+	char	buf[PRINT_ARG_BUFF_SIZE];
 	int		i;
 
 	while (arguments)
@@ -471,11 +469,12 @@ void	print_arguments(t_wrd *arguments, int depth)
 		while (++i < depth)
 			ft_printf("  ");
 		if (arguments->value && ft_strlen(arguments->value) == 0)
-			ft_snprintf(buf, BUFF_SIZE, "(empty string)");
+			ft_snprintf(buf, PRINT_ARG_BUFF_SIZE, "(empty string)");
 		else if (arguments->value && arguments->expand)
-			ft_snprintf(buf, BUFF_SIZE, "expand(%s)", arguments->value);
+			ft_snprintf(buf,
+				PRINT_ARG_BUFF_SIZE, "expand(%s)", arguments->value);
 		else
-			ft_snprintf(buf, BUFF_SIZE, "%s", arguments->value);
+			ft_snprintf(buf, PRINT_ARG_BUFF_SIZE, "%s", arguments->value);
 		ft_printf("ARGUMENT: %s", buf);
 		ft_print_arg_node(arguments, buf);
 		arguments = arguments->next_word;

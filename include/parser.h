@@ -34,6 +34,7 @@ typedef struct s_wrd
 
 # define HEREDOC_ARRAY_SIZE 1024
 # define FILENAME_BUF_SIZE 256
+# define PRINT_ARG_BUFF_SIZE 1024
 
 typedef enum e_errcodes
 {
