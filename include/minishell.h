@@ -184,6 +184,7 @@ void		ft_chdir_update_env_vars(t_ctx *ctx, char *oldpwd,
 void		ft_handle_redirects(t_cmd_node *cmd);
 int			ft_sh_is_legal_identifier(const char *name);
 int			unlink_herefiles(t_ctx *ctx);
+char		*heredoc_line_loop(char *l, t_hd_entry *en, t_ctx *ctx, int fd);
 int			handle_parser_err(int errcode, t_lexer *lexer);
 int			scan_the_line(const char *line, t_lexer *lexer, t_ctx *ctx);
 t_token		*create_token(t_token_type type, const char *value, t_lexer *lexer);

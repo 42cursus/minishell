@@ -25,8 +25,8 @@ set(FT_CFLAGS
         -Wwrite-strings
         -Wimplicit
         -Wformat -Werror=format-security
-        # -Wstrict-prototypes
-        # -Wmissing-prototypes
+        -Wstrict-prototypes
+        -Wmissing-prototypes
         -include include/minishell.h
         -fstack-protector-strong
 #        -Wno-error=unused-parameter
@@ -37,7 +37,6 @@ set(FT_CFLAGS
         -fasynchronous-unwind-tables
         -fno-omit-frame-pointer
         -fsanitize=address
-#        -fsanitize=leak
         -fsanitize=undefined
         -fno-sanitize-recover=all
         -fsanitize=float-divide-by-zero
@@ -45,8 +44,7 @@ set(FT_CFLAGS
 
 set(COMMON_LDFLAGS
         -fsanitize=address
-#        -fsanitize=undefined
-        -fsanitize=leak
+        -fsanitize=undefined
         -fno-sanitize-recover=all
         -fsanitize=float-divide-by-zero
         -fsanitize=float-cast-overflow)

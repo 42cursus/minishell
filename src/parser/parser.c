@@ -32,7 +32,6 @@ t_ast_node	*create_node(t_node_type type, t_token *t, t_ast_node *parent)
 	return (node);
 }
 
-
 static void	list_append(t_wrd **list, t_wrd *redir)
 {
 	t_wrd	*curr;
@@ -108,7 +107,6 @@ int	here_doc_cat(t_wrd *here, t_lexer *l)
 void	remove_non_compliant_chars(char *buf, int buf_size)
 {
 	char	*dst;
-	char	*odst = buf;
 
 	dst = buf;
 	while (buf_size--)
@@ -119,7 +117,6 @@ void	remove_non_compliant_chars(char *buf, int buf_size)
 	}
 	*dst = '\0';
 	return ;
-	(void)odst;
 }
 
 /**
@@ -132,34 +129,26 @@ static int	add_random_numbers_to_str(char *str_buf, int rand_count)
 {
 	char	buf[OPTIMISTIC + 1];
 	int		fd;
-	ssize_t bytes_read;
-	int		ret_val;
-	int 	len;
+	ssize_t	bytes_read;
+	int		len;
 
-	ret_val = 0;
 	fd = open("/dev/urandom", O_RDONLY);
-	if (fd >= 0)
+	if (fd < 0)
 	{
-		len = 0;
-		bytes_read = 1;
-		while (rand_count > len)
-		{
-			bytes_read = read(fd, buf + len, OPTIMISTIC - len);
-			if (bytes_read < 0)
-				break;
-			buf[bytes_read] = '\0';
-			remove_non_compliant_chars(buf + len, OPTIMISTIC  - len);
-			len = (int) ft_strnlen(buf, OPTIMISTIC);
-		}
-		close(fd);
-		ft_strncat(str_buf, buf, rand_count);
-	}
-	else
-	{
-		ret_val = -1;
 		errno = COULDNT_OPEN_URANDOM;
+		return (-1);
 	}
-	return (ret_val);
+	len = 0;
+	bytes_read = 1;
+	while (rand_count > len && bytes_read > 0)
+	{
+		bytes_read = read(fd, buf + len, OPTIMISTIC - len);
+		remove_non_compliant_chars(buf + len, OPTIMISTIC - len);
+		len = (int)ft_strnlen(buf, OPTIMISTIC);
+	}
+	close(fd);
+	ft_strncat(str_buf, buf, rand_count);
+	return (EX_OK);
 }
 
 __attribute__((unused))
@@ -196,7 +185,7 @@ static int	create_here_file(t_wrd *here, t_hd_entry *entry, bool expand)
 	{
 		entry->quotes = expand;
 		ft_snprintf(entry->filename, FILENAME_BUF_SIZE,
-					"/tmp/heredoc_%d_", ft_getpid());
+			"/tmp/heredoc_%d_", ft_getpid());
 		add_random_numbers_to_str(entry->filename, 20);
 		error_code = errno;
 		ft_strcpy(entry->delimiter, here->value);
@@ -218,7 +207,8 @@ void	parse_redirection(int *tp, t_ast_node *p, t_ctx *ctx, t_lexer *l)
 	rt = l->tok.t[*tp]->type;
 	hereexpand = l->tok.t[*tp]->hereexpand;
 	skip_blanks(l->tok.t, tp, NULL, l);
-	if (l->tok.t[*tp] && (l->tok.t[*tp]->type == T_WORD || l->tok.t[*tp]->type == T_VAR))
+	if (l->tok.t[*tp]
+		&& (l->tok.t[*tp]->type == T_WORD || l->tok.t[*tp]->type == T_VAR))
 	{
 		redir = ft_calloc(sizeof(t_wrd), 1);
 		create_wrd(redir, l->tok.t[*tp], rt);
@@ -255,7 +245,8 @@ void	parse_command_loop(int *tp, t_ctx *ctx, t_ast_node *cn, t_lexer *l)
 			la = arg;
 			skip_blanks(l->tok.t, tp, arg, l);
 		}
-		else if (l->tok.t[*tp]->type >= T_REDIRECT_STDOUT && l->tok.t[*tp]->type < 16)
+		else if (l->tok.t[*tp]->type >= T_REDIRECT_STDOUT
+			&& l->tok.t[*tp]->type < 16)
 			parse_redirection(tp, cn, ctx, l);
 		else if (l->tok.t[*tp]->type == TOKEN_DUMMY)
 			l->err = UNEXPECTED_DUMMY;
@@ -358,7 +349,7 @@ t_ast_node	*pipeline_loop(t_lexer *lexer, t_ctx *ctx)
 	t_ast_node	*cn;
 	t_ast_node	*nn;
 	t_ast_node	*op_node;
-	t_node_type type;
+	t_node_type	type;
 
 	cn = parse_command(lexer->tok.t, &lexer->tok.token_iter, ctx, lexer);
 	if (cn != NULL)
@@ -378,8 +369,6 @@ t_ast_node	*pipeline_loop(t_lexer *lexer, t_ctx *ctx)
 	return (cn);
 }
 
-
-
 int	handle_parser_err(int errcode, t_lexer *lexer)
 {
 	const char	*lt[SINGLE_AMPERSAND + 1] = {
@@ -396,13 +385,17 @@ int	handle_parser_err(int errcode, t_lexer *lexer)
 		"Syntax Error: Unsupported '&' operator.\n",
 	};
 
-	if (errcode == TOKEN_ALLOC_FAILURE)
-		ft_dprintf(STDERR_FILENO, lt[errcode], lexer->line_iter);
-	else if (errcode == EMPTY_LINE)
-		errcode = 0;
+	if (errcode == EMPTY_LINE)
+		errcode = EX_OK;
 	else
-		ft_dprintf(STDERR_FILENO, lt[errcode]);
-	return (EX_BADSYNTAX);
+	{
+		if (errcode == TOKEN_ALLOC_FAILURE)
+			ft_dprintf(STDERR_FILENO, lt[errcode], lexer->line_iter);
+		else
+			ft_dprintf(STDERR_FILENO, lt[errcode]);
+		errcode = EX_BADUSAGE;
+	}
+	return (errcode);
 }
 
 void	free_wrd(t_wrd *word)
@@ -444,15 +437,38 @@ void	free_ast(t_ast_node *node)
 
 #define BUFF_SIZE 1024
 
-void print_arguments(t_wrd *arguments, int depth)
+static void	ft_print_arg_node(t_wrd *arguments, char *buf)
 {
-	char buf[BUFF_SIZE];
-	t_wrd *node;
+	t_wrd	*cont_node;
+	t_wrd	*node;
+
+	cont_node = arguments;
+	while (cont_node->next_part)
+	{
+		*buf = '\0';
+		node = cont_node->next_part;
+		if (node->value && node->expand)
+			ft_snprintf(buf, BUFF_SIZE, "expand(%s)", node->value);
+		else if (node->value && ft_strlen(node->value) == 0)
+			ft_snprintf(buf, BUFF_SIZE, "(empty string)");
+		else
+			ft_snprintf(buf, BUFF_SIZE, "%s", node->value);
+		ft_printf("; %s", buf);
+		cont_node = cont_node->next_part;
+	}
+	printf("\n");
+}
+
+void	print_arguments(t_wrd *arguments, int depth)
+{
+	char	buf[BUFF_SIZE];
+	int		i;
 
 	while (arguments)
 	{
 		*buf = '\0';
-		for (int i = 0; i < depth; i++)
+		i = -1;
+		while (++i < depth)
 			ft_printf("  ");
 		if (arguments->value && ft_strlen(arguments->value) == 0)
 			ft_snprintf(buf, BUFF_SIZE, "(empty string)");
@@ -461,21 +477,7 @@ void print_arguments(t_wrd *arguments, int depth)
 		else
 			ft_snprintf(buf, BUFF_SIZE, "%s", arguments->value);
 		ft_printf("ARGUMENT: %s", buf);
-		t_wrd	*cont_node = arguments;
-		while (cont_node->next_part)
-		{
-			*buf = '\0';
-			node = cont_node->next_part;
-			if (node->value && node->expand)
-				ft_snprintf(buf, BUFF_SIZE, "expand(%s)", node->value);
-			else if (node->value && ft_strlen(node->value) == 0)
-				ft_snprintf(buf, BUFF_SIZE, "(empty string)");
-			else
-				ft_snprintf(buf, BUFF_SIZE, "%s", node->value);
-			ft_printf("; %s", buf);
-			cont_node = cont_node->next_part;
-		}
-		printf("\n");
+		ft_print_arg_node(arguments, buf);
 		arguments = arguments->next_word;
 	}
 }
@@ -483,6 +485,7 @@ void print_arguments(t_wrd *arguments, int depth)
 void	print_redirections(t_wrd *redir, int depth, t_token_type rt)
 {
 	const char	*type;
+	int			i;
 
 	if (rt == T_REDIRECT_STDOUT)
 		type = ">";
@@ -494,8 +497,6 @@ void	print_redirections(t_wrd *redir, int depth, t_token_type rt)
 		type = "2<";
 	while (redir)
 	{
-		int	i;
-
 		i = -1;
 		while (++i < depth)
 			ft_printf("  ");
@@ -507,7 +508,10 @@ void	print_redirections(t_wrd *redir, int depth, t_token_type rt)
 			printf(" - TO EXPAND");
 		while (redir->next_part)
 		{
-			printf("; %s", redir->next_part->value ? redir->next_part->value : "NULL");
+			if (redir->next_part->value)
+				printf("; %s", redir->next_part->value);
+			else
+				printf("; %s", "NULL");
 			if (redir->next_part->expand == true)
 				printf(" - TO EXPAND");
 			redir = redir->next_part;

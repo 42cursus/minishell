@@ -426,7 +426,6 @@ int	scan_the_line(const char *line, t_lexer *lexer, t_ctx *ctx)
 	state = scan_loop(lexer, ctx);
 	if (lexer->buf_index != 0 && state == INITIAL)
 		flush_buffer(lexer, T_WORD);
-	if ()
 	else if (state == IN_DOUBLE_QUOTE || state == IN_SINGLE_QUOTE)
 		lexer->err = UNCLOSED_QUOTE;
 	else if (state == CHECK_APPEND || state == CHECK_HERE_DOC)

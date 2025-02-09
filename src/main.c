@@ -117,7 +117,7 @@ static int	ft_sh_loop(t_ctx *ctx)
 				ft_memset(&ctx->hd, 0, sizeof(t_here_arr));
 				ctx->hd.size = HEREDOC_ARRAY_SIZE;
 				errcode = ft_do_parse(line, &ast, ctx);
-				if (!errcode && ft_sh_collect_heredocs(ctx))
+				if (ast != NULL && !errcode && ft_sh_collect_heredocs(ctx))
 				{
 					{
 						ft_printf("\n\nAbstract Syntax Tree:\n");
@@ -125,9 +125,8 @@ static int	ft_sh_loop(t_ctx *ctx)
 						ast->ctx = ctx;
 						ctx->last_status_code = ft_sh_execute_command(ast, 0);
 					}
-				}
-				if (ast != NULL)
 					free_ast(ast);
+				}
 				unlink_herefiles(ctx);
 
 			}
