@@ -25,7 +25,6 @@ int	ft_sh_destroy_ctx(t_ctx *ctx)
 	i = -1;
 	rl_clear_history();
 	printf("exit\n");
-	ft_give_terminal_to(ctx->parent_tpgrp);
 	close(SHELL_TTY_FILENO);
 	while (++i < (int)ctx->env_map.total_elems)
 	{
@@ -35,9 +34,7 @@ int	ft_sh_destroy_ctx(t_ctx *ctx)
 			free((void *)var->v);
 	}
 	free(ctx->env_map.base);
-	while (ctx->argc-- > 0)
-		free(ctx->argv[ctx->argc]);
-	free(ctx->argv);
+	ft_cleanup_argv(ctx);
 	free(ctx);
 	return (0);
 }

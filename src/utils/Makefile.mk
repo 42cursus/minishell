@@ -13,6 +13,7 @@
 FILES   = ft_get_argv.c \
 			ft_get_word.c \
 			ft_give_terminal_to.c \
+			ft_perrorf.c \
 			ft_print_ast.c \
 			ft_sh_cmp.c \
 			ft_sh_env_map.c \

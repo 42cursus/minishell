@@ -57,6 +57,25 @@ extern volatile sig_atomic_t	g_received_signal_num;
 # define ATT_NOASSIGN	0x0004000	/* assignment not allowed */
 # define ATT_IMPORTED	0x0008000	/* came from environment */
 
+/* Values that can be returned by execute_command (). */
+# define EXECUTION_FAILURE 1
+# define EXECUTION_SUCCESS 0
+
+/* Usage messages by builtins result in a return status of 2. */
+# define EX_BADUSAGE	2
+# define EX_MISCERROR	2
+
+/* Special exit statuses used by the shell, internally and externally. */
+# define EX_BINARY_FILE	126
+# define EX_NOEXEC		126
+# define EX_NOTFOUND	127
+
+# define EX_BADSYNTAX	257	/* shell syntax error */
+# define FT_USAGE		258	/* syntax error in usage like cd with many params */
+# define EX_REDIRFAIL	259	/* redirection failed */
+# define EX_BADASSIGN	260	/* variable assignment error */
+# define EX_EXPFAIL		261	/* word expansion failed */
+
 typedef enum e_token_type
 {
 	TOKEN_DUMMY,
@@ -149,14 +168,16 @@ typedef enum e_lombok
 	SET_VAL
 }	t_get_or_set;
 
+int			ft_wait_for_pid(int *wstatus, pid_t pid);
+int			ft_wait_for_pid_stop(int *wstatus, pid_t pid);
+int			ft_decode_wstatus(int wstatus);
 int			ft_is_builtin(t_cmd_node *cmd, t_ctx *ctx);
 void		ft_reset_sighandlers(t_ctx *ctx);
 void		ft_set_signal_handlers(t_ctx *ctx);
-void		ft_init_term(t_ctx *ctx);
+int ft_init_term(t_ctx *ctx);
 void		*global_ctx(void *val, t_get_or_set flag);
 void		ft_shell_handle_redirect(t_wrd *wrd, int fd_redir,
 				t_ctx *ctx, t_dir d);
-int			ft_handle_err(t_error err);
 void		remove_non_compliant_chars(char *buf, int buf_size);
 void		ft_chdir_update_env_vars(t_ctx *ctx, char *oldpwd,
 				const char *path, char *cwd);
@@ -209,6 +230,8 @@ t_state		handle_2(t_lexer *lexer, t_ctx *ctx);
 t_state		scan_loop(t_lexer *l, t_ctx *ctx);
 int			collect_heredocs_loop(t_ctx *ctx);
 
+void		ft_cleanup_argv(t_ctx *ctx);
+void		ft_cleanup_envp(char **envp);
 int			ft_sh_execute_command(t_ast_node *cmd, int level);
 void		ft_shell_redirect_stdin(t_cmd_node *cmd);
 void		ft_shell_redirect_stdout(t_cmd_node *cmd);
@@ -269,6 +292,8 @@ int			ft_unset(t_ctx *ctx);
 
 /* ---------- UTILS -------------------- */
 
+int			ft_handle_err(t_error err);
+void		ft_perrorf(const char *fmt, ...);
 char		*ft_sh_read_line(t_ctx *ctx, t_prompt_type type);
 int			ft_sh_init_interactive(t_ctx **ctx, char **envp);
 int			ft_sh_init_noninteractive(t_ctx **ctx, char **envp);

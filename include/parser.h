@@ -19,7 +19,6 @@
 # include "ft/ft_stdlib.h"
 # include <signal.h>
 
-# define SHELL_EXIT -100
 # define IO_REGULAR	0x00
 # define IO_OUT_APPEND	0x01
 # define IO_ERR_APPEND	0x02

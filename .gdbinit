@@ -38,16 +38,19 @@ br wait_sigint_handler
 
 catch fork
 set mem inaccessible-by-default off
-set detach-on-fork on
-set follow-fork-mode parent
-#set follow-fork-mode child
-#set follow-exec-mode new
-set follow-exec-mode same
+#set detach-on-fork on
+set detach-on-fork off
+#set follow-fork-mode parent
+set follow-fork-mode child
+set follow-exec-mode new
+#set follow-exec-mode same
 
 
 #handle SIGWINCH nostop pass
 handle SIGQUIT nostop pass
 handle SIGINT stop pass
+handle SIGCHLD print stop pass
+handle SIGTSTP print nostop pass
 
 define info signal-dispositions
   __isd_print_tbl_hdr

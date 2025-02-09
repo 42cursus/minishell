@@ -50,15 +50,16 @@ static t_obj_arr *ft_sh_init_builtin_ops(t_obj_arr **ops)
 void ft_reset_sighandlers(t_ctx *ctx)
 {
 	int		i;
-	char	(*const signals)[4] = &(char[4]) {
+	char	(*const signals)[5] = &(char[5]) {
 		SIGTERM,
 		SIGINT,
 		SIGQUIT,
-		SIGWINCH
+		SIGWINCH,
+		SIGTSTP
 	};
 
 	i = -1;
-	while(++i < 4)
+	while(++i < (int)(sizeof((*signals)) / sizeof((*signals)[0])))
 	{
 		if (sigaction((int)(*signals)[i],
 					  &ctx->old_act[(int)(*signals)[i]], NULL))
@@ -72,15 +73,16 @@ void ft_reset_sighandlers(t_ctx *ctx)
 void	ft_set_signal_handlers(t_ctx *const ctx)
 {
 	int		i;
-	char	(*const signals)[4] = &(char[4]) {
+	char	(*const signals)[5] = &(char[5]) {
 		SIGTERM,
 		SIGINT,
 		SIGQUIT,
-		SIGWINCH
+		SIGWINCH,
+		SIGTSTP
 	};
 
 	i = -1;
-	while(++i < 4)
+	while(++i < (int)(sizeof((*signals)) / sizeof((*signals)[0])))
 	{
 		if ((int)(*signals)[i] == SIGINT)
 		{
@@ -105,15 +107,32 @@ int	ft_sh_init_noninteractive(t_ctx **ctx, char **envp)
 	(void)envp;
 }
 
-void ft_init_term(t_ctx *ctx)
+int ft_init_term(t_ctx *ctx)
 {
 	const pid_t	mypid = ft_getpid();
+	int 		retaval;
 
-	if (mypid != ft_getpgrp() && ft_setpgid (0, mypid) < 0)
-		ft_dprintf(STDERR_FILENO, "ft_init_term setpgid (%d to %d) %d", mypid, 0, errno);
+	retaval = 0;
+	if (mypid != ft_getpgrp() && ft_setpgid(0, mypid) < 0)
+	{
+		ft_dprintf(STDERR_FILENO, "(ft_init_term setpgid (%d to %d) %d)\n", mypid, 0, errno);
+		ft_dprintf(STDERR_FILENO, "\non %s at %s:%d\n", __func__, __FILE__, __LINE__);
+	}
 	ctx->parent_tpgrp = ft_tcgetpgrp(STDIN_FILENO);
 	dup2(STDIN_FILENO, SHELL_TTY_FILENO);
-	ft_give_terminal_to(mypid);
+	if (ctx->parent_tpgrp == (-1))
+	{
+		ft_dprintf(STDERR_FILENO, "(no job control in this shell)\n");
+		retaval = -1;
+	}
+	else if (mypid != ft_tcgetpgrp(SHELL_TTY_FILENO) && ft_give_terminal_to(mypid) < 0)
+	{
+		ft_dprintf(STDERR_FILENO,
+				   "(cannot set terminal process group (%d to %d) %d)\n",
+				   mypid, ft_tcgetpgrp(SHELL_TTY_FILENO), errno);
+		retaval = -1;
+	}
+	return (retaval);
 }
 
 /**
@@ -138,7 +157,8 @@ int	ft_sh_init_interactive(t_ctx **ctx, char **envp)
 	ft_sh_init_builtin_ops(&new->ops);
 	ft_sh_parse_env_map(&new->env_map, envp);
 	*ctx = global_ctx(new, SET_VAL);
-	ft_init_term(*ctx);
+	if(ft_init_term(*ctx))
+		exit(((void)ft_sh_destroy_ctx(*ctx), -1));
 	ft_set_signal_handlers(*ctx);
 	return (0);
 }

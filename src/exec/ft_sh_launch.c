@@ -16,19 +16,22 @@
 static int exec_disc_command(t_cmd_node *cmd, t_ctx *ctx)
 {
 	int status;
+	char **envp = ft_sh_render_envp(ctx);
 
-	status = 0;
+	status = EXECUTION_SUCCESS;
 	close(SHELL_TTY_FILENO);
 	ft_reset_sighandlers(ctx);
 	ft_handle_redirects(cmd);
 	ctx->argv = ft_get_argv(cmd, &ctx->argc, ctx);
-	if (execve(ctx->pathname, ctx->argv, ft_sh_render_envp(ctx)))
+	status = execve(ctx->pathname, ctx->argv, envp);
+	if (status)
 	{
-		perror("ft_sh: error in execve");
 		if (errno == EACCES)
-			status = 129;
-		ft_sh_destroy_ctx(ctx);
+			status = EX_NOEXEC;
+		ft_perrorf("minishell: %s", ctx->pathname);
 	}
+	ft_cleanup_envp(envp);
+	ft_cleanup_argv(ctx);
 	return (status);
 }
 
@@ -46,36 +49,40 @@ void	ft_handle_redirects(t_cmd_node *cmd)
 
 int	ft_run_disc_command(t_cmd_node *cmd, t_ctx *ctx)
 {
-	pid_t	pid;
-	int		status;
-	int		wstatus;
+	pid_t		pid;
+	int			status;
+	int			wstatus;
+	sigset_t	set;
+	sigset_t	oldset;
 
-	status = 127;
+	status = EX_NOTFOUND;
 	if (cmd && !ft_sh_lookup_pathname(ctx, cmd))
 	{
-		pid_t myppid = ft_getpid();
-		pid_t pgrp = ft_getpgrp();
-		if (myppid != pgrp)
-			exit(exec_disc_command(cmd, ctx));
-		else
+		if (ft_getpid() == ft_getpgrp())
 		{
 			pid = fork();
 			if (pid == 0)
-				exit(exec_disc_command(cmd, ctx));
-			else if (pid < 0)
-				return (perror("ft_sh: error forking"), SHELL_EXIT);
-			else
 			{
-				waitpid(pid, &wstatus, WUNTRACED);
-				while (!WIFEXITED(wstatus) && !WIFSIGNALED(wstatus))
-					waitpid(pid, &wstatus, WUNTRACED);
-				if (WIFEXITED(wstatus))
-					status = WEXITSTATUS(wstatus);
+				sigemptyset(&set);
+				sigaddset(&set, SIGTTOU);
+				sigaddset(&set, SIGTTIN);
+				sigaddset(&set, SIGTSTP);
+				sigaddset(&set, SIGSTOP);
+				ft_sigprocmask(SIG_BLOCK, &set, &oldset);
+				status = exec_disc_command(cmd, ctx);
+				ft_sigprocmask(SIG_UNBLOCK, &oldset, NULL);
+				ft_cleanup_argv(ctx);
+				ft_sh_destroy_ctx(ctx);
+				exit(status);
 			}
+			else if (pid < 0)
+				status = (perror("minishell: error forking"), EX_MISCERROR);
+			else
+				status = (ft_decode_wstatus(ft_wait_for_pid(&wstatus, pid)));
 		}
+		else
+			return (exec_disc_command(cmd, ctx));
 	}
-	else
-		ft_dprintf(STDERR_FILENO, "%s: command not found\n", ctx->argv[0]);
 	return (status);
 }
 

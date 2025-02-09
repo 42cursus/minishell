@@ -105,33 +105,38 @@ static int	ft_sh_loop(t_ctx *ctx)
 	ctx->argv = NULL;
 	ctx->argc = 0;
 	history_offset = history_length;
-	while (ctx->last_status_code != SHELL_EXIT)
+	while (ctx->last_status_code != EX_MISCERROR)
 	{
 		ast = NULL;
 		line = ft_sh_read_line(ctx, PS_REGULAR);
-		if (line && *line != 0)
+		if (line)
 		{
-			add_history(line);
-			ft_memset(&ctx->hd, 0, sizeof(t_here_arr));
-			ctx->hd.size = HEREDOC_ARRAY_SIZE;
-			errcode = ft_do_parse(line, &ast, ctx);
-			if (!errcode && ft_sh_collect_heredocs(ctx))
+			if (*line != 0)
 			{
+				add_history(line);
+				ft_memset(&ctx->hd, 0, sizeof(t_here_arr));
+				ctx->hd.size = HEREDOC_ARRAY_SIZE;
+				errcode = ft_do_parse(line, &ast, ctx);
+				if (!errcode && ft_sh_collect_heredocs(ctx))
 				{
-					ft_printf("\n\nAbstract Syntax Tree:\n");
-					print_ast(ast, 0);
-					ast->ctx = ctx;
-					//TODO: int attr on SHLVL
-					ctx->last_status_code = ft_sh_execute_command(ast, 0);
+					{
+						ft_printf("\n\nAbstract Syntax Tree:\n");
+						print_ast(ast, 0);
+						ast->ctx = ctx;
+						ctx->last_status_code = ft_sh_execute_command(ast, 0);
+					}
 				}
+				if (ast != NULL)
+					free_ast(ast);
+				unlink_herefiles(ctx);
+
 			}
-			if (ast != NULL)
-				free_ast(ast);
-			unlink_herefiles(ctx);
 			free(line);
 		}
 		else
-			ctx->last_status_code = SHELL_EXIT;
+		{
+			ctx->last_status_code = EX_MISCERROR;
+		}
 	}
 	rl_clear_history();
 	return (ctx->last_status_code);
@@ -147,6 +152,9 @@ int	main(int argc, char **argv, char **envp)
 	t_ctx		*global;
 
 	exitcode = EX_OK;
+
+	if (argc > 1)
+		exit(EX_BADUSAGE);
 	if (isatty(STDIN_FILENO) && isatty(STDERR_FILENO))
 	{
 		if (ft_sh_init_interactive(&global, envp) == -1)
@@ -155,6 +163,11 @@ int	main(int argc, char **argv, char **envp)
 		global->argc = argc;
 		global->envp = envp;
 		exitcode = ft_sh_loop(global);
+		if (ft_give_terminal_to(global->parent_tpgrp))
+		{
+			fflush(stderr);
+			ft_dprintf(STDERR_FILENO, "\non %s at %s:%d\n", __func__, __FILE__, __LINE__);
+		}
 		ft_sh_destroy_ctx(global);
 	}
 	else

@@ -37,6 +37,8 @@ int ft_sh_lookup_pathname(t_ctx *ctx, t_cmd_node *cmd)
 		}
 		free(pathdup);
 	}
+	if ((errcode == -1 && errno == ENOENT))
+		ft_perrorf("minishell: %s", argv_zero);
 	free(argv_zero);
 	return (errcode);
 }
