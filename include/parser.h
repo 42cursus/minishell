@@ -48,6 +48,7 @@ typedef enum e_errcodes
 	OP_AT_BEGINNING, 
 	HD_CAT_FAILURE,
 	SINGLE_AMPERSAND,
+	EMPTY_LINE
 }	t_errcodes;
 
 typedef struct s_hd_entry

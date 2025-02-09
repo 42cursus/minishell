@@ -17,10 +17,9 @@ int	ft_do_parse(const char *line, t_ast_node **root, t_ctx *ctx)
 	t_lexer		lexer;
 	int			errcode;
 
-	errcode = 0;
-
+	errcode = EX_OK;
 	scan_the_line(line + ft_strspn(line, " \t"), &lexer, ctx);
-	if (lexer.err == 0)
+	if (!lexer.err)
 	{
 		if (lexer.tok.t[lexer.tok.token_iter]->type == TOKEN_BLANK)
 			skip_blanks(lexer.tok.t, &lexer.tok.token_iter, NULL, &lexer);

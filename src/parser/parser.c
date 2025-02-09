@@ -378,31 +378,31 @@ t_ast_node	*pipeline_loop(t_lexer *lexer, t_ctx *ctx)
 	return (cn);
 }
 
+
+
 int	handle_parser_err(int errcode, t_lexer *lexer)
 {
-	if (errcode == UNCLOSED_QUOTE)
-		ft_putstr_fd("Error: Input contained an un-closed quote.\n", STDERR_FILENO);
-	else if (errcode == TOKEN_ALLOC_FAILURE)
-		ft_dprintf(STDERR_FILENO,
-				   "Error: Token allocation failure near position[%d].\n",
-				   lexer->line_iter);
-	else if (errcode == PID_ALLOC_FAILURE)
-		ft_putstr_fd("Error: PID allocation failure.\n", STDERR_FILENO);
-	else if (errcode == COULDNT_OPEN_URANDOM)
-		ft_putstr_fd("Error: Failure to open /dev/urandom.\n", STDERR_FILENO);
-	else if (errcode == ALLOC_FAILURE)
-		ft_putstr_fd("Error: Memory allocation failure.\n", STDERR_FILENO);
-	else if (errcode == NO_REDIR_TARGET)
-		ft_putstr_fd("Error: Reidirection without a target.\n", STDERR_FILENO);
-	else if (errcode == HD_CAT_FAILURE)
-		ft_putstr_fd("Error: Failed to concatenate HERE DOC delimiter.\n", STDERR_FILENO);
-	else if (errcode == SINGLE_AMPERSAND)
-		ft_putstr_fd("Syntax Error: Unsupported '&' operator.\n", STDERR_FILENO);
-	else if (errcode == OP_AT_BEGINNING)
-		ft_putstr_fd("Syntax Error: Operator at line beginning.\n", STDERR_FILENO);
-	else if (errcode == UNEXPECTED_DUMMY)
-		ft_putstr_fd("Syntax Error: Unexpected () in input.\n", STDERR_FILENO);
-	return (1);
+	const char	*lt[SINGLE_AMPERSAND + 1] = {
+		"",
+		"Syntax Error: Unexpected () in input.\n",
+		"Error: Failure to open /dev/urandom.\n",
+		"Error: Input contained an un-closed quote.\n",
+		"Error: Token allocation failure near position[%d].\n",
+		"Error: PID allocation failure.\n",
+		"Error: Memory allocation failure.\n",
+		"Error: Reidirection without a target.\n",
+		"Syntax Error: Operator at line beginning.\n",
+		"Error: Failed to concatenate HERE DOC delimiter.\n",
+		"Syntax Error: Unsupported '&' operator.\n",
+	};
+
+	if (errcode == TOKEN_ALLOC_FAILURE)
+		ft_dprintf(STDERR_FILENO, lt[errcode], lexer->line_iter);
+	else if (errcode == EMPTY_LINE)
+		errcode = 0;
+	else
+		ft_dprintf(STDERR_FILENO, lt[errcode]);
+	return (EX_BADSYNTAX);
 }
 
 void	free_wrd(t_wrd *word)
