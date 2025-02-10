@@ -28,6 +28,8 @@ char *ft_get_word(t_wrd *wrd, t_ctx *ctx)
 			var = ft_sh_env_map_get_entry(wrd->value, ctx);
 			if (var && var->v)
 				substring = var->v;
+			else
+				substring = "";
 		}
 		substring_length = (int)ft_strlen(substring);
 		string = ft_reallocarray(string, string_length,

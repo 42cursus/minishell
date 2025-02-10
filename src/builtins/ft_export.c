@@ -19,6 +19,7 @@ int	ft_export(t_ctx *ctx)
 	t_sh_var	var;
 	int 		i;
 
+	//TODO: check for not a valid identifier
 	if (ctx->argc == 1)
 		return (ft_env(ctx));
 	var = (t_sh_var){.k = NULL, .v = NULL};

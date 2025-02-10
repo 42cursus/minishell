@@ -293,6 +293,7 @@ int			ft_env(t_ctx *ctx);
 int			ft_pwd(t_ctx *ctx);
 int			ft_echo(t_ctx *ctx);
 int			ft_export(t_ctx *ctx);
+int			ft_exit_with_exitcode(t_ctx *ctx);
 int			ft_unset(t_ctx *ctx);
 
 /* ---------- UTILS -------------------- */

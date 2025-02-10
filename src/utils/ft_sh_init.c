@@ -35,6 +35,7 @@ static t_obj_arr *ft_sh_init_builtin_ops(t_obj_arr **ops)
 	{.inst = "cd", .fun = ft_chdir},
 	{.inst = "echo", .fun = ft_echo},
 	{.inst = "export", .fun = ft_export},
+	{.inst = "exit", .fun = ft_exit_with_exitcode},
 	{.inst = "unset", .fun = ft_unset}
 	};
 

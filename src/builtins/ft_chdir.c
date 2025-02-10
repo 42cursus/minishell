@@ -18,6 +18,7 @@ void	ft_chdir_update_env_vars(t_ctx *ctx, char *oldpwd,
 	char		*pwd;
 	t_sh_var	*var;
 
+	//TODO: check for amount arguments
 	pwd = ft_strdup(path);
 	if (getcwd(cwd, PATH_MAX) != NULL)
 		pwd = (free(pwd), ft_strdup(cwd));

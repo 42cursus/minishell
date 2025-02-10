@@ -24,6 +24,7 @@ int	ft_sh_is_legal_identifier(const char *name)
 	const char		*s;
 	unsigned char	c;
 
+	//TODO: check for not a valid identifier
 	if (!name)
 		return (0);
 	c = *name;
