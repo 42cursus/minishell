@@ -177,9 +177,11 @@ t_state	handle_symbol(t_lexer *l, t_state state, t_ctx *ctx)
 	end_of_heredoc_check(l);
 	c = l->line[l->line_iter];
 	if ((c == '|' || c == '&') && l->line_iter == 0)
-		l->err = OP_AT_BEGINNING;
+		l->err = OP_OUT_OF_PLACE;
 	l->line_iter++;
-	if (l->line[l->line_iter] == '|' && c == '|')
+	if (l->line[l->line_iter] == '\0')
+			l->err = OP_OUT_OF_PLACE;
+	else if (l->line[l->line_iter] == '|' && c == '|')
 		l->tok.t[l->tok.token_iter] = create_token(TOKEN_OR, "||", l);
 	else if (l->line[l->line_iter] != '|' && c == '|')
 	{
@@ -337,8 +339,6 @@ t_state	exit_variable(t_lexer *l, t_ctx *ctx)
 		create_token(T_WORD, sc, l);
 		free(sc);
 	}
-	else if (l->line[(l->line_iter)] != '?' && l->buf_index == 0)
-		create_token(T_WORD, "$", l);
 	else if (l->buf_index > 0)
 		flush_buffer(l, T_VAR);
 	if (l->curent_string == '"')
@@ -389,6 +389,8 @@ t_state	handle_variable(t_lexer *lexer, t_ctx *ctx)
 		else
 			break ;
 	}
+	if (lexer->buf_index == 0)
+		create_token(T_WORD, "$", lexer);
 	return (exit_variable(lexer, ctx));
 }
 

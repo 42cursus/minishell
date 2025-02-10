@@ -133,9 +133,7 @@ static int	ft_sh_loop(t_ctx *ctx)
 			free(line);
 		}
 		else
-		{
 			ctx->last_status_code = EX_MISCERROR;
-		}
 	}
 	rl_clear_history();
 	return (ctx->last_status_code);

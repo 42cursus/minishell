@@ -15,9 +15,9 @@
 int	ft_do_parse(const char *line, t_ast_node **root, t_ctx *ctx)
 {
 	t_lexer		lexer;
-	int			errcode;
+	int			ec;
 
-	errcode = EX_OK;
+	ec = EX_OK;
 	scan_the_line(line + ft_strspn(line, " \t"), &lexer, ctx);
 	if (!lexer.err)
 	{
@@ -29,7 +29,12 @@ int	ft_do_parse(const char *line, t_ast_node **root, t_ctx *ctx)
 		print_tokens(&lexer);
 	}
 	if (lexer.err != 0)
-		errcode = handle_parser_err(lexer.err, &lexer);
+		ec = handle_parser_err(lexer.err, &lexer);
 	free_tokens(&lexer);
-	return (errcode);
+	if (ec == 1 || ec == 3 || ec == 7 || ec == 8 || ec == 10)
+		ec = EX_BADSYNTAX;
+	else if (ec != 0)
+		ec = EX_MISCERROR;
+	ctx->last_status_code = ec;
+	return (ec);
 }

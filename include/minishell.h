@@ -174,7 +174,7 @@ int			ft_decode_wstatus(int wstatus);
 int			ft_is_builtin(t_cmd_node *cmd, t_ctx *ctx);
 void		ft_reset_sighandlers(t_ctx *ctx);
 void		ft_set_signal_handlers(t_ctx *ctx);
-int ft_init_term(t_ctx *ctx);
+int			ft_init_term(t_ctx *ctx);
 void		*global_ctx(void *val, t_get_or_set flag);
 void		ft_shell_handle_redirect(t_wrd *wrd, int fd_redir,
 				t_ctx *ctx, t_dir d);

@@ -277,6 +277,9 @@ t_ast_node	*parse_command(t_token **t, int *tp, t_ctx *ctx, t_lexer *l)
 	if (!command_node)
 		return (NULL);
 	parse_command_loop(tp, ctx, command_node, l);
+	if (t[*tp])
+		if (t[*tp]->type == TOKEN_DUMMY)
+			l->err = UNEXPECTED_DUMMY;
 	return (command_node);
 }
 
@@ -335,11 +338,14 @@ static int	has_right(t_lexer *l, t_ast_node **r, t_ctx *ctx, t_node_type *type)
 		else if (t == TOKEN_PIPE)
 			*type = NODE_PIPE;
 		skip_blanks(l->tok.t, &l->tok.token_iter, NULL, l);
-		*r = parse_command(l->tok.t, &l->tok.token_iter, ctx, l);
-		return (true);
+		if (l->tok.t[l->tok.token_iter] != NULL)
+		{
+			*r = parse_command(l->tok.t, &l->tok.token_iter, ctx, l);
+			if (*r)
+				return (true);
+		}
+		l->err = OP_OUT_OF_PLACE;
 	}
-	else if (t != TOKEN_END)
-		l->err = UNEXPECTED_DUMMY;
 	*r = NULL;
 	return (false);
 }
@@ -380,22 +386,18 @@ int	handle_parser_err(int errcode, t_lexer *lexer)
 		"Error: PID allocation failure.\n",
 		"Error: Memory allocation failure.\n",
 		"Error: Reidirection without a target.\n",
-		"Syntax Error: Operator at line beginning.\n",
+		"Syntax Error: Operator out of place.\n",
 		"Error: Failed to concatenate HERE DOC delimiter.\n",
 		"Syntax Error: Unsupported '&' operator.\n",
 	};
 
 	if (errcode == EMPTY_LINE)
-		errcode = EX_OK;
+		return (0);
+	if (errcode == TOKEN_ALLOC_FAILURE)
+		ft_dprintf(STDERR_FILENO, lt[errcode], lexer->line_iter);
 	else
-	{
-		if (errcode == TOKEN_ALLOC_FAILURE)
-			ft_dprintf(STDERR_FILENO, lt[errcode], lexer->line_iter);
-		else
-			ft_dprintf(STDERR_FILENO, lt[errcode]);
-		errcode = EX_BADUSAGE;
-	}
-	return (errcode);
+		ft_dprintf(STDERR_FILENO, lt[errcode]);
+	return (lexer->err);
 }
 
 void	free_wrd(t_wrd *word)
@@ -433,89 +435,4 @@ void	free_ast(t_ast_node *node)
 	if (node->cmd)
 		free(node->cmd);
 	free(node);
-}
-
-static void	ft_print_arg_node(t_wrd *arguments, char *buf)
-{
-	t_wrd	*cont_node;
-	t_wrd	*node;
-
-	cont_node = arguments;
-	while (cont_node->next_part)
-	{
-		*buf = '\0';
-		node = cont_node->next_part;
-		if (node->value && node->expand)
-			ft_snprintf(buf, PRINT_ARG_BUFF_SIZE, "expand(%s)", node->value);
-		else if (node->value && ft_strlen(node->value) == 0)
-			ft_snprintf(buf, PRINT_ARG_BUFF_SIZE, "(empty string)");
-		else
-			ft_snprintf(buf, PRINT_ARG_BUFF_SIZE, "%s", node->value);
-		ft_printf("; %s", buf);
-		cont_node = cont_node->next_part;
-	}
-	printf("\n");
-}
-
-void	print_arguments(t_wrd *arguments, int depth)
-{
-	char	buf[PRINT_ARG_BUFF_SIZE];
-	int		i;
-
-	while (arguments)
-	{
-		*buf = '\0';
-		i = -1;
-		while (++i < depth)
-			ft_printf("  ");
-		if (arguments->value && ft_strlen(arguments->value) == 0)
-			ft_snprintf(buf, PRINT_ARG_BUFF_SIZE, "(empty string)");
-		else if (arguments->value && arguments->expand)
-			ft_snprintf(buf,
-				PRINT_ARG_BUFF_SIZE, "expand(%s)", arguments->value);
-		else
-			ft_snprintf(buf, PRINT_ARG_BUFF_SIZE, "%s", arguments->value);
-		ft_printf("ARGUMENT: %s", buf);
-		ft_print_arg_node(arguments, buf);
-		arguments = arguments->next_word;
-	}
-}
-
-void	print_redirections(t_wrd *redir, int depth, t_token_type rt)
-{
-	const char	*type;
-	int			i;
-
-	if (rt == T_REDIRECT_STDOUT)
-		type = ">";
-	else if (rt == TOKEN_REDIRECT_STDERR)
-		type = "2>";
-	else if (rt == TOKEN_REDIRECT_STDIN)
-		type = "<";
-	else if (rt == TOKEN_REDIRECT_IN_2)
-		type = "2<";
-	while (redir)
-	{
-		i = -1;
-		while (++i < depth)
-			ft_printf("  ");
-		printf("Redirection Type: %s", type);
-		if (redir->redir_flag == O_APPEND)
-			printf(">");
-		printf(", Target: %s", redir->value);
-		if (redir->expand == true)
-			printf(" - TO EXPAND");
-		while (redir->next_part)
-		{
-			if (redir->next_part->value)
-				printf("; %s", redir->next_part->value);
-			else
-				printf("; %s", "NULL");
-			if (redir->next_part->expand == true)
-				printf(" - TO EXPAND");
-			redir = redir->next_part;
-		}
-		printf("\n");
-		redir = redir->next_word;
-	}
 }
