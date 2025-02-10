@@ -16,6 +16,7 @@ int	ft_echo(t_ctx *ctx)
 {
 	int	i;
 
+	//TODO: implement -n option
 	i = 1;
 	ft_putstr_fd(ctx->argv[i], STDOUT_FILENO);
 	while (++i < ctx->argc)
