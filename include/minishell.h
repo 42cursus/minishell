@@ -168,6 +168,7 @@ typedef enum e_lombok
 	SET_VAL
 }	t_get_or_set;
 
+int			add_random_numbers_to_str(char *str_buf, int rand_count);
 int			ft_wait_for_pid(int *wstatus, pid_t pid);
 int			ft_wait_for_pid_stop(int *wstatus, pid_t pid);
 int			ft_decode_wstatus(int wstatus);
@@ -230,6 +231,8 @@ t_state		handle_1(t_lexer *lexer);
 t_state		handle_2(t_lexer *lexer, t_ctx *ctx);
 t_state		scan_loop(t_lexer *l, t_ctx *ctx);
 int			collect_heredocs_loop(t_ctx *ctx);
+int			ft_getpid_c(void);
+int			create_here_file(t_wrd *here, t_hd_entry *entry, bool expand);
 
 void		ft_cleanup_argv(t_ctx *ctx);
 void		ft_cleanup_envp(char **envp);

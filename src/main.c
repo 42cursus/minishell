@@ -119,16 +119,11 @@ static int	ft_sh_loop(t_ctx *ctx)
 				errcode = ft_do_parse(line, &ast, ctx);
 				if (ast != NULL && !errcode && ft_sh_collect_heredocs(ctx))
 				{
-					{
-						ft_printf("\n\nAbstract Syntax Tree:\n");
-						print_ast(ast, 0);
-						ast->ctx = ctx;
-						ctx->last_status_code = ft_sh_execute_command(ast, 0);
-					}
+					print_ast(ast, 0);
+					ctx->last_status_code = ft_sh_execute_command(ast, 0);
 					free_ast(ast);
 				}
 				unlink_herefiles(ctx);
-
 			}
 			free(line);
 		}
@@ -149,7 +144,6 @@ int	main(int argc, char **argv, char **envp)
 	t_ctx		*global;
 
 	exitcode = EX_OK;
-
 	if (argc > 1)
 		exit(EX_BADUSAGE);
 	if (isatty(STDIN_FILENO) && isatty(STDERR_FILENO))
@@ -163,7 +157,7 @@ int	main(int argc, char **argv, char **envp)
 		if (ft_give_terminal_to(global->parent_tpgrp))
 		{
 			fflush(stderr);
-			ft_dprintf(STDERR_FILENO, "\non %s at %s:%d\n", __func__, __FILE__, __LINE__);
+			ft_dprintf(2, "\non %s at %s:%d\n", __func__, __FILE__, __LINE__);
 		}
 		ft_sh_destroy_ctx(global);
 	}
