@@ -76,7 +76,7 @@ int	ft_run_disc_command(t_cmd_node *cmd, t_ctx *ctx)
 				exit(status);
 			}
 			else if (pid < 0)
-				status = (perror("minishell: error forking"), EX_MISCERROR);
+				status = (perror("minishell: error forking"), EX_SHELL_EXIT);
 			else
 				status = (ft_decode_wstatus(ft_wait_for_pid(&wstatus, pid)));
 		}

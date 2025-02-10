@@ -64,6 +64,7 @@ extern volatile sig_atomic_t	g_received_signal_num;
 /* Usage messages by builtins result in a return status of 2. */
 # define EX_BADUSAGE	2
 # define EX_MISCERROR	2
+# define EX_SHELL_EXIT	-100
 
 /* Special exit statuses used by the shell, internally and externally. */
 # define EX_BINARY_FILE	126

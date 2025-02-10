@@ -32,35 +32,6 @@ t_ast_node	*create_node(t_node_type type, t_token *t, t_ast_node *parent)
 	return (node);
 }
 
-static void	list_append(t_wrd **list, t_wrd *redir)
-{
-	t_wrd	*curr;
-
-	if (list == NULL)
-		return ;
-	if (*list == NULL)
-		*list = redir;
-	else
-	{
-		curr = *list;
-		while (curr->next_word != NULL)
-			curr = curr->next_word;
-		curr->next_word = redir;
-	}
-}
-
-void	find_redir_list(t_wrd *redir, t_token_type type, t_cmd_node *cmd)
-{
-	if (type == T_REDIRECT_STDOUT || type == TOKEN_APPEND)
-		list_append(&cmd->redirects_out, redir);
-	else if (type == TOKEN_REDIRECT_STDIN || type == TOKEN_HERE_DOC)
-		list_append(&cmd->redirects_in, redir);
-	else if (type == TOKEN_REDIRECT_STDERR || type == TOKEN_APPEND_2)
-		list_append(&cmd->redirects_err, redir);
-	else if (type == TOKEN_REDIRECT_IN_2 || type == TOKEN_HERE_DOC_2)
-		list_append(&cmd->redirects_err_in, redir);
-}
-
 int	ft_getpid_c(void)
 {
 	int		fd;

@@ -105,7 +105,7 @@ static int	ft_sh_loop(t_ctx *ctx)
 	ctx->argv = NULL;
 	ctx->argc = 0;
 	history_offset = history_length;
-	while (ctx->last_status_code != EX_MISCERROR)
+	while (ctx->last_status_code != EX_SHELL_EXIT)
 	{
 		ast = NULL;
 		line = ft_sh_read_line(ctx, PS_REGULAR);
@@ -128,7 +128,7 @@ static int	ft_sh_loop(t_ctx *ctx)
 			free(line);
 		}
 		else
-			ctx->last_status_code = EX_MISCERROR;
+			ctx->last_status_code = EX_SHELL_EXIT;
 	}
 	rl_clear_history();
 	return (ctx->last_status_code);

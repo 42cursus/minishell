@@ -40,20 +40,15 @@ int	ft_decode_wstatus(int wstatus)
 	if (WIFSIGNALED (wstatus))
 	{
 		if (WCOREDUMP(wstatus))
-			ft_dprintf (STDERR_FILENO, "Quit (core dumped) \n");
+			ft_dprintf (STDERR_FILENO, "Quit (core dumped)\n");
+		else
+			ft_dprintf (STDERR_FILENO, "Killed\n");
 		status = (128 + WTERMSIG (wstatus));
-		ft_dprintf (STDERR_FILENO, "signalled with  (%d)\n",  WTERMSIG (wstatus));
 	}
 	else if (WIFSTOPPED(wstatus))
-	{
 		status = (128 + WSTOPSIG(wstatus));
-		ft_dprintf (STDERR_FILENO, "stopped with (%d)\n",  WSTOPSIG (wstatus));
-	}
 	else if (WIFEXITED(wstatus))
-	{
 		status = (WEXITSTATUS (wstatus));
-		ft_dprintf (STDERR_FILENO, "exited with (%d)\n",  WEXITSTATUS (wstatus));
-	}
 	return status;
 }
 
@@ -61,14 +56,6 @@ int	ft_wait_for_pid(int *wstatus, pid_t pid)
 {
 	waitpid(pid, wstatus, WUNTRACED);
 	while (!WIFEXITED((*wstatus)) && !WIFSIGNALED((*wstatus)))
-		waitpid(pid, wstatus, WUNTRACED);
-	return (*wstatus);
-}
-
-int	ft_wait_for_pid_stop(int *wstatus, pid_t pid)
-{
-	waitpid(pid, wstatus, WUNTRACED | WNOHANG);
-	while (!WIFEXITED((*wstatus)) && !WIFSIGNALED((*wstatus)) && !WIFSTOPPED((*wstatus)))
 		waitpid(pid, wstatus, WUNTRACED);
 	return (*wstatus);
 }
@@ -122,7 +109,7 @@ static int ft_run_on_pipe(t_ast_node *left, t_ast_node *right, int level)
 		exit(ft_sh_execute_command(right, level + 1));
 	}
 	(close(fd[0]), close(fd[1]));
-	ft_decode_wstatus(ft_wait_for_pid(&wstatus, pid_cmd1));
+	ft_wait_for_pid(&wstatus, pid_cmd1);
 	status = ft_decode_wstatus(ft_wait_for_pid(&wstatus, pid_cmd2));
 	return (status);
 }
@@ -253,13 +240,10 @@ int ft_sh_execute_command(t_ast_node *cmd, int level)
 				return (perror("minishell: error forking"), EX_MISCERROR);
 			else
 			{
-				waitpid(fork_pid, &wstatus, WUNTRACED);
-				while (!WIFEXITED(wstatus) && !WIFSIGNALED(wstatus))
-					waitpid(fork_pid, &wstatus, WUNTRACED);
+				status = ft_decode_wstatus(ft_wait_for_pid(&wstatus, fork_pid));
 				if (ft_getpid() != ft_tcgetpgrp(SHELL_TTY_FILENO))
 					if (ft_give_terminal_to(ft_getpid()))
 						ft_dprintf(STDERR_FILENO, "\non %s at %s:%d\n", __func__, __FILE__, __LINE__);
-				status = ft_decode_wstatus(wstatus);
 			}
 		}
 		else
