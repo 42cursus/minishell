@@ -69,7 +69,7 @@ int	scan_the_line(const char *line, t_lexer *lexer, t_ctx *ctx)
 	lexer->tok.t[lexer->tok.token_iter] = NULL;
 	lexer->tok.tokens_size = lexer->tok.token_iter;
 	lexer->tok.token_iter = 0;
-	if (lexer->tok.tokens_size == 0)
+	if (lexer->tok.tokens_size == 0 && lexer->err == 0)
 		lexer->err = EMPTY_LINE;
 	return (lexer->err);
 }

@@ -10,6 +10,8 @@
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "minishell.h"
+
 int	ft_exit_with_exitcode(t_ctx *ctx)
 {
 	//TODO: check for valid exit code

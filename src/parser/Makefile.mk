@@ -19,6 +19,8 @@ FILES   = ft_heredoc_file_lexing.c \
 			parse_hd_delimiter.c \
 			parse_print.c \
 			parse_redirections.c \
-			parser.c
+			parser.c \
+			parse_command.c \
+			free_ast.c
 
 SH_SRCS    += $(FILES:%.c=$(dir $(lastword $(MAKEFILE_LIST)))%.c)
