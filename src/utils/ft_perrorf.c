@@ -13,7 +13,7 @@
 #include <stdio.h>
 #include "libft.h"
 
-void ft_perrorf(const char *fmt, ...)
+void	ft_perrorf(const char *fmt, ...)
 {
 	char	buf[256];
 	va_list	args;

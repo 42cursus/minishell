@@ -67,7 +67,7 @@ void	ft_print_arg_node(t_wrd *arguments)
 	while (node)
 	{
 		*buf = '\0';
-		if (node->value && node->expand)
+		if (node->value && node->to_expand)
 			ft_snprintf(buf, PRINT_ARG_BUFF_SIZE, "expand(%s)", node->value);
 		else if (node->value && ft_strlen(node->value) == 0)
 			ft_snprintf(buf, PRINT_ARG_BUFF_SIZE, "(empty string)");

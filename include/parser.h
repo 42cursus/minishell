@@ -26,7 +26,7 @@
 typedef struct s_wrd
 {
 	const char		*value;
-	unsigned char	expand;
+	unsigned char	to_expand;
 	int				redir_flag;
 	struct s_wrd	*next_part;
 	struct s_wrd	*next_word;

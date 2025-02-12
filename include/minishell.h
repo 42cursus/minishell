@@ -154,10 +154,10 @@ typedef struct s_error
  * S_IRGRP: Read permission for the group (0040 in octal).
  * S_IROTH: Read permission for others (0004 in octal).
  */
-# define DEFAULT_MODE S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH
+# define DEFAULT_MODE S_IRUSR
 # define SHELL_TTY_FILENO 255
 
-typedef enum
+typedef enum e_direction
 {
 	IN = 0,
 	OUT
@@ -233,12 +233,17 @@ int			ft_sh_collect_heredocs(t_ctx *ctx);
 t_state		handle_1(t_lexer *lexer);
 t_state		handle_2(t_lexer *lexer, t_ctx *ctx);
 t_state		scan_loop(t_lexer *l, t_ctx *ctx);
-int			collect_heredocs_loop(t_ctx *ctx);
+int			ft_collect_heredocs_loop(t_ctx *ctx);
 int			ft_getpid_c(void);
 int			create_here_file(t_wrd *here, t_hd_entry *entry, bool expand);
 
 void		ft_cleanup_argv(t_ctx *ctx);
 int			ft_sh_execute_command(t_ast_node *cmd, int level);
+int			exec_disc_command(t_cmd_node *cmd, t_ctx *ctx);
+void		ft_sh_sig_block(sigset_t *oldset);
+void		ft_exec_with_sig_block(t_cmd_node *cmd, t_ctx *ctx);
+void		ft_sh_run_forked(t_ast_node *cmd,
+				int level, const int *fd, int fd_idx);
 int			ft_run_builtin(t_cmd_node *cmd, t_ctx *ctx);
 void		ft_sh_init_welcome(void);
 
@@ -268,15 +273,11 @@ typedef struct s_shell_var
 # define RL_BLUE "\001\e[:;34m\002"
 # define RL_RESET "\001\e[0;m\002"
 
-# define PS0 RL_RESET""
-# define PS1 RL_RESET"[%d]"RL_GREEN"%s"RL_RESET"@"RL_BLUE"%s"RL_RESET"-> "
-# define PS2 RL_RESET"> "
-
 /* ---------- TESTS -------------------- */
 
 void		check(bool succes);
 void		ft_print_title(char *title);
-typedef int	(*t_shell_fun)(t_ctx *);
+typedef int						(*t_shell_fun)(t_ctx *);
 
 typedef struct s_shell_op
 {

@@ -19,12 +19,14 @@ int	ft_is_builtin(t_cmd_node *cmd, t_ctx *const	ctx)
 	int				retval;
 	char			*inst;
 	t_shell_op		*op;
+	t_shell_op		*to_find;
 
 	retval = 0;
 	if (cmd && cmd->args)
 	{
 		inst = ft_get_word(cmd->args, ctx);
-		op = ft_bsearch_obj(&(t_shell_op){ .inst = inst }, ctx->ops);
+		to_find = &(t_shell_op){.inst = inst};
+		op = ft_bsearch_obj(to_find, ctx->ops);
 		if (op)
 			retval = 1;
 		free(inst);
@@ -34,7 +36,7 @@ int	ft_is_builtin(t_cmd_node *cmd, t_ctx *const	ctx)
 
 int	ft_decode_wstatus(int wstatus)
 {
-	int status;
+	int	status;
 
 	status = (EXIT_FAILURE);
 	if (WIFSIGNALED (wstatus))
@@ -49,7 +51,7 @@ int	ft_decode_wstatus(int wstatus)
 		status = (128 + WSTOPSIG(wstatus));
 	else if (WIFEXITED(wstatus))
 		status = (WEXITSTATUS (wstatus));
-	return status;
+	return (status);
 }
 
 int	ft_wait_for_pid(int *wstatus, pid_t pid)
@@ -60,55 +62,38 @@ int	ft_wait_for_pid(int *wstatus, pid_t pid)
 	return (*wstatus);
 }
 
-static int ft_run_on_pipe(t_ast_node *left, t_ast_node *right, int level)
+void	ft_sh_run_forked(t_ast_node *cmd, int level, const int *fd, int fd_idx)
 {
-	int fd[2];
-	int status;
-	int wstatus;
+	int	statuscode;
+
+	ft_sh_sig_block(NULL);
+	ft_reset_sighandlers(cmd->ctx);
+	dup2(fd[fd_idx], STDIN_FILENO);
+	close(fd[0]);
+	close(fd[1]);
+	statuscode = ft_sh_execute_command(cmd, level + 1);
+	exit(statuscode);
+}
+
+static int	ft_run_on_pipe(t_ast_node *left, t_ast_node *right, int level)
+{
+	int		fd[2];
+	int		status;
+	int		wstatus;
+	pid_t	pid_cmd1;
+	pid_t	pid_cmd2;
 
 	wstatus = 0;
 	if (pipe(fd) < 0)
-	{
-		ft_dprintf(STDERR_FILENO, "on %s at %s:%d\n",
-				   __func__, __FILE__, __LINE__);
 		exit((ft_perrorf("minishell: pipe"), EXIT_FAILURE));
-	}
-	pid_t pid_cmd1 = fork();
+	pid_cmd1 = fork();
 	if (pid_cmd1 == 0)
-	{
-		sigset_t	set;
-
-		sigemptyset(&set);
-		sigaddset(&set, SIGTTOU);
-		sigaddset(&set, SIGTTIN);
-		sigaddset(&set, SIGTSTP);
-		sigaddset(&set, SIGSTOP);
-
-		ft_sigprocmask(SIG_BLOCK, &set, NULL);
-
-		ft_reset_sighandlers(left->ctx);
-		(dup2(fd[1], STDOUT_FILENO),  close(fd[0]),  close(fd[1]));
-		exit(ft_sh_execute_command(left, level + 1));
-	}
-	pid_t pid_cmd2;
+		ft_sh_run_forked(left, level, fd, 1);
 	pid_cmd2 = fork();
 	if (pid_cmd2 == 0)
-	{
-		sigset_t	set;
-
-		sigemptyset(&set);
-		sigaddset(&set, SIGTTOU);
-		sigaddset(&set, SIGTTIN);
-		sigaddset(&set, SIGTSTP);
-		sigaddset(&set, SIGSTOP);
-
-		ft_sigprocmask(SIG_BLOCK, &set, NULL);
-
-		ft_reset_sighandlers(right->ctx);
-		(dup2(fd[0], STDIN_FILENO),  close(fd[0]),  close(fd[1]));
-		exit(ft_sh_execute_command(right, level + 1));
-	}
-	(close(fd[0]), close(fd[1]));
+		ft_sh_run_forked(right, level, fd, 0);
+	close(fd[0]);
+	close(fd[1]);
 	ft_wait_for_pid(&wstatus, pid_cmd1);
 	status = ft_decode_wstatus(ft_wait_for_pid(&wstatus, pid_cmd2));
 	return (status);
@@ -117,7 +102,7 @@ static int ft_run_on_pipe(t_ast_node *left, t_ast_node *right, int level)
 int	ft_run_builtin(t_cmd_node *cmd, t_ctx *ctx)
 {
 	int				status;
-	int 			fd[3];
+	int				fd[3];
 	t_shell_op		*op;
 
 	fd[STDIN_FILENO] = dup(STDIN_FILENO);
@@ -138,14 +123,7 @@ int	ft_run_builtin(t_cmd_node *cmd, t_ctx *ctx)
 	return (status);
 }
 
-void	ft_cleanup_argv(t_ctx *ctx)
-{
-	ft_tab_str_free(ctx->argv);
-	ctx->argc = 0;
-	ctx->argv = NULL;
-}
-
-static int ft_run_simple(t_cmd_node *cmd, t_ctx *ctx)
+static int	ft_run_simple(t_cmd_node *cmd, t_ctx *ctx)
 {
 	int			status;
 
@@ -160,7 +138,7 @@ static int ft_run_simple(t_cmd_node *cmd, t_ctx *ctx)
 	return (status);
 }
 
-static int ft_run_other(t_ast_node *cmd, int level)
+static int	ft_run_other(t_ast_node *cmd, int level)
 {
 	int	exit_status;
 
@@ -188,7 +166,7 @@ static int ft_run_other(t_ast_node *cmd, int level)
 	return (exit_status);
 }
 
-int ft_sh_execute_command(t_ast_node *cmd, int level)
+int	ft_sh_execute_command(t_ast_node *cmd, int level)
 {
 	int		status;
 	int		wstatus;
@@ -210,11 +188,11 @@ int ft_sh_execute_command(t_ast_node *cmd, int level)
 				mypid = ft_getpid();
 				if (ft_setpgid(mypid, (pid_t)0) < 0)
 					ft_dprintf(STDERR_FILENO,
-							   "leader setpgid (%d to %d)\n", mypid, 0);
+						"leader setpgid (%d to %d)\n", mypid, 0);
 				original_pgrp = ft_tcgetpgrp(SHELL_TTY_FILENO);
 				if (ft_give_terminal_to(mypid))
 					ft_dprintf(STDERR_FILENO, "on %s at %s:%d\n",
-							   __func__, __FILE__, __LINE__);
+						__func__, __FILE__, __LINE__);
 				status = ft_run_other(cmd, level + 1);
 				if (g_received_signal_num)
 				{
@@ -224,7 +202,7 @@ int ft_sh_execute_command(t_ast_node *cmd, int level)
 				}
 				if (ft_give_terminal_to(original_pgrp))
 					ft_dprintf(STDERR_FILENO, "on %s at %s:%d\n",
-							   __func__, __FILE__, __LINE__);
+						__func__, __FILE__, __LINE__);
 				exit(status);
 			}
 			else if (fork_pid < 0)
@@ -235,7 +213,7 @@ int ft_sh_execute_command(t_ast_node *cmd, int level)
 				if (ft_getpid() != ft_tcgetpgrp(SHELL_TTY_FILENO))
 					if (ft_give_terminal_to(ft_getpid()))
 						ft_dprintf(STDERR_FILENO, "on %s at %s:%d\n",
-								   __func__, __FILE__, __LINE__);
+							__func__, __FILE__, __LINE__);
 			}
 		}
 		else

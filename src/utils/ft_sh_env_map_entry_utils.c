@@ -26,7 +26,7 @@ int	ft_sh_env_map_add_entry(t_sh_var var, t_ctx *ctx)
 
 	obj = &ctx->env_map;
 	new = ft_reallocarray(obj->base, obj->total_elems,
-						  obj->total_elems  + 1, obj->elem_size);
+			obj->total_elems + 1, obj->elem_size);
 	new[obj->total_elems] = var;
 	obj->base = new;
 	obj->total_elems++;
@@ -43,7 +43,7 @@ int	ft_sh_env_map_del_entry(t_sh_var var, t_ctx *ctx)
 	idx = ft_sh_env_map_get_index(var.k, ctx);
 	ft_sh_env_map_free_entry((t_sh_var *)obj->base + idx);
 	ft_memmove(obj->base + (idx * obj->elem_size),
-			   (obj->base + (idx + 1) * obj->elem_size),
-			   (--(obj->total_elems) - idx) * obj->elem_size);
+		(obj->base + (idx + 1) * obj->elem_size),
+		(--(obj->total_elems) - idx) * obj->elem_size);
 	return (0);
 }

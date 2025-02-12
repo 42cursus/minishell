@@ -90,38 +90,9 @@ char	*heredoc_line_loop(char *l, t_hd_entry *en, t_ctx *ctx, int fd)
 	return (l);
 }
 
-int	collect_heredocs_loop(t_ctx *ctx)
-{
-	int				fd;
-	char			*l;
-	t_hd_entry		*en;
-	int				i;
-
-	i = -1;
-	while (++i < ctx->hd.size && ctx->received_signal_num != SIGINT)
-	{
-		en = &ctx->hd.entries[i];
-		fd = open(en->filename, O_WRONLY | O_CREAT, DEFAULT_MODE);
-		if (fd < 0)
-			return (1);
-		ctx->received_signal_num = 0;
-		l = ft_sh_read_line(ctx, PS_HERE);
-		l = heredoc_line_loop(l, en, ctx, fd);
-		if (l == NULL)
-		{
-			ft_dprintf(2, "Minishell: warning: here-document delimited ");
-			ft_dprintf(2, "by end-of-file (wanted '%s')\n", en->delimiter);
-		}
-		else
-			free(l);
-		close(fd);
-	}
-	return (0);
-}
-
 int	ft_sh_collect_heredocs(t_ctx *ctx)
 {
-	if (!collect_heredocs_loop(ctx) && ctx->received_signal_num == SIGINT)
+	if (!ft_collect_heredocs_loop(ctx) && ctx->received_signal_num == SIGINT)
 	{
 		ctx->received_signal_num = 0;
 		ctx->last_status_code = (-1);

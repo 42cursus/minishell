@@ -19,7 +19,7 @@ void	create_wrd(t_wrd *word, t_token *token, t_token_type rt)
 	{
 		word->value = ft_strdup(token->value);
 		if (token->type == T_VAR)
-			word->expand = true;
+			word->to_expand = true;
 	}
 	word->redir_flag = O_TRUNC;
 	if (rt == TOKEN_APPEND || rt == TOKEN_APPEND_2)
@@ -122,7 +122,7 @@ t_ast_node	*create_node(t_node_type type, t_token *t, t_ast_node *parent)
 		node->cmd->args = ft_calloc(sizeof(t_wrd), 1);
 		node->cmd->args->value = strdup(t->value);
 		if (t->type == T_VAR)
-			node->cmd->args->expand = true;
+			node->cmd->args->to_expand = true;
 	}
 	node->parent = parent;
 	return (node);

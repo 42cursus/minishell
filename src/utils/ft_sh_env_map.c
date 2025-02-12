@@ -58,7 +58,7 @@ t_sh_var	*ft_sh_env_map_get_entry(const char *key, t_ctx *ctx)
 
 char	*ft_sh_env_map_get_val(const char *key, t_ctx *ctx)
 {
-	const char			*val;
+	const char		*val;
 	t_sh_var		*found;
 	t_sh_var *const	to_find = &(t_sh_var){.k = key};
 

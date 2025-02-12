@@ -14,13 +14,9 @@
 
 int	ft_handle_err(t_error err)
 {
-	char	buf[PATH_MAX];
-
 	if (err.assertion)
 	{
-		ft_snprintf(buf, PATH_MAX,
-			"minishell: %s \n", err.description);
-		perror(buf);
+		ft_perrorf( "minishell: %s", err.description);
 		ft_dprintf(STDERR_FILENO,
 			"on %s at %s:%d\n", err.func, err.file, err.line);
 		return (-1);

@@ -10,7 +10,8 @@
 #                                                                              #
 # **************************************************************************** #
 
-FILES   = ft_sh_collect_heredocs.c \
+FILES   = ft_collect_heredocs_loop.c \
+			ft_sh_collect_heredocs.c \
 			ft_sh_exec_cmd.c \
 			ft_sh_launch.c \
 			ft_shell_redirect.c

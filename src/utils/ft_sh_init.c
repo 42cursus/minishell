@@ -151,9 +151,9 @@ int	ft_sh_init_interactive(t_ctx **ctx, char **envp)
 		errno = ENOMEM;
 		return (-1);
 	}
-	new->ps0 = PS0;
-	new->ps1 = PS1;
-	new->ps2 = PS2;
+	new->ps0 = RL_RESET"";
+	new->ps1 = RL_RESET"[%d]"RL_GREEN"%s"RL_RESET"@"RL_BLUE"%s"RL_RESET"-> ";
+	new->ps2 = RL_RESET"> ";
 	new->last_status_code = 0;
 	ft_sh_init_builtin_ops(&new->ops);
 	ft_sh_parse_env_map(&new->env_map, envp);

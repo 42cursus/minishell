@@ -12,6 +12,13 @@
 
 #include "minishell.h"
 
+void	ft_cleanup_argv(t_ctx *ctx)
+{
+	ft_tab_str_free(ctx->argv);
+	ctx->argc = 0;
+	ctx->argv = NULL;
+}
+
 /**
  * readline is messy and generates too many leaks
  * generating-suppressions-for-memory-leaks
