@@ -40,7 +40,7 @@ int	ft_chdir(t_ctx *ctx)
 			ft_strncpy((char *) path, home, PATH_MAX);
 		else
 			return ((void) ft_dprintf(STDERR_FILENO,
-									  "minish: cd: HOME not set\n"), EXECUTION_FAILURE);
+					"minish: cd: HOME not set\n"), EXECUTION_FAILURE);
 	}
 	oldpwd = getcwd(NULL, 0);
 	if (chdir(path) != 0)

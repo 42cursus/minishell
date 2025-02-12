@@ -14,7 +14,7 @@
 
 int	ft_handle_err(t_error err)
 {
-	char 			buf[PATH_MAX];
+	char	buf[PATH_MAX];
 
 	if (err.assertion)
 	{

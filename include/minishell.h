@@ -141,8 +141,8 @@ typedef struct s_lexer
 typedef struct s_error
 {
 	int			assertion;
-	int 		errnum;
-	int 		fd;
+	int			errnum;
+	int			fd;
 	const char	*description;
 	int			line;
 	const char	*func;
@@ -276,8 +276,8 @@ typedef struct s_shell_var
 
 void		check(bool succes);
 void		ft_print_title(char *title);
+typedef int	(*t_shell_fun)(t_ctx *);
 
-typedef int					(*t_shell_fun)(t_ctx *);
 typedef struct s_shell_op
 {
 	const char	*inst;

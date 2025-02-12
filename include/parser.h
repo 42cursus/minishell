@@ -27,7 +27,7 @@ typedef struct s_wrd
 {
 	const char		*value;
 	unsigned char	expand;
-	int 			redir_flag;
+	int				redir_flag;
 	struct s_wrd	*next_part;
 	struct s_wrd	*next_word;
 }	t_wrd;
@@ -46,7 +46,7 @@ typedef enum e_errcodes
 	PID_ALLOC_FAILURE,
 	ALLOC_FAILURE,
 	NO_REDIR_TARGET,
-	OP_OUT_OF_PLACE, 
+	OP_OUT_OF_PLACE,
 	HD_CAT_FAILURE,
 	SINGLE_AMPERSAND,
 	EMPTY_LINE
@@ -64,7 +64,7 @@ typedef struct s_here_array
 	t_hd_entry	entries[HEREDOC_ARRAY_SIZE];
 	int			size;
 	int			ss;
-	int 		already_unlinked;
+	int			already_unlinked;
 }	t_here_arr;
 
 typedef struct sigaction	t_sigaction;
@@ -94,7 +94,6 @@ typedef struct s_exec_ctx
 	const char		*ps2;
 	t_prompt_type	prompt_type;
 }	t_ctx;
-
 
 typedef enum e_node_type
 {

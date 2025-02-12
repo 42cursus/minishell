@@ -14,7 +14,7 @@
 
 int	ft_exit_with_exitcode(t_ctx *ctx)
 {
-	int 	retval;
+	int		retval;
 	long	val;
 	char	*endptr;
 
@@ -34,7 +34,7 @@ int	ft_exit_with_exitcode(t_ctx *ctx)
 			retval = (int) val % 256;
 		else
 			retval = (ft_dprintf(STDERR_FILENO, "minishell: exit: `%s':"
-				" numeric argument required\n", ctx->argv[1]), EX_BADUSAGE);
+						" numeric argument required\n", ctx->argv[1]), EX_BADUSAGE);
 	}
 	else
 		retval = ctx->last_status_code;

@@ -1,6 +1,18 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   parse_print.c                                      :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: sbelcher <marvin@42.fr>                    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/02/12 14:26:43 by sbelcher          #+#    #+#             */
+/*   Updated: 2025/02/12 14:26:45 by sbelcher         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "minishell.h"
 
-const char *get_idstring(int token)
+const char	*get_idstring(int token)
 {
 	static const char	*lt[TOKEN_MAX] = {
 		"TOKEN_DUMMY",
@@ -22,15 +34,16 @@ const char *get_idstring(int token)
 		"TOKEN_HERE_DOC_2",
 		"TOKEN_APPEND_2"
 	};
+
 	return (lt[token]);
 }
 
 void	print_tokens(t_lexer *lexer)
 {
-	int 			i;
+	int				i;
 	t_token			*tok;
 	const char		*type;
-	t_token *const (*toks)[MAX_TOKENS] = &(lexer->tok.t);
+	t_token			*const (*toks)[MAX_TOKENS] = &(lexer->tok.t);
 
 	ft_printf("\n\nTokens:\n");
 	i = -1;
