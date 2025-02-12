@@ -25,7 +25,6 @@ int	ft_sh_destroy_ctx(t_ctx *ctx)
 
 	i = -1;
 	rl_clear_history();
-	printf("exit\n");
 	close(SHELL_TTY_FILENO);
 	while (++i < (int)ctx->env_map.total_elems)
 	{

@@ -33,7 +33,7 @@ static int exec_disc_command(t_cmd_node *cmd, t_ctx *ctx)
 		}
 		ft_cleanup_argv(ctx);
 	}
-	ft_cleanup_envp(envp);
+	ft_tab_str_free(envp);
 	return (status);
 }
 

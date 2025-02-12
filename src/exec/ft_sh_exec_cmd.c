@@ -69,9 +69,9 @@ static int ft_run_on_pipe(t_ast_node *left, t_ast_node *right, int level)
 	wstatus = 0;
 	if (pipe(fd) < 0)
 	{
-		ft_dprintf(STDERR_FILENO, "\non %s at %s:%d\n", __func__, __FILE__, __LINE__);
-		perror("pipe failed");
-		exit(EXIT_FAILURE);
+		ft_dprintf(STDERR_FILENO, "on %s at %s:%d\n",
+				   __func__, __FILE__, __LINE__);
+		exit((ft_perrorf("minishell: pipe"), EXIT_FAILURE));
 	}
 	pid_t pid_cmd1 = fork();
 	if (pid_cmd1 == 0)
@@ -114,7 +114,7 @@ static int ft_run_on_pipe(t_ast_node *left, t_ast_node *right, int level)
 	return (status);
 }
 
-static int ft_run_builtin(t_cmd_node *cmd, t_ctx *ctx)
+int	ft_run_builtin(t_cmd_node *cmd, t_ctx *ctx)
 {
 	int				status;
 	int 			fd[3];
@@ -138,22 +138,10 @@ static int ft_run_builtin(t_cmd_node *cmd, t_ctx *ctx)
 	return (status);
 }
 
-void	ft_cleanup_envp(char **envp)
-{
-	char **envptr = envp;
-	while (envp && *envp)
-	{
-		free(*envp);
-		envp++;
-	}
-	free(envptr);
-}
-
 void	ft_cleanup_argv(t_ctx *ctx)
 {
-	while (ctx->argc-- > 0)
-		free(ctx->argv[ctx->argc]);
-	free(ctx->argv);
+	ft_tab_str_free(ctx->argv);
+	ctx->argc = 0;
 	ctx->argv = NULL;
 }
 
@@ -222,10 +210,11 @@ int ft_sh_execute_command(t_ast_node *cmd, int level)
 				mypid = ft_getpid();
 				if (ft_setpgid(mypid, (pid_t)0) < 0)
 					ft_dprintf(STDERR_FILENO,
-							   "leader setpgid (%d to %d)", mypid, 0);
+							   "leader setpgid (%d to %d)\n", mypid, 0);
 				original_pgrp = ft_tcgetpgrp(SHELL_TTY_FILENO);
 				if (ft_give_terminal_to(mypid))
-					ft_dprintf(STDERR_FILENO, "\non %s at %s:%d\n", __func__, __FILE__, __LINE__);
+					ft_dprintf(STDERR_FILENO, "on %s at %s:%d\n",
+							   __func__, __FILE__, __LINE__);
 				status = ft_run_other(cmd, level + 1);
 				if (g_received_signal_num)
 				{
@@ -234,17 +223,19 @@ int ft_sh_execute_command(t_ast_node *cmd, int level)
 					printf("\n");
 				}
 				if (ft_give_terminal_to(original_pgrp))
-					ft_dprintf(STDERR_FILENO, "\non %s at %s:%d\n", __func__, __FILE__, __LINE__);
+					ft_dprintf(STDERR_FILENO, "on %s at %s:%d\n",
+							   __func__, __FILE__, __LINE__);
 				exit(status);
 			}
 			else if (fork_pid < 0)
-				return (perror("minishell: error forking"), EX_MISCERROR);
+				return (ft_perrorf("minishell: error"), EX_MISCERROR);
 			else
 			{
 				status = ft_decode_wstatus(ft_wait_for_pid(&wstatus, fork_pid));
 				if (ft_getpid() != ft_tcgetpgrp(SHELL_TTY_FILENO))
 					if (ft_give_terminal_to(ft_getpid()))
-						ft_dprintf(STDERR_FILENO, "\non %s at %s:%d\n", __func__, __FILE__, __LINE__);
+						ft_dprintf(STDERR_FILENO, "on %s at %s:%d\n",
+								   __func__, __FILE__, __LINE__);
 			}
 		}
 		else

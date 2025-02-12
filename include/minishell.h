@@ -180,11 +180,11 @@ void		ft_reset_sighandlers(t_ctx *ctx);
 void		ft_set_signal_handlers(t_ctx *ctx);
 int			ft_init_term(t_ctx *ctx);
 void		*global_ctx(void *val, t_get_or_set flag);
-int ft_shell_handle_redirect(t_wrd *wrd, int fd_redir,
-							 t_ctx *ctx, t_dir d);
+int			ft_shell_handle_redirect(t_wrd *wrd, int fd_redir,
+				t_ctx *ctx, t_dir d);
 void		remove_non_compliant_chars(char *buf, int buf_size);
 void		ft_chdir_update_env_vars(t_ctx *ctx, char *oldpwd);
-int ft_handle_redirects(t_cmd_node *cmd);
+int			ft_handle_redirects(t_cmd_node *cmd);
 int			ft_sh_is_legal_identifier(const char *name);
 int			unlink_herefiles(t_ctx *ctx);
 char		*heredoc_line_loop(char *l, t_hd_entry *en, t_ctx *ctx, int fd);
@@ -238,15 +238,14 @@ int			ft_getpid_c(void);
 int			create_here_file(t_wrd *here, t_hd_entry *entry, bool expand);
 
 void		ft_cleanup_argv(t_ctx *ctx);
-void		ft_cleanup_envp(char **envp);
 int			ft_sh_execute_command(t_ast_node *cmd, int level);
-
+int			ft_run_builtin(t_cmd_node *cmd, t_ctx *ctx);
 void		ft_sh_init_welcome(void);
 
 /* Utils */
 char		*ft_get_word(t_wrd *wrd, t_ctx *ctx);
 char		**ft_get_argv(t_cmd_node *cmd, int *size, t_ctx *ctx);
-int ft_sh_lookup_pathname(t_ctx *ctx, t_cmd_node *cmd);
+int			ft_sh_lookup_pathname(t_ctx *ctx, t_cmd_node *cmd);
 
 enum
 {

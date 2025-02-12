@@ -27,9 +27,11 @@ int	ft_chdir(t_ctx *ctx)
 	char		*oldpwd;
 
 	if (ctx->argc > 2)
-		return ((void) ft_dprintf(STDERR_FILENO,
-				"minishell: cd: too many arguments\n"), EXECUTION_FAILURE);
-	else if (ft_strlen(ctx->argv[1]))
+	{
+		errno = E2BIG;
+		return (ft_perrorf("minishell: cd"), EXECUTION_FAILURE);
+	}
+	else if (ctx->argc == 2 && ft_strlen(ctx->argv[1]))
 		ft_strncpy((char *) path, ctx->argv[1], PATH_MAX);
 	else
 	{
@@ -38,7 +40,7 @@ int	ft_chdir(t_ctx *ctx)
 			ft_strncpy((char *) path, home, PATH_MAX);
 		else
 			return ((void) ft_dprintf(STDERR_FILENO,
-					"minish: cd: HOME not set\n"), EXECUTION_FAILURE);
+									  "minish: cd: HOME not set\n"), EXECUTION_FAILURE);
 	}
 	oldpwd = getcwd(NULL, 0);
 	if (chdir(path) != 0)

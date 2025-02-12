@@ -155,11 +155,9 @@ int	main(int argc, char **argv, char **envp)
 		global->envp = envp;
 		exitcode = ft_sh_loop(global);
 		if (ft_give_terminal_to(global->parent_tpgrp))
-		{
-			fflush(stderr);
-			ft_dprintf(2, "\non %s at %s:%d\n", __func__, __FILE__, __LINE__);
-		}
-		ft_sh_destroy_ctx(global);
+			ft_dprintf(2, "\non %s at %s:%d\n",
+					   __func__, __FILE__, __LINE__);
+		ft_exit_with_exitcode(global);
 	}
 	else
 		ft_sh_init_noninteractive(&global, envp);
