@@ -19,7 +19,7 @@ int	ft_sh_init_term(t_ctx *ctx)
 
 	retaval = 0;
 	if (mypid != ft_getpgrp() && ft_setpgid(0, mypid) < 0)
-		ft_perrorf("minishell: ft_setpgid (%d to %d)", mypid, 0);
+		ft_perrorf("%s: ft_setpgid (%d to %d)", ctx->cmd_name, mypid, 0);
 	ctx->parent_tpgrp = ft_tcgetpgrp(STDIN_FILENO);
 	dup2(STDIN_FILENO, SHELL_TTY_FILENO);
 	if (ctx->parent_tpgrp == (-1))

@@ -37,7 +37,7 @@ char	**ft_get_argv(t_cmd_node *cmd, int *size, t_ctx *ctx)
 	argv = ft_calloc(ft_sh_psize(cmd->args) + 1, sizeof(char *));
 	if (!argv)
 	{
-		ft_perrorf("minishell: Error allocating argv.");
+		ft_perrorf("%s: Error allocating argv.", ctx->cmd_name);
 		exit((ft_sh_destroy_ctx(ctx), EX_SHELL_EXIT));
 	}
 	argc = 0;

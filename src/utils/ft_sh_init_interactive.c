@@ -30,6 +30,7 @@ int	ft_sh_init_interactive(t_ctx **ctx, char **envp)
 	new->ps0 = RL_RESET"";
 	new->ps1 = RL_RESET"[%d]"RL_GREEN"%s"RL_RESET"@"RL_BLUE"%s"RL_RESET"-> ";
 	new->ps2 = RL_RESET"> ";
+	new->cmd_name = getenv("_");
 	new->last_status_code = 0;
 	ft_sh_init_builtin_ops(&new->ops);
 	ft_sh_parse_env_map(&new->env_map, envp);

@@ -84,6 +84,7 @@ typedef struct s_exec_ctx
 	char			pathname[PATH_MAX];
 	t_obj_arr		*ops;
 	t_here_arr		hd;
+	const char		*cmd_name;
 	int				last_status_code;
 	pid_t			parent_tpgrp;
 	int				received_signal_num;

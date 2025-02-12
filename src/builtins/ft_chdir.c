@@ -45,7 +45,7 @@ int	ft_chdir(t_ctx *ctx)
 	if (ctx->argc > 2)
 	{
 		errno = E2BIG;
-		return (ft_perrorf("minishell: cd"), EXECUTION_FAILURE);
+		return (ft_perrorf("%s: cd", ctx->cmd_name), EXECUTION_FAILURE);
 	}
 	else if (ctx->argc == 2 && ft_strlen(ctx->argv[1]))
 		ft_strncpy((char *) path, ctx->argv[1], PATH_MAX);

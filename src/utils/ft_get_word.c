@@ -50,8 +50,8 @@ char	*ft_get_word(t_wrd *wrd, t_ctx *ctx)
 			substring = ft_sh_do_expansion(wrd->value, ctx);
 		sublen = (int)ft_strlen(substring);
 		if (!ft_do_realloc(&string, slen, sublen))
-			return (ft_perrorf(
-					"minishell: %s", "Error allocating word string."), NULL);
+			return (ft_perrorf("%s: %s", ctx->cmd_name,
+					"Error allocating word string."), NULL);
 		string[slen] = '\0';
 		ft_strlcat(string, substring, slen + sublen + 1);
 		slen += sublen;

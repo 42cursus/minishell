@@ -27,7 +27,7 @@ LINK_FLAGS		:= -L $(LIBFT_DIR) -lft -L/usr/lib/x86_64-linux-gnu \
 
 SRC_DIR			= src
 
-SH_DIRS			= builtins error exec parser utils
+SH_DIRS			= builtins exec parser utils
 SH_SRCS	 		:=
 
 ifndef VERBOSE

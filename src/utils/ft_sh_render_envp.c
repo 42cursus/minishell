@@ -30,7 +30,8 @@ char	**ft_sh_render_envp(t_ctx *ctx)
 	{
 		var = map.base + (i * map.elem_size);
 		if (var->v)
-			new[j++] = ft_tab_str_join((const char *[2]){var->k, var->v}, 2, "=");
+			new[j++] = ft_tab_str_join(
+					(const char *[2]){var->k, var->v}, 2, "=");
 	}
 	new[j] = NULL;
 	return (new);

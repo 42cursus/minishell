@@ -85,7 +85,7 @@ static int	ft_run_on_pipe(t_ast_node *left, t_ast_node *right, int level)
 
 	wstatus = 0;
 	if (pipe(fd) < 0)
-		exit((ft_perrorf("minishell: pipe"), EXIT_FAILURE));
+		exit((ft_perrorf("%s: pipe", left->ctx->cmd_name), EXIT_FAILURE));
 	pid_cmd1 = fork();
 	if (pid_cmd1 == 0)
 		ft_sh_run_forked(left, level, fd, STDOUT_FILENO);
@@ -205,7 +205,7 @@ int	ft_sh_execute_command(t_ast_node *cmd, int level)
 				exit(status);
 			}
 			else if (fork_pid < 0)
-				return (ft_perrorf("minishell: error"), EX_MISCERROR);
+				return (ft_perrorf("%s: error", cmd->ctx->cmd_name), EX_MISCERROR);
 			else
 			{
 				status = ft_decode_wstatus(ft_wait_for_pid(&wstatus, fork_pid));

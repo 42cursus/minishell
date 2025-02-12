@@ -297,7 +297,6 @@ int			ft_unset(t_ctx *ctx);
 
 /* ---------- UTILS -------------------- */
 
-int			ft_handle_err(t_error err);
 void		ft_perrorf(const char *fmt, ...);
 char		*ft_sh_read_line(t_ctx *ctx, t_prompt_type type);
 int			ft_sh_init_interactive(t_ctx **ctx, char **envp);

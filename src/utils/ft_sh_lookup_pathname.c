@@ -43,7 +43,7 @@ int	ft_sh_lookup_pathname(t_ctx *ctx, t_cmd_node *cmd)
 	else if (ft_sh_env_map_get_val("PATH", ctx))
 		errcode = ft_sh_do_lookup(ctx, argv_zero, errcode);
 	if ((errcode == -1 && errno == ENOENT))
-		ft_perrorf("minishell: %s", argv_zero);
+		ft_perrorf("%s: %s", ctx->cmd_name, argv_zero);
 	free(argv_zero);
 	return (errcode);
 }

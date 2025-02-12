@@ -23,8 +23,8 @@ char	*get_working_directory(t_ctx *ctx)
 		cwd = getcwd(NULL, 0);
 		if (!cwd)
 		{
-			ft_perrorf("minishell: error retrieving current directory:"
-					   " %s", getcwd_errstr);
+			ft_perrorf("%s: error retrieving current directory: %s",
+				ctx->cmd_name, getcwd_errstr);
 			cwd = ft_strdup("");
 		}
 	}
@@ -36,7 +36,7 @@ char	*get_working_directory(t_ctx *ctx)
 int	ft_pwd(t_ctx *ctx)
 {
 	char	*cwd;
-	int 	retval;
+	int		retval;
 
 	retval = EX_OK;
 	cwd = get_working_directory(ctx);

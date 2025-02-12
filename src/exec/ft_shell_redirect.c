@@ -29,7 +29,7 @@ int	ft_shell_handle_redirect(t_wrd *wrd, int fd_redir, t_ctx *ctx, t_dir d)
 		fd = open(word, flags, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 		if (fd < 0)
 		{
-			ft_perrorf("minishell: %s", word);
+			ft_perrorf("%s: %s", ctx->cmd_name, word);
 			return (free((void *) word), EXECUTION_FAILURE);
 		}
 		free((void *) word);

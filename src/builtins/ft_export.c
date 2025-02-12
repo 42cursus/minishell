@@ -12,6 +12,12 @@
 
 #include "minishell.h"
 
+/**
+ * below line 42 (2) is used for STDERR_FILENO and (1) for EXECUTION_FAILURE
+ * 	due to norminette
+ * @param ctx
+ * @return
+ */
 int	ft_export(t_ctx *ctx)
 {
 	char			*name;
@@ -35,8 +41,8 @@ int	ft_export(t_ctx *ctx)
 			ft_sh_env_map_bind_var(*var, ctx);
 		}
 		else
-			retval = (ft_dprintf(STDERR_FILENO, "minishell: export: `%s':"
-						" not a valid identifier\n", name), EXECUTION_FAILURE);
+			retval = (ft_dprintf(2, "%s: export: `%s': not a valid"
+						" identifier\n", ctx->cmd_name, name), 1);
 	}
 	return (retval);
 }

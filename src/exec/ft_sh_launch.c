@@ -29,7 +29,7 @@ int	exec_disc_command(t_cmd_node *cmd, t_ctx *ctx)
 		{
 			if (errno == EACCES)
 				status = EX_NOEXEC;
-			ft_perrorf("minishell: %s", ctx->pathname);
+			ft_perrorf("%s: %s", ctx->cmd_name, ctx->pathname);
 		}
 		ft_cleanup_argv(ctx);
 	}
@@ -87,6 +87,7 @@ int	ft_run_disc_command(t_cmd_node *cmd, t_ctx *ctx)
 	pid_t		pid;
 	int			status;
 	int			wstatus;
+	const char	*cm = ctx->cmd_name;
 
 	status = EX_NOTFOUND;
 	if (cmd && !ft_sh_lookup_pathname(ctx, cmd))
@@ -97,7 +98,7 @@ int	ft_run_disc_command(t_cmd_node *cmd, t_ctx *ctx)
 			if (pid == 0)
 				ft_exec_with_sig_block(cmd, ctx);
 			else if (pid < 0)
-				status = (perror("minishell: error forking"), EX_SHELL_EXIT);
+				status = (ft_perrorf("%s: error forking", cm), EX_SHELL_EXIT);
 			else
 				status = (ft_decode_wstatus(ft_wait_for_pid(&wstatus, pid)));
 		}

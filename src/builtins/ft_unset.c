@@ -41,9 +41,10 @@ int	ft_sh_is_legal_identifier(const char *name)
 
 int	ft_unset(t_ctx *ctx)
 {
-	int		i;
-	int		retval;
-	char	*name;
+	int			i;
+	int			retval;
+	char		*name;
+	const char	*cm = ctx->cmd_name;
 
 	i = 0;
 	retval = 0;
@@ -55,7 +56,7 @@ int	ft_unset(t_ctx *ctx)
 		else
 		{
 			ft_dprintf(STDERR_FILENO,
-				"minishell: unset: `%s': not a valid identifier\n", name);
+				"%s: unset: `%s': not a valid identifier\n", cm, name);
 			retval = EXECUTION_FAILURE;
 		}
 	}

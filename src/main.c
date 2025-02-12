@@ -160,7 +160,7 @@ int	main(int argc, char **argv, char **envp)
 		global->envp = envp;
 		exitcode = ft_sh_loop(global);
 		if (ft_sh_give_terminal_to(global->parent_tpgrp))
-			ft_perrorf("minishell: couldn't allocate terminal");
+			ft_perrorf("%s: couldn't allocate terminal", global->cmd_name);
 		ft_exit_with_exitcode(global);
 	}
 	else
