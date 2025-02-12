@@ -17,7 +17,7 @@
  *
  * https://stackoverflow.com/questions/53165704/
  */
-static void	ft_sh_sigint_handler(int sig, siginfo_t *info, void *ctx)
+void	ft_sh_sigint_handler(int sig, siginfo_t *info, void *ctx)
 {
 	if (sig == SIGINT)
 		g_received_signal_num = SIGINT;
@@ -26,7 +26,7 @@ static void	ft_sh_sigint_handler(int sig, siginfo_t *info, void *ctx)
 	(void)info;
 }
 
-static t_obj_arr *ft_sh_init_builtin_ops(t_obj_arr **ops)
+t_obj_arr	*ft_sh_init_builtin_ops(t_obj_arr **ops)
 {
 	static t_obj_arr	obj;
 	static t_shell_op	builtins[] = {
@@ -62,11 +62,11 @@ void ft_reset_sighandlers(t_ctx *ctx)
 	i = -1;
 	while(++i < (int)(sizeof((*signals)) / sizeof((*signals)[0])))
 	{
-		if (sigaction((int)(*signals)[i],
-					  &ctx->old_act[(int)(*signals)[i]], NULL))
+		if (sigaction((int) (*signals)[i],
+					  &ctx->old_act[(int) (*signals)[i]], NULL))
 		{
-			ft_sh_destroy_ctx(ctx);
-			exit(EXIT_FAILURE);
+			ctx->last_status_code = EXIT_FAILURE;
+			exit(ft_sh_destroy_ctx(ctx));
 		}
 	}
 }
@@ -95,8 +95,8 @@ void	ft_set_signal_handlers(t_ctx *const ctx)
 		if (sigaction((int)(*signals)[i], &ctx->act[(int)(*signals)[i]],
 					  &ctx->old_act[(int)(*signals)[i]]))
 		{
-			ft_sh_destroy_ctx(ctx);
-			exit(EXIT_FAILURE);
+			ctx->last_status_code = EXIT_FAILURE;
+			exit(ft_sh_destroy_ctx(ctx));
 		}
 	}
 }

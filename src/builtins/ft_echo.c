@@ -15,15 +15,16 @@
 int	ft_echo(t_ctx *ctx)
 {
 	int	i;
+	int	newline_opt;
 
-	//TODO: implement -n option
 	i = 1;
-	ft_putstr_fd(ctx->argv[i], STDOUT_FILENO);
+	newline_opt = 0;
+	if (ctx->argv[i] && !ft_strncmp(ctx->argv[i], "-n", 2) && i++)
+		newline_opt = 1;
+	ft_printf("%s", ctx->argv[i]);
 	while (++i < ctx->argc)
-	{
-		ft_putchar_fd(' ', STDOUT_FILENO);
-		ft_putstr_fd(ctx->argv[i], STDOUT_FILENO);
-	}
-	ft_putchar_fd('\n', STDOUT_FILENO);
+		ft_printf(" %s", ctx->argv[i]);
+	if (!newline_opt)
+		ft_printf("\n");
 	return (0);
 }

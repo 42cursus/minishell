@@ -16,6 +16,6 @@ FILES   = ft_chdir.c \
 			ft_exit.c \
 			ft_export.c \
 			ft_pwd.c \
-			ft_unset.c 
+			ft_unset.c
 
 SH_SRCS    += $(FILES:%.c=$(dir $(lastword $(MAKEFILE_LIST)))%.c)

@@ -19,10 +19,11 @@ int	ft_handle_err(t_error err)
 	if (err.assertion)
 	{
 		ft_snprintf(buf, PATH_MAX,
-			"minishell: %s ", err.description);
+			"minishell: %s \n", err.description);
 		perror(buf);
 		ft_dprintf(STDERR_FILENO,
-			"on %s at %s:%d", err.file, err.line, err.func);
+			"on %s at %s:%d\n", err.func, err.file, err.line);
+		return (-1);
 	}
 	return (0);
 }

@@ -24,11 +24,10 @@ int	ft_sh_is_legal_identifier(const char *name)
 	const char		*s;
 	unsigned char	c;
 
-	//TODO: check for not a valid identifier
 	if (!name)
 		return (0);
 	c = *name;
-	if (!c || ((ft_isalnum(c) || (c == '_')) == 0))
+	if (!c || ((ft_isalpha(c) || (c == '_')) == 0))
 		return (0);
 	s = name + 1;
 	while (*s != 0)
@@ -44,21 +43,20 @@ int	ft_unset(t_ctx *ctx)
 {
 	int		i;
 	int		retval;
-	char	*str;
+	char	*name;
 
 	i = 0;
+	retval = 0;
 	while (++i < ctx->argc)
 	{
-		str = ctx->argv[i];
-		if (ft_sh_is_legal_identifier(str))
-		{
-			ft_sh_env_map_unbind_var((t_sh_var) {.k = str}, ctx);
-			retval = 0;
-		}
+		name = ctx->argv[i];
+		if (ft_sh_is_legal_identifier(name))
+			ft_sh_env_map_unbind_var((t_sh_var){.k = name}, ctx);
 		else
 		{
-			perror("not a valid identifier");
-			retval = -1;
+			ft_dprintf(STDERR_FILENO,
+				"minishell: unset: `%s': not a valid identifier\n", name);
+			retval = EXECUTION_FAILURE;
 		}
 	}
 	return (retval);

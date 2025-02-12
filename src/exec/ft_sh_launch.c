@@ -18,33 +18,43 @@ static int exec_disc_command(t_cmd_node *cmd, t_ctx *ctx)
 	int status;
 	char **envp = ft_sh_render_envp(ctx);
 
-	status = EXECUTION_SUCCESS;
 	close(SHELL_TTY_FILENO);
 	ft_reset_sighandlers(ctx);
-	ft_handle_redirects(cmd);
-	ctx->argv = ft_get_argv(cmd, &ctx->argc, ctx);
-	status = execve(ctx->pathname, ctx->argv, envp);
-	if (status)
+	status = ft_handle_redirects(cmd);
+	if (!status)
 	{
-		if (errno == EACCES)
-			status = EX_NOEXEC;
-		ft_perrorf("minishell: %s", ctx->pathname);
+		ctx->argv = ft_get_argv(cmd, &ctx->argc, ctx);
+		status = execve(ctx->pathname, ctx->argv, envp);
+		if (status)
+		{
+			if (errno == EACCES)
+				status = EX_NOEXEC;
+			ft_perrorf("minishell: %s", ctx->pathname);
+		}
+		ft_cleanup_argv(ctx);
 	}
 	ft_cleanup_envp(envp);
-	ft_cleanup_argv(ctx);
 	return (status);
 }
 
-void	ft_handle_redirects(t_cmd_node *cmd)
+int	ft_handle_redirects(t_cmd_node *cmd)
 {
+	int err_code;
+
+	err_code = EX_OK;
 	if (cmd && cmd->redirects_in)
-		ft_shell_handle_redirect(cmd->redirects_in, STDIN_FILENO, cmd->ctx, IN);
-	if (cmd && cmd->redirects_out)
-		ft_shell_handle_redirect(cmd->redirects_out, STDOUT_FILENO, cmd->ctx, OUT);
-	if (cmd && cmd->redirects_err_in)
-		ft_shell_handle_redirect(cmd->redirects_err_in, STDERR_FILENO, cmd->ctx, IN);
-	if (cmd && cmd->redirects_err)
-		ft_shell_handle_redirect(cmd->redirects_err, STDERR_FILENO, cmd->ctx, OUT);
+		err_code = ft_shell_handle_redirect(cmd->redirects_in,
+					STDIN_FILENO, cmd->ctx, IN);
+	if (!err_code && cmd && cmd->redirects_out)
+		err_code = ft_shell_handle_redirect(cmd->redirects_out,
+					STDOUT_FILENO, cmd->ctx, OUT);
+	if (!err_code && cmd && cmd->redirects_err_in)
+		err_code = ft_shell_handle_redirect(cmd->redirects_err_in,
+					STDERR_FILENO, cmd->ctx, IN);
+	if (!err_code && cmd && cmd->redirects_err)
+		err_code = ft_shell_handle_redirect(cmd->redirects_err,
+					STDERR_FILENO, cmd->ctx, OUT);
+	return (err_code);
 }
 
 int	ft_run_disc_command(t_cmd_node *cmd, t_ctx *ctx)

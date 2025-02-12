@@ -29,6 +29,7 @@ int	ft_sh_env_map_bind_var(t_sh_var var, t_ctx *ctx)
 	found = ft_sh_env_map_get_entry(var.k, ctx);
 	if (found)
 	{
+		free((void *)found->v);
 		found->v = var.v;
 		found->attrs = var.attrs;
 		return (1);

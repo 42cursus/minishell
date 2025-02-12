@@ -169,6 +169,8 @@ typedef enum e_lombok
 	SET_VAL
 }	t_get_or_set;
 
+void		ft_sh_sigint_handler(int sig, siginfo_t *info, void *ctx);
+t_obj_arr	*ft_sh_init_builtin_ops(t_obj_arr **ops);
 int			add_random_numbers_to_str(char *str_buf, int rand_count);
 int			ft_wait_for_pid(int *wstatus, pid_t pid);
 int			ft_wait_for_pid_stop(int *wstatus, pid_t pid);
@@ -178,12 +180,11 @@ void		ft_reset_sighandlers(t_ctx *ctx);
 void		ft_set_signal_handlers(t_ctx *ctx);
 int			ft_init_term(t_ctx *ctx);
 void		*global_ctx(void *val, t_get_or_set flag);
-void		ft_shell_handle_redirect(t_wrd *wrd, int fd_redir,
-				t_ctx *ctx, t_dir d);
+int ft_shell_handle_redirect(t_wrd *wrd, int fd_redir,
+							 t_ctx *ctx, t_dir d);
 void		remove_non_compliant_chars(char *buf, int buf_size);
-void		ft_chdir_update_env_vars(t_ctx *ctx, char *oldpwd,
-				const char *path, char *cwd);
-void		ft_handle_redirects(t_cmd_node *cmd);
+void		ft_chdir_update_env_vars(t_ctx *ctx, char *oldpwd);
+int ft_handle_redirects(t_cmd_node *cmd);
 int			ft_sh_is_legal_identifier(const char *name);
 int			unlink_herefiles(t_ctx *ctx);
 char		*heredoc_line_loop(char *l, t_hd_entry *en, t_ctx *ctx, int fd);
@@ -217,6 +218,7 @@ void		create_wrd(t_wrd *word, t_token *token, t_token_type rt);
 t_ast_node	*pipeline_loop(t_lexer *lexer, t_ctx *ctx);
 void		parse_command_loop(int *tp, t_ctx *ctx, t_ast_node *cn, t_lexer *l);
 void		print_tokens(t_lexer *lexer);
+void		ft_print_arg_node(t_wrd *arguments);
 void		end_of_heredoc_check(t_lexer *lexer);
 void		ft_heredoc_file_lexing(int fd, char *line, bool quotes, t_ctx *ctx);
 int			herefile_varname(int i, char *var, char *line);
@@ -238,10 +240,6 @@ int			create_here_file(t_wrd *here, t_hd_entry *entry, bool expand);
 void		ft_cleanup_argv(t_ctx *ctx);
 void		ft_cleanup_envp(char **envp);
 int			ft_sh_execute_command(t_ast_node *cmd, int level);
-void		ft_shell_redirect_stdin(t_cmd_node *cmd);
-void		ft_shell_redirect_stdout(t_cmd_node *cmd);
-void		ft_shell_redirect_stderr(t_cmd_node *cmd);
-void		ft_shell_redirect_stderr_in(t_cmd_node *cmd);
 
 void		ft_sh_init_welcome(void);
 
@@ -263,7 +261,7 @@ enum
 typedef struct s_shell_var
 {
 	const char	*k;
-	const char	*v;
+	char		*v;
 	int			attrs;
 }	t_sh_var;
 

@@ -15,42 +15,28 @@
 void	print_ast(t_ast_node *node, int depth)
 {
 	int	i;
-	i = -1;
 
 	if (!node)
 		return;
+	i = -1;
 	while (++i < depth)
 		ft_printf("  ");
 	if (node->type == NODE_COMMAND)
-		printf("COMMAND: ");
+		ft_printf("COMMAND: ");
 	else if (node->type == NODE_PIPE)
-		printf("PIPE: ");
+		ft_printf("PIPE: ");
 	else if (node->type == NODE_OR)
-		printf("OR ||: ");
+		ft_printf("OR ||: ");
 	else if (node->type == NODE_AND)
-		printf("AND &&: ");
+		ft_printf("AND &&: ");
 	else if (node->type == NODE_DUMMY)
-		printf("DUMMY (): ");
-	if (node->type == NODE_COMMAND && node->cmd->args)
-	{
-		printf("%s", node->cmd->args->value);
-		if (node->cmd->args->expand == true)
-			printf(" - TO EXPAND");
-		t_wrd	*cont = node->cmd->args;
-		while (cont->next_part)
-		{
-			printf("; %s", cont->next_part->value ? cont->next_part->value : "NULL");
-			if (cont->next_part->expand == true)
-				printf(" - TO EXPAND");
-			cont = cont->next_part;
-		}
-	}
-	printf("\n");
+		ft_printf("DUMMY (): ");
 	if (node->type == NODE_COMMAND)
 	{
 		t_wrd *arg = node->cmd->args;
-		if (arg && arg->next_word)
+		if (arg)
 		{
+			ft_print_arg_node(node->cmd->args);
 			i = -1;
 			while (++i < depth + 1)
 				ft_printf("  ");

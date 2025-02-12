@@ -14,12 +14,16 @@
 
 int	ft_pwd(t_ctx *ctx)
 {
-	char	cwd[PATH_MAX];
+	char	*cwd;
 
-	if (getcwd(cwd, PATH_MAX) != NULL)
+	cwd = getcwd(NULL, 0);
+	if (cwd)
+	{
 		ft_putendl_fd(cwd, STDOUT_FILENO);
+		free(cwd);
+	}
 	else
-		return (perror("getcwd error"), 1);
-	return (0);
+		return (ft_perrorf("minishell: getcwd error"), EXECUTION_FAILURE);
+	return (EX_OK);
 	(void)ctx;
 }

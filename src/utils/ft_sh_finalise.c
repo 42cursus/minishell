@@ -20,6 +20,7 @@
 int	ft_sh_destroy_ctx(t_ctx *ctx)
 {
 	int			i;
+	int			exitcode;
 	t_sh_var	*var;
 
 	i = -1;
@@ -35,6 +36,7 @@ int	ft_sh_destroy_ctx(t_ctx *ctx)
 	}
 	free(ctx->env_map.base);
 	ft_cleanup_argv(ctx);
+	exitcode = ctx->last_status_code;
 	free(ctx);
-	return (0);
+	return (exitcode);
 }

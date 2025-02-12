@@ -12,7 +12,7 @@
 
 #include "minishell.h"
 
-void ft_shell_handle_redirect(t_wrd *wrd, int fd_redir, t_ctx *ctx, t_dir d)
+int ft_shell_handle_redirect(t_wrd *wrd, int fd_redir, t_ctx *ctx, t_dir d)
 {
 	char		path[MAX_PATH_LEN];
 	const char	*word = NULL;
@@ -20,7 +20,7 @@ void ft_shell_handle_redirect(t_wrd *wrd, int fd_redir, t_ctx *ctx, t_dir d)
 	int			fd;
 
 	if (!wrd)
-		return ;
+		return (EXECUTION_FAILURE);
 	while (wrd)
 	{
 		flags = O_RDONLY;
@@ -32,7 +32,7 @@ void ft_shell_handle_redirect(t_wrd *wrd, int fd_redir, t_ctx *ctx, t_dir d)
 		if (ft_handle_err((t_error) {
 			.assertion = (fd < 0 && errno == ENOENT), .description = word,
 			.func = __func__, .line = __LINE__, .file = __FILE__}))
-			return (free((void *) word));
+			return (free((void *) word), EXECUTION_FAILURE);
 		free((void *) word);
 		if (wrd->next_word)
 			close(fd);
@@ -40,4 +40,5 @@ void ft_shell_handle_redirect(t_wrd *wrd, int fd_redir, t_ctx *ctx, t_dir d)
 	}
 	dup2(fd, fd_redir);
 	close(fd);
+	return (EX_OK);
 }

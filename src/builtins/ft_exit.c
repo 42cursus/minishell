@@ -18,4 +18,3 @@ int	ft_exit_with_exitcode(t_ctx *ctx)
 	return (0);
 	(void)ctx;
 }
-

@@ -17,18 +17,17 @@ int	ft_export(t_ctx *ctx)
 	char		*str;
 	char		*sptr;
 	t_sh_var	var;
-	int 		i;
+	int			i;
 
-	//TODO: check for not a valid identifier
 	if (ctx->argc == 1)
 		return (ft_env(ctx));
 	var = (t_sh_var){.k = NULL, .v = NULL};
-
 	i = 0;
 	while (++i < ctx->argc)
 	{
 		str = ctx->argv[i];
-		var.k = ft_strtok_r(str, "=", &sptr);
+		//TODO: check for not a valid identifier
+		var.k = ft_strdup(ft_strtok_r(str, "=", &sptr));
 		if (sptr != NULL)
 			var.v = ft_strdup(sptr);
 		var.attrs = ATT_EXPORTED;
