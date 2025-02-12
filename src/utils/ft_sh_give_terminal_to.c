@@ -13,11 +13,11 @@
 #include "minishell.h"
 
 /* Give the terminal to PGRP.  */
-int	ft_give_terminal_to(pid_t pgrp)
+int	ft_sh_give_terminal_to(pid_t pgrp)
 {
 	sigset_t	set;
 	sigset_t	oset;
-	int			*retval = (int[1]){0};
+	int *const	retval = (int [1]){0};
 
 	sigemptyset(&set);
 	sigaddset(&set, SIGTTOU);
@@ -26,12 +26,11 @@ int	ft_give_terminal_to(pid_t pgrp)
 	sigaddset(&set, SIGCHLD);
 	sigemptyset(&oset);
 	ft_sigprocmask(SIG_BLOCK, &set, &oset);
-
 	if (ft_tcsetpgrp(SHELL_TTY_FILENO, pgrp) < 0)
 	{
 		ft_dprintf(STDERR_FILENO,
-				   "ft_tcsetpgrp(%d) failed: pid %d to pgrp %d\n",
-				   SHELL_TTY_FILENO, (long) ft_getpid(), pgrp);
+			"ft_tcsetpgrp(%d) failed: pid %d to pgrp %d\n",
+			SHELL_TTY_FILENO, (long) ft_getpid(), pgrp);
 		*retval = (-1);
 	}
 	ft_sigprocmask(SIG_SETMASK, &oset, (sigset_t *) NULL);

@@ -20,10 +20,26 @@ void	ft_chdir_update_env_vars(t_ctx *ctx, char *oldpwd)
 		(t_sh_var){.k = ft_strdup("OLDPWD"), .v = oldpwd}, ctx);
 }
 
+static int	ft_sh_cd_get_home(t_ctx *ctx, const char *path)
+{
+	char	*home;
+	int		retval;
+
+	retval = 0;
+	home = ft_sh_env_map_get_val("HOME", ctx);
+	if (home)
+		ft_strncpy((char *) path, home, PATH_MAX);
+	else
+	{
+		retval = -1;
+		ft_dprintf(STDERR_FILENO, "minish: cd: HOME not set\n");
+	}
+	return (retval);
+}
+
 int	ft_chdir(t_ctx *ctx)
 {
 	char		path[PATH_MAX];
-	char		*home;
 	char		*oldpwd;
 
 	if (ctx->argc > 2)
@@ -35,12 +51,8 @@ int	ft_chdir(t_ctx *ctx)
 		ft_strncpy((char *) path, ctx->argv[1], PATH_MAX);
 	else
 	{
-		home = ft_sh_env_map_get_val("HOME", ctx);
-		if (home)
-			ft_strncpy((char *) path, home, PATH_MAX);
-		else
-			return ((void) ft_dprintf(STDERR_FILENO,
-					"minish: cd: HOME not set\n"), EXECUTION_FAILURE);
+		if (ft_sh_cd_get_home(ctx, path))
+			return (EXECUTION_FAILURE);
 	}
 	oldpwd = getcwd(NULL, 0);
 	if (chdir(path) != 0)

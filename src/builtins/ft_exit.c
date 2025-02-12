@@ -12,11 +12,25 @@
 
 #include "minishell.h"
 
-int	ft_exit_with_exitcode(t_ctx *ctx)
+static int	ft_sh_exit_get_val(const t_ctx *ctx)
 {
 	int		retval;
 	long	val;
 	char	*endptr;
+
+	val = ft_strtol(ctx->argv[1], &endptr, 10);
+	if (!(errno == ERANGE && (val == LONG_MAX || val == LONG_MIN))
+		&& !(errno != 0 && val == 0))
+		retval = (int) val % 256;
+	else
+		retval = (ft_dprintf(STDERR_FILENO, "minishell: exit: `%s':"
+					" numeric argument required\n", ctx->argv[1]), EX_BADUSAGE);
+	return (retval);
+}
+
+int	ft_exit_with_exitcode(t_ctx *ctx)
+{
+	int		retval;
 
 	retval = EX_OK;
 	ft_printf("exit\n");
@@ -27,15 +41,7 @@ int	ft_exit_with_exitcode(t_ctx *ctx)
 		retval = EXIT_FAILURE;
 	}
 	else if (ctx->argc == 2)
-	{
-		val = ft_strtol(ctx->argv[1], &endptr, 10);
-		if (!(errno == ERANGE && (val == LONG_MAX || val == LONG_MIN))
-			&& !(errno != 0 && val == 0))
-			retval = (int) val % 256;
-		else
-			retval = (ft_dprintf(STDERR_FILENO, "minishell: exit: `%s':"
-						" numeric argument required\n", ctx->argv[1]), EX_BADUSAGE);
-	}
+		retval = ft_sh_exit_get_val(ctx);
 	else
 		retval = ctx->last_status_code;
 	ft_cleanup_argv(ctx);

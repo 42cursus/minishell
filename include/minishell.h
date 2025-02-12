@@ -178,7 +178,7 @@ int			ft_decode_wstatus(int wstatus);
 int			ft_is_builtin(t_cmd_node *cmd, t_ctx *ctx);
 void		ft_reset_sighandlers(t_ctx *ctx);
 void		ft_set_signal_handlers(t_ctx *ctx);
-int			ft_init_term(t_ctx *ctx);
+int			ft_sh_init_term(t_ctx *ctx);
 void		*global_ctx(void *val, t_get_or_set flag);
 int			ft_shell_handle_redirect(t_wrd *wrd, int fd_redir,
 				t_ctx *ctx, t_dir d);
@@ -224,7 +224,7 @@ void		ft_heredoc_file_lexing(int fd, char *line, bool quotes, t_ctx *ctx);
 int			herefile_varname(int i, char *var, char *line);
 void		herefile_expansion(int fd, const char *varname, t_ctx *ctx);
 t_state		create_pid_token(t_lexer *lexer, t_ctx *ctx);
-int			ft_give_terminal_to(pid_t pgrp);
+int			ft_sh_give_terminal_to(pid_t pgrp);
 pid_t		ft_tcgetpgrp(int fd);
 int			ft_tcsetpgrp(int fd, pid_t pgrp);
 int			here_doc_cat(t_wrd *here, t_lexer *l);

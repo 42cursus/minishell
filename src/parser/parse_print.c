@@ -43,7 +43,7 @@ void	print_tokens(t_lexer *lexer)
 	int				i;
 	t_token			*tok;
 	const char		*type;
-	t_token			*const (*toks)[MAX_TOKENS] = &(lexer->tok.t);
+	t_token	*const	(*toks)[MAX_TOKENS] = &(lexer->tok.t);
 
 	ft_printf("\n\nTokens:\n");
 	i = -1;

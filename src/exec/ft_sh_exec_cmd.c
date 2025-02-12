@@ -190,7 +190,7 @@ int	ft_sh_execute_command(t_ast_node *cmd, int level)
 					ft_dprintf(STDERR_FILENO,
 						"leader setpgid (%d to %d)\n", mypid, 0);
 				original_pgrp = ft_tcgetpgrp(SHELL_TTY_FILENO);
-				if (ft_give_terminal_to(mypid))
+				if (ft_sh_give_terminal_to(mypid))
 					ft_dprintf(STDERR_FILENO, "on %s at %s:%d\n",
 						__func__, __FILE__, __LINE__);
 				status = ft_run_other(cmd, level + 1);
@@ -200,7 +200,7 @@ int	ft_sh_execute_command(t_ast_node *cmd, int level)
 					status = 128 + g_received_signal_num;
 					printf("\n");
 				}
-				if (ft_give_terminal_to(original_pgrp))
+				if (ft_sh_give_terminal_to(original_pgrp))
 					ft_dprintf(STDERR_FILENO, "on %s at %s:%d\n",
 						__func__, __FILE__, __LINE__);
 				exit(status);
@@ -211,7 +211,7 @@ int	ft_sh_execute_command(t_ast_node *cmd, int level)
 			{
 				status = ft_decode_wstatus(ft_wait_for_pid(&wstatus, fork_pid));
 				if (ft_getpid() != ft_tcgetpgrp(SHELL_TTY_FILENO))
-					if (ft_give_terminal_to(ft_getpid()))
+					if (ft_sh_give_terminal_to(ft_getpid()))
 						ft_dprintf(STDERR_FILENO, "on %s at %s:%d\n",
 							__func__, __FILE__, __LINE__);
 			}

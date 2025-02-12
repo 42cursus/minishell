@@ -94,11 +94,28 @@ static int	ft_sh_split_and_parse(const char *line,
 	return (errcode);
 }
 
+static void	ft_sh_parse_and_exec(t_ctx *ctx, const char *line, t_ast_node **ast)
+{
+	int	errcode;
+
+	add_history(line);
+	ft_memset(&ctx->hd, 0, sizeof(t_here_arr));
+	ctx->hd.size = HEREDOC_ARRAY_SIZE;
+	(*ast) = NULL;
+	errcode = ft_do_parse(line, ast, ctx);
+	if ((*ast) != NULL && !errcode && ft_sh_collect_heredocs(ctx))
+	{
+		print_ast((*ast), 0);
+		ctx->last_status_code = ft_sh_execute_command((*ast), 0);
+		free_ast((*ast));
+	}
+	unlink_herefiles(ctx);
+}
+
 static int	ft_sh_loop(t_ctx *ctx)
 {
 	char			*line;
 	t_ast_node		*ast;
-	int				errcode;
 
 	rl_event_hook = ft_readline_event_hook;
 	ft_sh_init_welcome();
@@ -107,24 +124,11 @@ static int	ft_sh_loop(t_ctx *ctx)
 	history_offset = history_length;
 	while (ctx->last_status_code != EX_SHELL_EXIT)
 	{
-		ast = NULL;
 		line = ft_sh_read_line(ctx, PS_REGULAR);
 		if (line)
 		{
 			if (*line != 0)
-			{
-				add_history(line);
-				ft_memset(&ctx->hd, 0, sizeof(t_here_arr));
-				ctx->hd.size = HEREDOC_ARRAY_SIZE;
-				errcode = ft_do_parse(line, &ast, ctx);
-				if (ast != NULL && !errcode && ft_sh_collect_heredocs(ctx))
-				{
-					print_ast(ast, 0);
-					ctx->last_status_code = ft_sh_execute_command(ast, 0);
-					free_ast(ast);
-				}
-				unlink_herefiles(ctx);
-			}
+				ft_sh_parse_and_exec(ctx, line, &ast);
 			free(line);
 		}
 		else
@@ -154,9 +158,8 @@ int	main(int argc, char **argv, char **envp)
 		global->argc = argc;
 		global->envp = envp;
 		exitcode = ft_sh_loop(global);
-		if (ft_give_terminal_to(global->parent_tpgrp))
-			ft_dprintf(2, "\non %s at %s:%d\n",
-					   __func__, __FILE__, __LINE__);
+		if (ft_sh_give_terminal_to(global->parent_tpgrp))
+			ft_perrorf("minishell: couldn't allocate terminal");
 		ft_exit_with_exitcode(global);
 	}
 	else
