@@ -55,6 +55,8 @@ int	ft_chdir(t_ctx *ctx)
 			return (EXECUTION_FAILURE);
 	}
 	oldpwd = getcwd(NULL, 0);
+	oldpwd = ft_sh_env_map_get_val("PWD", ctx);
+	oldpwd = ".";
 	if (chdir(path) != 0)
 		return (free(oldpwd),
 			ft_perrorf("minish: cd: %s", path), EXECUTION_FAILURE);

@@ -45,7 +45,10 @@ t_state	handle_in_single_quote(t_lexer *lexer)
 	end_of_heredoc_check(lexer);
 	if (lexer->line[lexer->line_iter] == '\'')
 	{
-		flush_buffer(lexer, T_WORD);
+		if (lexer->buf_index == 0)
+			create_token(T_WORD, "\0", lexer);
+		else
+			flush_buffer(lexer, T_WORD);
 		return (INITIAL);
 	}
 	lexer->buffer[lexer->buf_index++] = lexer->line[lexer->line_iter];
