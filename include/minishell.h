@@ -202,6 +202,7 @@ t_state		handle_check_append(t_lexer *lexer, int i, t_ctx *ctx);
 t_state		handle_check_here_doc(t_lexer *lexer, int i, t_ctx *ctx);
 t_state		handle_reading_whitespace(t_lexer *lexer, t_ctx *ctx);
 const char	*get_idstring(int token);
+char		*get_working_directory(t_ctx *ctx);
 void		free_tokens(t_lexer *lexer);
 void		parse_redirection(int *tp, t_ast_node *p, t_ctx *ctx, t_lexer *l);
 t_ast_node	*parse_command(t_token **t, int *tp, t_ctx *ctx, t_lexer *l);

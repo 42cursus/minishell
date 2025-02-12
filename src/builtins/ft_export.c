@@ -29,7 +29,7 @@ int	ft_export(t_ctx *ctx)
 		name = ft_strtok_r(ctx->argv[i], "=", &sptr);
 		if (ft_sh_is_legal_identifier(name))
 		{
-			var->k = ft_strdup(name);
+			var->k = name;
 			if (sptr != NULL)
 				var->v = ft_strdup(sptr);
 			ft_sh_env_map_bind_var(*var, ctx);

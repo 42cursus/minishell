@@ -68,7 +68,7 @@ void	ft_sh_run_forked(t_ast_node *cmd, int level, const int *fd, int fd_idx)
 
 	ft_sh_sig_block(NULL);
 	ft_reset_sighandlers(cmd->ctx);
-	dup2(fd[fd_idx], STDIN_FILENO);
+	dup2(fd[fd_idx], fd_idx);
 	close(fd[0]);
 	close(fd[1]);
 	statuscode = ft_sh_execute_command(cmd, level + 1);
@@ -88,10 +88,10 @@ static int	ft_run_on_pipe(t_ast_node *left, t_ast_node *right, int level)
 		exit((ft_perrorf("minishell: pipe"), EXIT_FAILURE));
 	pid_cmd1 = fork();
 	if (pid_cmd1 == 0)
-		ft_sh_run_forked(left, level, fd, 1);
+		ft_sh_run_forked(left, level, fd, STDOUT_FILENO);
 	pid_cmd2 = fork();
 	if (pid_cmd2 == 0)
-		ft_sh_run_forked(right, level, fd, 0);
+		ft_sh_run_forked(right, level, fd, STDIN_FILENO);
 	close(fd[0]);
 	close(fd[1]);
 	ft_wait_for_pid(&wstatus, pid_cmd1);
@@ -198,7 +198,6 @@ int	ft_sh_execute_command(t_ast_node *cmd, int level)
 				{
 					g_received_signal_num = 0;
 					status = 128 + g_received_signal_num;
-					printf("\n");
 				}
 				if (ft_sh_give_terminal_to(original_pgrp))
 					ft_dprintf(STDERR_FILENO, "on %s at %s:%d\n",

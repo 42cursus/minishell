@@ -29,9 +29,8 @@ int	ft_sh_env_map_bind_var(t_sh_var var, t_ctx *ctx)
 	found = ft_sh_env_map_get_entry(var.k, ctx);
 	if (found)
 	{
-		free((void *)found->k);
 		free((void *)found->v);
-		*found = var;
+		found->v = var.v;
 		return (1);
 	}
 	return (ft_sh_env_map_add_entry(var, ctx));

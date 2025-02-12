@@ -19,11 +19,17 @@ int	ft_echo(t_ctx *ctx)
 
 	i = 1;
 	newline_opt = 0;
-	if (ctx->argv[i] && !ft_strncmp(ctx->argv[i], "-n", 2) && i++)
-		newline_opt = 1;
-	ft_printf("%s", ctx->argv[i]);
-	while (++i < ctx->argc)
-		ft_printf(" %s", ctx->argv[i]);
+	if (ctx->argc > 1)
+	{
+		if (ctx->argv[i] && !ft_strncmp(ctx->argv[i], "-n", 2) && i++)
+			newline_opt = 1;
+	}
+	while (i < ctx->argc)
+	{
+		ft_printf("%s", ctx->argv[i]);
+		if (++i < ctx->argc)
+			ft_printf(" ");
+	}
 	if (!newline_opt)
 		ft_printf("\n");
 	return (0);

@@ -27,7 +27,9 @@ int	ft_sh_env_map_add_entry(t_sh_var var, t_ctx *ctx)
 	obj = &ctx->env_map;
 	new = ft_reallocarray(obj->base, obj->total_elems,
 			obj->total_elems + 1, obj->elem_size);
-	new[obj->total_elems] = var;
+	new[obj->total_elems].k = ft_strdup(var.k);
+	new[obj->total_elems].v = var.v;
+	new[obj->total_elems].attrs = var.attrs;
 	obj->base = new;
 	obj->total_elems++;
 	ft_qsort_obj(obj);

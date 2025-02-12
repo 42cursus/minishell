@@ -15,9 +15,9 @@
 void	ft_chdir_update_env_vars(t_ctx *ctx, char *oldpwd)
 {
 	ft_sh_env_map_bind_var(
-		(t_sh_var){.k = ft_strdup("PWD"), .v = getcwd(NULL, 0)}, ctx);
+		(t_sh_var){.k = "OLDPWD", .v = oldpwd}, ctx);
 	ft_sh_env_map_bind_var(
-		(t_sh_var){.k = ft_strdup("OLDPWD"), .v = oldpwd}, ctx);
+		(t_sh_var){.k = "PWD", .v = getcwd(NULL, 0)}, ctx);
 }
 
 static int	ft_sh_cd_get_home(t_ctx *ctx, const char *path)
@@ -54,9 +54,7 @@ int	ft_chdir(t_ctx *ctx)
 		if (ft_sh_cd_get_home(ctx, path))
 			return (EXECUTION_FAILURE);
 	}
-	oldpwd = getcwd(NULL, 0);
-	oldpwd = ft_sh_env_map_get_val("PWD", ctx);
-	oldpwd = ".";
+	oldpwd = get_working_directory(ctx);
 	if (chdir(path) != 0)
 		return (free(oldpwd),
 			ft_perrorf("minish: cd: %s", path), EXECUTION_FAILURE);

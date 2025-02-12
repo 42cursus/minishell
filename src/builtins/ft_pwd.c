@@ -12,18 +12,38 @@
 
 #include "minishell.h"
 
+char	*get_working_directory(t_ctx *ctx)
+{
+	const char	*cwd;
+	const char	*getcwd_errstr = "getcwd: cannot access parent directories";
+
+	cwd = ft_sh_env_map_get_val("PWD", ctx);
+	if (!cwd)
+	{
+		cwd = getcwd(NULL, 0);
+		if (!cwd)
+		{
+			ft_perrorf("minishell: error retrieving current directory:"
+					   " %s", getcwd_errstr);
+			cwd = ft_strdup("");
+		}
+	}
+	else
+		cwd = ft_strdup(cwd);
+	return ((char *)cwd);
+}
+
 int	ft_pwd(t_ctx *ctx)
 {
 	char	*cwd;
+	int 	retval;
 
-	cwd = getcwd(NULL, 0);
-	if (cwd)
-	{
-		ft_putendl_fd(cwd, STDOUT_FILENO);
-		free(cwd);
-	}
+	retval = EX_OK;
+	cwd = get_working_directory(ctx);
+	if (!errno)
+		ft_dprintf(STDERR_FILENO, "%s\n", cwd);
 	else
-		return (ft_perrorf("minishell: getcwd error"), EXECUTION_FAILURE);
-	return (EX_OK);
-	(void)ctx;
+		retval = EXECUTION_FAILURE;
+	free(cwd);
+	return (retval);
 }
