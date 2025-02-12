@@ -26,7 +26,8 @@ int	ft_do_parse(const char *line, t_ast_node **root, t_ctx *ctx)
 		*root = pipeline_loop(&lexer, ctx);
 		ctx->hd.size = ctx->hd.ss;
 		ctx->hd.ss = 0;
-		print_tokens(&lexer);
+		if (ft_sh_env_map_get_entry("DEBUG", ctx))
+			print_tokens(&lexer);
 	}
 	if (lexer.err != 0)
 		ec = handle_parser_err(lexer.err, &lexer);

@@ -17,7 +17,6 @@ int	ft_shell_handle_redirect(t_wrd *wrd, int fd_redir, t_ctx *ctx, t_dir d)
 	const char	*word = NULL;
 	int			flags;
 	int			fd;
-	t_error		err;
 
 	if (!wrd)
 		return (EXECUTION_FAILURE);
@@ -28,11 +27,11 @@ int	ft_shell_handle_redirect(t_wrd *wrd, int fd_redir, t_ctx *ctx, t_dir d)
 			flags = O_WRONLY | O_CREAT | wrd->redir_flag;
 		word = ft_get_word(wrd, ctx);
 		fd = open(word, flags, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
-		err = (t_error){
-			.assertion = (fd < 0 && errno == ENOENT), .description = word,
-			.func = __func__, .line = __LINE__, .file = __FILE__};
-		if (ft_handle_err(err))
+		if (fd < 0)
+		{
+			ft_perrorf("minishell: %s", word);
 			return (free((void *) word), EXECUTION_FAILURE);
+		}
 		free((void *) word);
 		if (wrd->next_word)
 			close(fd);

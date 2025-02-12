@@ -15,6 +15,7 @@
 char	**ft_sh_render_envp(t_ctx *ctx)
 {
 	ssize_t		i;
+	ssize_t		j;
 	t_obj_arr	map;
 	t_sh_var	*var;
 	char		**new;
@@ -24,11 +25,13 @@ char	**ft_sh_render_envp(t_ctx *ctx)
 	if (!new)
 		return (NULL);
 	i = -1;
+	j = 0;
 	while (++i < (int)map.total_elems)
 	{
 		var = map.base + (i * map.elem_size);
-		new[i] = ft_tab_str_join((const char *[2]){var->k, var->v}, 2, "=");
+		if (var->v)
+			new[j++] = ft_tab_str_join((const char *[2]){var->k, var->v}, 2, "=");
 	}
-	new[i] = NULL;
+	new[j] = NULL;
 	return (new);
 }

@@ -105,7 +105,8 @@ static void	ft_sh_parse_and_exec(t_ctx *ctx, const char *line, t_ast_node **ast)
 	errcode = ft_do_parse(line, ast, ctx);
 	if ((*ast) != NULL && !errcode && ft_sh_collect_heredocs(ctx))
 	{
-		print_ast((*ast), 0);
+		if (ft_sh_env_map_get_entry("DEBUG", ctx))
+			print_ast((*ast), 0);
 		ctx->last_status_code = ft_sh_execute_command((*ast), 0);
 		free_ast((*ast));
 	}

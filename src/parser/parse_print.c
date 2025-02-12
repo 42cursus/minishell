@@ -45,7 +45,7 @@ void	print_tokens(t_lexer *lexer)
 	const char		*type;
 	t_token	*const	(*toks)[MAX_TOKENS] = &(lexer->tok.t);
 
-	ft_printf("\n\nTokens:\n");
+	ft_printf("Tokens:\n");
 	i = -1;
 	while (++i < lexer->tok.tokens_size)
 	{
