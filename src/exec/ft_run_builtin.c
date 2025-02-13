@@ -43,7 +43,7 @@ int	ft_run_builtin(t_cmd_node *cmd, t_ctx *ctx)
 	fd[STDERR_FILENO] = dup(STDERR_FILENO);
 	ctx->argv = ft_get_argv(cmd, &ctx->argc, ctx);
 	op = ft_bsearch_obj((t_shell_op *)(&ctx->argv[0]), ctx->ops);
-	status = ft_handle_redirects(cmd);
+	status = ft_handle_redirects(cmd, ctx);
 	if (!status)
 		status = op->fun(ctx);
 	dup2(fd[STDIN_FILENO], STDIN_FILENO);

@@ -20,7 +20,7 @@ int	exec_disc_command(t_cmd_node *cmd, t_ctx *ctx)
 
 	close(SHELL_TTY_FILENO);
 	ft_reset_sighandlers(ctx);
-	status = ft_handle_redirects(cmd);
+	status = ft_handle_redirects(cmd, ctx);
 	if (!status)
 	{
 		ctx->argv = ft_get_argv(cmd, &ctx->argc, ctx);
@@ -37,23 +37,23 @@ int	exec_disc_command(t_cmd_node *cmd, t_ctx *ctx)
 	return (status);
 }
 
-int	ft_handle_redirects(t_cmd_node *cmd)
+int	ft_handle_redirects(t_cmd_node *cmd, t_ctx *ctx)
 {
 	int	err_code;
 
 	err_code = EX_OK;
 	if (cmd && cmd->redirects_in)
 		err_code = ft_shell_handle_redirect(cmd->redirects_in,
-				STDIN_FILENO, cmd->ctx, IN);
+				STDIN_FILENO, ctx, IN);
 	if (!err_code && cmd && cmd->redirects_out)
 		err_code = ft_shell_handle_redirect(cmd->redirects_out,
-				STDOUT_FILENO, cmd->ctx, OUT);
+				STDOUT_FILENO, ctx, OUT);
 	if (!err_code && cmd && cmd->redirects_err_in)
 		err_code = ft_shell_handle_redirect(cmd->redirects_err_in,
-				STDERR_FILENO, cmd->ctx, IN);
+				STDERR_FILENO, ctx, IN);
 	if (!err_code && cmd && cmd->redirects_err)
 		err_code = ft_shell_handle_redirect(cmd->redirects_err,
-				STDERR_FILENO, cmd->ctx, OUT);
+				STDERR_FILENO, ctx, OUT);
 	return (err_code);
 }
 

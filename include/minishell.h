@@ -184,7 +184,7 @@ int			ft_shell_handle_redirect(t_wrd *wrd, int fd_redir,
 				t_ctx *ctx, t_dir d);
 void		remove_non_compliant_chars(char *buf, int buf_size);
 void		ft_chdir_update_env_vars(t_ctx *ctx, char *oldpwd);
-int			ft_handle_redirects(t_cmd_node *cmd);
+int			ft_handle_redirects(t_cmd_node *cmd, t_ctx *ctx);
 int			ft_sh_is_legal_identifier(const char *name);
 int			unlink_herefiles(t_ctx *ctx);
 char		*heredoc_line_loop(char *l, t_hd_entry *en, t_ctx *ctx, int fd);
