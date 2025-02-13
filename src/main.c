@@ -59,10 +59,11 @@ int	main(int argc, char **argv, char **envp)
 		exitcode = ft_sh_loop(global);
 		if (ft_sh_give_terminal_to(global->parent_tpgrp))
 			ft_perrorf("%s: couldn't allocate terminal", global->cmd_name);
-		ft_exit_with_exitcode(global);
+		ft_sh_destroy_ctx(global);
 	}
 	else
 		ft_sh_init_noninteractive(&global, envp);
+	ft_printf("exit\n");
 	global = NULL;
 	return (exitcode);
 }
