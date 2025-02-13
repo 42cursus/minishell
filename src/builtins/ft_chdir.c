@@ -32,7 +32,7 @@ static int	ft_sh_cd_get_home(t_ctx *ctx, const char *path)
 	else
 	{
 		retval = -1;
-		ft_dprintf(STDERR_FILENO, "minish: cd: HOME not set\n");
+		ft_dprintf(STDERR_FILENO, "%s: cd: HOME not set\n", ctx->cmd_name);
 	}
 	return (retval);
 }
@@ -57,7 +57,7 @@ int	ft_chdir(t_ctx *ctx)
 	oldpwd = get_working_directory(ctx);
 	if (chdir(path) != 0)
 		return (free(oldpwd),
-			ft_perrorf("minish: cd: %s", path), EXECUTION_FAILURE);
+			ft_perrorf("%s: cd: %s", ctx->cmd_name, path), EXECUTION_FAILURE);
 	ft_chdir_update_env_vars(ctx, oldpwd);
 	return (0);
 }

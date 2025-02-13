@@ -31,8 +31,8 @@ int	ft_collect_heredocs_loop(t_ctx *ctx)
 		l = heredoc_line_loop(l, en, ctx, fd);
 		if (l == NULL)
 		{
-			ft_dprintf(2, "Minishell: warning: here-document delimited ");
-			ft_dprintf(2, "by end-of-file (wanted '%s')\n", en->delimiter);
+			ft_dprintf(2, "%s: warning: here-document delimited "
+				"by end-of-file (wanted '%s')\n", ctx->cmd_name, en->delimiter);
 		}
 		else
 			free(l);
