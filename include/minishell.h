@@ -201,7 +201,6 @@ t_state		handle_in_double_quote(t_lexer *lexer, t_ctx *ctx);
 t_state		handle_check_append(t_lexer *lexer, int i, t_ctx *ctx);
 t_state		handle_check_here_doc(t_lexer *lexer, int i, t_ctx *ctx);
 t_state		handle_reading_whitespace(t_lexer *lexer, t_ctx *ctx);
-const char	*get_idstring(int token);
 char		*get_working_directory(t_ctx *ctx);
 void		free_tokens(t_lexer *lexer);
 void		parse_redirection(int *tp, t_ast_node *p, t_ctx *ctx, t_lexer *l);
@@ -246,7 +245,10 @@ void		ft_exec_with_sig_block(t_cmd_node *cmd, t_ctx *ctx);
 void		ft_sh_run_forked(t_ast_node *cmd,
 				int level, const int *fd, int fd_idx);
 int			ft_run_builtin(t_cmd_node *cmd, t_ctx *ctx);
+void		ft_sh_run_leader(t_ast_node *cmd, int level, int status);
+int			ft_sh_wait_leader(const t_ast_node *cmd, pid_t fork_pid);
 void		ft_sh_init_welcome(void);
+int			ft_sh_loop(t_ctx *ctx);
 
 /* Utils */
 char		*ft_get_word(t_wrd *wrd, t_ctx *ctx);

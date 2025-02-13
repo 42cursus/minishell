@@ -2,49 +2,57 @@
 This project is about creating a simple shell.
 
 ### To build project with run cmake:
-  ```bash
-  mkdir -pv build; cd build
-  cmake ..
-  cmake --build . --target all
-  ```
-
+```bash
+mkdir -pv build; cd build
+cmake ..
+cmake --build . --target all
+```
 generating suppressions for memory leaks
 https://wiki.wxwidgets.org/Valgrind_Suppression_File_Howto
 https://stackoverflow.com/questions/17159578/17178559#17178559
 ### To  generate valgrind readline suppressions:
-  ```bash
-  valgrind --leak-check=full \
-    --show-reachable=yes \
-    --error-limit=no \
-    --gen-suppressions=all \
-    --log-file=memcheck.log ./minishell
-  ```
+```bash
+valgrind --leak-check=full \
+--show-reachable=yes \
+--error-limit=no \
+--gen-suppressions=all \
+--log-file=memcheck.log ./minishell
+```
 - if you find the output is mixed with the application output then redirect valigrind output to separate file descriptor:
-  ```bash
+```bash
 valgrind --leak-check=full \
     --show-reachable=yes \
     --error-limit=no \
     --gen-suppressions=all \
    --log-fd=9 ./minishell 9>>memcheck.log
-  ```
+```
 - You now have a file containing the raw output, with the suppressions mingled with the errors and other stuff. Also, as errors are usually multiple, there'll usually be multiple instances of each suppression. So the next step is to pass minimalraw.log through this gawk script which removes the cruft.
-  ```bash
-  cat ./memcheck.log | ./parse_valgrind_suppressions.sh > readline.supp
-  ```
+```bash
+cat ./memcheck.log | ./parse_valgrind_suppressions.sh > readline.supp
+```
 ### To run valgrind with readline suppressions:
-  ```bash
+```bash
+valgrind --leak-check=full \
+--show-leak-kinds=all \
+--suppressions=readline.supp ./minishell
+```
+- if you find the output is mixed with the application output then redirect valigrind output to separate file descriptor:
+```bash
 valgrind --leak-check=full \
     --show-leak-kinds=all \
-    --suppressions=readline.supp ./minishell
-  ```
-- if you find the output is mixed with the application output then redirect valigrind output to separate file descriptor:
-  ```bash
-  valgrind --leak-check=full \
-        --show-leak-kinds=all \
-        --suppressions=supp.supp \
-        --log-fd=9 ./minishell \
-        9>>memcheck.log
-  ```
+    --suppressions=supp.supp \
+    --log-fd=9 ./minishell \
+    9>>memcheck.log
+```
+
+You could also suppress the forked process via:
+```bash
+valgrind --leak-check=full \
+  --show-leak-kinds=all \
+  --trace-children=no \
+  --child-silent-after-fork=yes \
+  ./minishell
+```
 
 ### Lexer-parser
 

@@ -12,7 +12,7 @@
 
 #include "minishell.h"
 
-const char	*get_idstring(int token)
+static const char	*get_idstring(int token)
 {
 	static const char	*lt[TOKEN_MAX] = {
 		"TOKEN_DUMMY",
@@ -36,6 +36,15 @@ const char	*get_idstring(int token)
 	};
 
 	return (lt[token]);
+}
+
+static void	ft_print_depth(int depth)
+{
+	int	i;
+
+	i = -1;
+	while (++i < depth + 1)
+		ft_printf("  ");
 }
 
 void	print_tokens(t_lexer *lexer)
@@ -83,42 +92,11 @@ void	ft_print_arg_node(t_wrd *arguments)
 
 void	print_arguments(t_wrd *arguments, int depth)
 {
-	int		i;
-
 	while (arguments)
 	{
-		i = -1;
-		while (++i < depth)
-			ft_printf("  ");
+		ft_print_depth(depth);
 		ft_printf("ARGUMENT: ");
 		ft_print_arg_node(arguments);
 		arguments = arguments->next_word;
-	}
-}
-
-void	print_redirections(t_wrd *redir, int depth, t_token_type rt)
-{
-	const char	*type;
-	int			i;
-
-	if (rt == T_REDIRECT_STDOUT)
-		type = ">";
-	else if (rt == TOKEN_REDIRECT_STDERR)
-		type = "2>";
-	else if (rt == TOKEN_REDIRECT_STDIN)
-		type = "<";
-	else if (rt == TOKEN_REDIRECT_IN_2)
-		type = "2<";
-	while (redir)
-	{
-		i = -1;
-		while (++i < depth)
-			ft_printf("  ");
-		ft_printf("Redirection Type: %s", type);
-		if (redir->redir_flag == O_APPEND)
-			ft_printf(">");
-		ft_printf(", Target: ");
-		ft_print_arg_node(redir);
-		redir = redir->next_word;
 	}
 }

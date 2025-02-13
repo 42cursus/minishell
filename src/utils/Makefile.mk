@@ -13,7 +13,6 @@
 FILES   = ft_get_argv.c \
 			ft_get_word.c \
 			ft_perrorf.c \
-			ft_print_ast.c \
 			ft_sh_cmp.c \
 			ft_sh_env_map.c \
 			ft_sh_env_map_entry_utils.c \
@@ -24,6 +23,7 @@ FILES   = ft_get_argv.c \
 			ft_sh_init_interactive.c \
 			ft_sh_init_term.c \
 			ft_sh_lookup_pathname.c \
+			ft_sh_loop.c \
 			ft_sh_read_line.c \
 			ft_sh_render_envp.c \
 			ft_tcgetpgrp.c \
