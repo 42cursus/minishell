@@ -74,6 +74,7 @@ static void	ft_sh_print_cmd_node(t_ast_node *node, int depth)
 
 static void	ft_sh_print_complex(t_ast_node *node, int depth)
 {
+	ft_printf("\n");
 	if (node->left)
 	{
 		ft_print_depth(depth);
