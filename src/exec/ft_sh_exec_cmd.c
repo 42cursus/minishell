@@ -94,8 +94,8 @@ void	ft_sh_run_leader(t_ast_node *cmd, int level, int status)
 	status = ft_run_other(cmd, level + 1);
 	if (g_received_signal_num)
 	{
-		g_received_signal_num = 0;
 		status = 128 + g_received_signal_num;
+		g_received_signal_num = 0;
 	}
 	if (ft_sh_give_terminal_to(original_pgrp))
 		ft_perrorf("%s", cmd->ctx->cmd_name);

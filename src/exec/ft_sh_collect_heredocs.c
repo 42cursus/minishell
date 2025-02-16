@@ -95,7 +95,7 @@ int	ft_sh_collect_heredocs(t_ctx *ctx)
 	if (!ft_collect_heredocs_loop(ctx) && ctx->received_signal_num == SIGINT)
 	{
 		ctx->received_signal_num = 0;
-		ctx->last_status_code = (-1);
+		ctx->last_status_code = (EX_OK);
 		unlink_herefiles(ctx);
 		return (0);
 	}

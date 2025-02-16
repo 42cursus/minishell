@@ -21,8 +21,8 @@ static int	ft_sh_exit_get_val(const t_ctx *ctx)
 
 	val = ft_strtol(ctx->argv[1], &endptr, 10);
 	if (!(errno == ERANGE && (val == LONG_MAX || val == LONG_MIN))
-		&& !(errno != 0 && val == 0))
-		retval = (int) val % 256;
+		&& !(errno != 0 && val == 0) && (!*endptr))
+		retval = (int)val % 256;
 	else
 		retval = (ft_dprintf(STDERR_FILENO, "%s: exit: `%s': numeric "
 					"argument required\n", cm, ctx->argv[1]), EX_BADUSAGE);
@@ -39,12 +39,15 @@ int	ft_exit_with_exitcode(t_ctx *ctx)
 	{
 		errno = E2BIG;
 		ft_perrorf("%s: exit", ctx->cmd_name);
-		retval = EXIT_FAILURE;
+		return (EX_OK);
 	}
 	else if (ctx->argc == 2)
 		retval = ft_sh_exit_get_val(ctx);
 	else
 		retval = ctx->last_status_code;
+	close((*ctx->savefds)[STDIN_FILENO]);
+	close((*ctx->savefds)[STDOUT_FILENO]);
+	close((*ctx->savefds)[STDERR_FILENO]);
 	ft_cleanup_argv(ctx);
 	ft_sh_destroy_ctx(ctx);
 	exit(retval);

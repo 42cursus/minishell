@@ -90,6 +90,7 @@ typedef struct s_exec_ctx
 	int				received_signal_num;
 	t_sigaction		act[64];
 	t_sigaction		old_act[64];
+	int 			(*savefds)[3];
 	const char		*ps0;
 	const char		*ps1;
 	const char		*ps2;

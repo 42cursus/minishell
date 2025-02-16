@@ -41,7 +41,7 @@ int	ft_pwd(t_ctx *ctx)
 	retval = EX_OK;
 	cwd = get_working_directory(ctx);
 	if (!errno)
-		ft_dprintf(STDERR_FILENO, "%s\n", cwd);
+		ft_printf("%s\n", cwd);
 	else
 		retval = EXECUTION_FAILURE;
 	free(cwd);

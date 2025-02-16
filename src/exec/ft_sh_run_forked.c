@@ -22,7 +22,7 @@ int	ft_decode_wstatus(int wstatus)
 	{
 		if (WCOREDUMP(wstatus))
 			ft_dprintf (STDERR_FILENO, "Quit (core dumped)\n");
-		else
+		else if (WTERMSIG (wstatus) == SIGKILL)
 			ft_dprintf (STDERR_FILENO, "Killed\n");
 		status = (128 + WTERMSIG (wstatus));
 	}
