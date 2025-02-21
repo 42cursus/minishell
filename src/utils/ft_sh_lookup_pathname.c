@@ -20,7 +20,7 @@ static int	ft_sh_do_lookup(t_ctx *ctx, const char *argv_zero, int errcode)
 
 	pathdup = ft_strdup(ft_sh_env_map_get_val("PATH", ctx));
 	str = ft_strtok_r(pathdup, ":", &sptr);
-	while ((errcode == -1 && errno == ENOENT) && str)
+	while ((errcode == -1 && (errno == ENOENT || errno == EACCES)) && str)
 	{
 		ft_snprintf(ctx->pathname, PATH_MAX, "%s/%s", str, argv_zero);
 		errcode = access(ctx->pathname, F_OK);

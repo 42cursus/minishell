@@ -12,6 +12,7 @@
 
 NAME			:= minishell
 CC				:= clang
+RM				:= /bin/rm
 INC_DIR			=  ./include
 INCLUDE_FLAGS	:= -I. -I$(INC_DIR) -I/usr/include
 OPTIMIZE_FLAGS	:= -O0
@@ -80,18 +81,18 @@ $(BUILD_DIR)/%.o: %.c
 
 ## clean
 clean:
-		@$(RM) -rf $(BUILD_DIR)
-		@$(MAKE) -C $(LIBFT_DIR) clean
+		@if [ -d $(BUILD_DIR) ]; then $(RM) -rf $(BUILD_DIR); fi
+		@$(MAKE) -C $(LIBFT_DIR) --no-print-directory clean
 
 ## fclean
 fclean: clean
-		@$(RM) $(RMFLAGS) $(NAME)
-		@$(MAKE) -C $(LIBFT_DIR) fclean
+		@if [ -f $(NAME) ]; then $(RM) $(RMFLAGS) $(NAME); fi
+		@$(MAKE) -C $(LIBFT_DIR) --no-print-directory fclean
 
 re: fclean all
 
 norm:
-		@norminette $(SRCS)
+		@norminette --use-gitignore $(SRCS) || true
 		@$(MAKE) -C $(LIBFT_DIR) norm
 
 # Magic help adapted: from https://gitlab.com/depressiveRobot/make-help/blob/master/help.mk (MIT License)

@@ -289,4 +289,5 @@ end
 #Links:
 #  - https://sourceware.org/gdb/onlinedocs/gdb/Forks.html
 #  - https://sourceware.org/gdb/onlinedocs/gdb/Inferiors-and-Programs.html
+#  - https://stackoverflow.com/questions/39733919/detaching-gdb-without-resuming-the-inferior
 #  - https://www.qnx.com/developers/docs/8.0/com.qnx.doc.ide.userguide/topic/debugging_child.html
